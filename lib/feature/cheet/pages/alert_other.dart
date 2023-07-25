@@ -498,23 +498,25 @@ class AlertDeleteDocument extends StatelessWidget {
           child: SizedBox(
             width: MediaQuery.of(context).size.width,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 S.h(20),
                 Text(
-                  'ต้องการออกห้องเรียน?',
+                  'ต้องการลบเอกสารนี้ ?',
                   style: CustomStyles.bold18Black363636,
                 ),
-                S.h(5),
-                Text(
-                  'เอกสารนี้ถูกใช้กับคอร์สเรียนของคุณ',
-                  style: CustomStyles.blod16gray878787,
-                ),
-                Text(
-                  'หากลบเอกสาร คอร์สเรียนเหล่านี้ จะไม่มีเอกสารประกอบการสอน',
-                  style: CustomStyles.blod16gray878787
-                      .copyWith(fontWeight: FontWeight.normal),
-                ),
+
+                /// TODO: removed on first launch
+                // S.h(5),
+                // Text(
+                //   'เอกสารนี้ถูกใช้กับคอร์สเรียนของคุณ',
+                //   style: CustomStyles.blod16gray878787,
+                // ),
+                // Text(
+                //   'หากลบเอกสาร คอร์สเรียนเหล่านี้ จะไม่มีเอกสารประกอบการสอน',
+                //   style: CustomStyles.blod16gray878787
+                //       .copyWith(fontWeight: FontWeight.normal),
+                // ),
                 S.h(20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -550,8 +552,7 @@ class AlertDeleteDocument extends StatelessWidget {
             onTap();
           },
           child: Center(
-            child: Text(CustomStrings.deleteCourse,
-                style: CustomStyles.med14White),
+            child: Text('ลบเอกสาร', style: CustomStyles.med14White),
           ),
         ),
       ),
@@ -718,7 +719,7 @@ class AlertDeleteVideo extends StatelessWidget {
             onTap();
           },
           child: Center(
-            child: Text(CustomStrings.deleteCourse,
+            child: Text(CustomStrings.deleteDocument,
                 style: CustomStyles.med14White),
           ),
         ),

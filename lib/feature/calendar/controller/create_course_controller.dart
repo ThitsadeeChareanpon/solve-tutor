@@ -29,7 +29,7 @@ class CourseController extends ChangeNotifier {
   var selectedLevel = '';
   var selectedSubject = '';
   var indexSelected = 0;
-  var slectedDocumentIndex = 0;
+  var selectedDocumentIndex = 0;
   var isLoading = false;
   var keywordTextEditingController = TextEditingController();
   List<String> studentIds = [];
@@ -49,7 +49,7 @@ class CourseController extends ChangeNotifier {
   var skipWeekTextEditing = TextEditingController();
   var startDateController = TextEditingController();
   var endDateController = TextEditingController();
-  var slectedDateController = TextEditingController();
+  var selectedDateController = TextEditingController();
   var startTimeController = TextEditingController();
   var endTimeController = TextEditingController();
   var findStudentController = TextEditingController();
@@ -130,12 +130,11 @@ class CourseController extends ChangeNotifier {
       equals: isSameDay,
       hashCode: getHashCode,
     )..addAll(kEventSource);
-    print(kEvents);
     notifyListeners();
   }
 
-  setSelectedDocuemnt(int index) {
-    slectedDocumentIndex = index;
+  setSelectedDocument(int index) {
+    selectedDocumentIndex = index;
     notifyListeners();
   }
 
@@ -171,7 +170,7 @@ class CourseController extends ChangeNotifier {
     notifyListeners();
   }
 
-  claerData() {
+  clearData() {
     if (courseNameTextEditing.text.isNotEmpty) {
       courseNameTextEditing.text = '';
     }
@@ -353,18 +352,25 @@ class CourseController extends ChangeNotifier {
       (index) => SelectOptionItem(
           id: data[index].subjectId, name: data[index].subjectName),
     ));
+    subjects.add(SelectOptionItem(id: '999', name: 'อื่นๆ'));
     notifyListeners();
   }
 
   getLevels() async {
     levels.clear();
     final List<LevelModel> data = await CourseService().getLevelsList();
-    levels.addAll(List.generate(
+    var list = List.generate(
       data.length,
       (index) => SelectOptionItem(
           id: data[index].levelId, name: data[index].levelName),
-    ));
-
+    );
+    list.sort((a, b) {
+      if (a.name == null && b.name == null) return 0;
+      if (a.name == null) return 1;
+      if (b.name == null) return -1;
+      return a.name!.compareTo(b.name!);
+    });
+    levels.addAll(list);
     notifyListeners();
   }
 
@@ -403,7 +409,7 @@ class CourseController extends ChangeNotifier {
     }
   }
 
-  Future<void> updateCourseDestails(CourseModel? courseData) async {
+  Future<void> updateCourseDetails(CourseModel? courseData) async {
     try {
       if (courseData == null) return;
       if (courseData.id?.isNotEmpty == true &&

@@ -1,23 +1,19 @@
-import 'dart:math';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 import 'package:solve_tutor/authentication/service/auth_provider.dart';
-import 'package:solve_tutor/constants/theme.dart';
 import 'package:solve_tutor/feature/calendar/constants/assets_manager.dart';
 import 'package:solve_tutor/feature/calendar/constants/custom_colors.dart';
 import 'package:solve_tutor/feature/calendar/constants/custom_styles.dart';
 import 'package:solve_tutor/feature/calendar/controller/create_course_live_controller.dart';
 import 'package:solve_tutor/feature/calendar/helper/utility_helper.dart';
-import 'package:solve_tutor/feature/calendar/model/course_model.dart';
 import 'package:solve_tutor/feature/calendar/model/show_course.dart';
 import 'package:solve_tutor/feature/calendar/pages/utils.dart';
-import 'package:solve_tutor/feature/calendar/widgets/alert_overlay.dart';
 import 'package:solve_tutor/feature/calendar/widgets/format_date.dart';
 import 'package:solve_tutor/feature/calendar/widgets/sizebox.dart';
 import 'package:table_calendar/table_calendar.dart';
+
+import '../constants/custom_fontfamily.dart';
 
 class CourseLiveCalendar extends StatefulWidget {
   const CourseLiveCalendar({super.key});
@@ -36,7 +32,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
   CalendarFormat _calendarFormat = CalendarFormat.month;
   ValueNotifier<List<Event>>? _selectedEvents;
   RangeSelectionMode _rangeSelectionMode = RangeSelectionMode.toggledOff;
-  DateTime _focusedDay = DateTime.now();
+  // DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   DateTime? startTime;
   DateTime? endTime;
@@ -57,33 +53,10 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
     getTableCalendarList();
     await courseController.getLevels();
     await courseController.getSubjects();
-
-    // SchedulerBinding.instance.addPostFrameCallback((timeStamp) async {
-    //   await Alert.showOverlay(
-    //     loadingWidget: Alert.getOverlayScreen(),
-    //     asyncFunction: () async {
-    //
-    //       await courseController.getCalendarListAll(auth?.uid??"");
-    //       // await courseController
-    //       //     .getDataCalendarList(courseController.calendarListAll);
-    //
-    //     },
-    //     context: context,
-    //   );
-    //   // setState(() {});
-    // });
   }
 
   Future<void> getCalendarList() async {
     await courseController.getCourseTutorToday(auth?.uid ?? "");
-    await courseController.getCourseTutorToday(auth?.uid ?? "");
-    await courseController.getCalendarListAll(auth?.uid ?? "");
-    await courseController
-        .getDataCalendarList(courseController.calendarListAll);
-    await courseController.getCourseTutorToday(auth?.uid ?? "");
-    await courseController.getCalendarListAll(auth?.uid ?? "");
-    await courseController
-        .getDataCalendarList(courseController.calendarListAll);
     if (_util.isTablet()) {
       getDateAll();
       getDate(1);
@@ -177,7 +150,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  _listCalss(),
+                  _listClass(),
                   const SizedBox(
                     height: 50,
                   ),
@@ -191,7 +164,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
     );
   }
 
-  Widget _listCalss() {
+  Widget _listClass() {
     return SingleChildScrollView(child: Consumer<CourseLiveController>(
       builder: (_, student, child) {
         return Column(
@@ -222,7 +195,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
               ],
             ),
             student.isLoadingCourseTutorToday
-                ? Column(
+                ? const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -254,7 +227,10 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                                   ? cardTablet(
                                       showCourseTutor: courseController
                                           .showCourseTutorFilterToday[index],
-                                      onTap: () {},
+                                      onTap: () {
+                                        print('tap today course');
+                                        print(auth?.uid);
+                                      },
                                     )
                                   : cardMobile(
                                       showCourseTutor: courseController
@@ -617,7 +593,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
   }
 
   List<bool> _isSelected = [true, false];
-  Widget _swicth() {
+  Widget _switch() {
     return ToggleButtons(
       isSelected: _isSelected,
       borderColor: Colors.grey,
@@ -669,7 +645,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [_topicText('ตารางเรียนสอนของฉัน'), _swicth()],
+          children: [_topicText('ตารางเรียนสอนของฉัน'), _switch()],
         ),
         if (_isSelected.last == true) ...[
           if (_util.isTablet()) ...[
@@ -691,7 +667,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
 
   var indexListCalendar = 0;
 
-  List<ShowCourseTutor> listCelendarTab = [];
+  List<ShowCourseTutor> listCalendarTab = [];
   void getDateAll() {
     courseController.daysForTablet.map((e) => e.sum = 0).toList();
     for (var day in courseController.showCourseTutorToday) {
@@ -705,10 +681,10 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
   }
 
   void getDate(int daySelected) {
-    listCelendarTab.clear();
+    listCalendarTab.clear();
     for (var day in courseController.showCourseTutorToday) {
       if (day.start?.weekday == daySelected) {
-        listCelendarTab.add(day);
+        listCalendarTab.add(day);
       }
     }
 
@@ -748,7 +724,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
             )),
       ),
       S.h(20),
-      if (listCelendarTab.isEmpty) ...[
+      if (listCalendarTab.isEmpty) ...[
         Container(
           margin: const EdgeInsets.symmetric(vertical: 10),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
@@ -767,12 +743,12 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
         ),
       ],
       Column(
-        children: List.generate(listCelendarTab.length, (index) {
-          var filterLevelId = courseController.levels
-              .where((e) => e.id == listCelendarTab[index].levelId)
-              .toList();
+        children: List.generate(listCalendarTab.length, (index) {
+          // var filterLevelId = courseController.levels
+          //     .where((e) => e.id == listCalendarTab[index].levelId)
+          //     .toList();
           var filterSubjectId = courseController.subjects
-              .where((e) => e.id == listCelendarTab[index].subjectId)
+              .where((e) => e.id == listCalendarTab[index].subjectId)
               .toList();
 
           return Container(
@@ -790,12 +766,12 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '${FormatDate.timeOnlyNumber(listCelendarTab[index].start)} น. - ${FormatDate.timeOnlyNumber(listCelendarTab[index].end)} น.',
+                      '${FormatDate.timeOnlyNumber(listCalendarTab[index].start)} น. - ${FormatDate.timeOnlyNumber(listCalendarTab[index].end)} น.',
                       style: CustomStyles.blod16gray878787
                           .copyWith(color: Colors.black),
                     ),
                     Text(
-                      FormatDate.dayOnly(listCelendarTab[index].start),
+                      FormatDate.dayOnly(listCalendarTab[index].start),
                       style: CustomStyles.reg16gray878787,
                     )
                   ],
@@ -829,7 +805,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                             fit: BoxFit.fitHeight,
                           );
                         },
-                        imageUrl: listCelendarTab[index].thumbnailUrl ?? '',
+                        imageUrl: listCalendarTab[index].thumbnailUrl ?? '',
                       ),
                     ),
                     S.w(10),
@@ -838,13 +814,13 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            listCelendarTab[index].courseName ?? '',
+                            listCalendarTab[index].courseName ?? '',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: CustomStyles.bold16Black363636,
                           ),
                           Text(
-                            listCelendarTab[index].detailsText ?? '',
+                            listCalendarTab[index].detailsText ?? '',
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: CustomStyles.med14Black363636Overflow,
@@ -859,7 +835,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      listCelendarTab[index].tutorId ?? '',
+                      listCalendarTab[index].tutorId ?? '',
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: CustomStyles.reg16Green,
@@ -907,7 +883,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
           ),
         ),
         S.h(20),
-        if (listCelendarTab.isEmpty) ...[
+        if (listCalendarTab.isEmpty) ...[
           Container(
             margin: const EdgeInsets.symmetric(vertical: 10),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
@@ -926,12 +902,12 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
           ),
         ],
         Column(
-          children: List.generate(listCelendarTab.length, (index) {
+          children: List.generate(listCalendarTab.length, (index) {
             var filterLevelId = courseController.levels
-                .where((e) => e.id == listCelendarTab[index].levelId)
+                .where((e) => e.id == listCalendarTab[index].levelId)
                 .toList();
             var filterSubjectId = courseController.subjects
-                .where((e) => e.id == listCelendarTab[index].subjectId)
+                .where((e) => e.id == listCalendarTab[index].subjectId)
                 .toList();
 
             return Container(
@@ -949,12 +925,12 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _tagTime(
-                          '${FormatDate.timeOnlyNumber(listCelendarTab[index].start)} น. - ${FormatDate.timeOnlyNumber(listCelendarTab[index].end)} น.'),
+                          '${FormatDate.timeOnlyNumber(listCalendarTab[index].start)} น. - ${FormatDate.timeOnlyNumber(listCalendarTab[index].end)} น.'),
                       S.w(50),
                       SizedBox(
                         height: 48,
                         width: 85,
-                        child: listCelendarTab[index]
+                        child: listCalendarTab[index]
                                     .thumbnailUrl
                                     .toString()
                                     .isNotEmpty ==
@@ -976,13 +952,13 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                                   ),
                                 ),
                                 imageUrl:
-                                    listCelendarTab[index].thumbnailUrl ?? '',
+                                    listCalendarTab[index].thumbnailUrl ?? '',
                               )
                             : Container(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(8.0),
                                   border: Border.all(
-                                    color: Color.fromRGBO(29, 41, 57, 1),
+                                    color: const Color.fromRGBO(29, 41, 57, 1),
                                     width: 0.5,
                                   ),
                                 ),
@@ -1005,13 +981,13 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              listCelendarTab[index].courseName ?? '',
+                              listCalendarTab[index].courseName ?? '',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: CustomStyles.bold14Black363636,
                             ),
                             Text(
-                              listCelendarTab[index].detailsText ?? '',
+                              listCalendarTab[index].detailsText ?? '',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: CustomStyles.med14Black363636Overflow,
@@ -1044,7 +1020,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                             ),
                             S.w(10),
                             Text(
-                              listCelendarTab[index].tutorId ?? '',
+                              listCalendarTab[index].tutorId ?? '',
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: CustomStyles.reg16Green,
@@ -1055,7 +1031,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                       Column(
                         children: [
                           Text(
-                            FormatDate.dayOnly(listCelendarTab[index].start),
+                            FormatDate.dayOnly(listCalendarTab[index].start),
                             style: CustomStyles.bold14Black363636,
                           ),
                           S.w(10),
@@ -1075,134 +1051,162 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
 
   Widget tableCalendarTablet() {
     var now = DateTime.now();
-    return TableCalendar<Event>(
-      availableGestures: AvailableGestures.horizontalSwipe,
-      locale: 'en_US',
-      firstDay: now,
-      onHeaderTapped: (focusedDay) {},
-      lastDay: courseController.kEvents?.isNotEmpty == true
-          ? courseController.kEvents?.keys.last ??
-              DateTime(now.year, now.month + 1, now.day)
-          : DateTime(now.year, now.month + 1, now.day),
-      focusedDay: now,
-      calendarFormat: _calendarFormat,
-      availableCalendarFormats: const {
-        CalendarFormat.month: 'Month',
-      },
-      rangeSelectionMode: _rangeSelectionMode,
-      eventLoader: _getEventsForDay,
-      startingDayOfWeek: StartingDayOfWeek.monday,
-      daysOfWeekHeight: 56,
-      rowHeight: 128.4,
-      daysOfWeekStyle: DaysOfWeekStyle(
-        weekendStyle: CustomStyles.med16Black363636,
-        weekdayStyle: CustomStyles.med16Black363636,
-      ),
-      calendarStyle: const CalendarStyle(
-        // Use `CalendarStyle` to customize the UI
-        outsideDaysVisible: false, cellPadding: EdgeInsets.all(16),
-        tableBorder: TableBorder(
-            horizontalInside:
-                BorderSide(width: 1, color: CustomColors.grayCFCFCF),
-            verticalInside:
-                BorderSide(width: 1, color: CustomColors.grayCFCFCF),
-            left: BorderSide(width: 1, color: CustomColors.grayCFCFCF),
-            right: BorderSide(width: 1, color: CustomColors.grayCFCFCF),
-            top: BorderSide(width: 1, color: CustomColors.grayCFCFCF),
-            bottom: BorderSide(
-              width: 1,
-            ),
-            borderRadius: BorderRadius.all(Radius.circular(8.0))),
-      ),
-      onDaySelected: _onDaySelected,
-      onRangeSelected: _onRangeSelected,
-      onFormatChanged: (format) {
-        if (_calendarFormat != format) {
-          setState(() {
-            _calendarFormat = format;
-          });
-        }
-      },
-      onPageChanged: (focusedDay) {
-        _focusedDay = focusedDay;
-      },
-      calendarBuilders: CalendarBuilders(
-        todayBuilder: (context, day, focusedDay) {
-          return TextButton(
-            onPressed: () {},
-            child: Container(
-              padding: const EdgeInsets.only(left: 20, top: 20),
-              alignment: Alignment.topLeft,
-              child: Text(
-                day.day.toString(),
-                style: CustomStyles.med16Black363636
-                    .copyWith(fontWeight: FontWeight.bold),
+    return Consumer<CourseLiveController>(
+        builder: (context, courseLive, child) {
+      return TableCalendar<Event>(
+        availableGestures: AvailableGestures.horizontalSwipe,
+        locale: 'en_US',
+        firstDay: now,
+        onHeaderTapped: (focusedDay) {},
+        lastDay: courseController.kEvents?.isNotEmpty == true
+            ? courseController.kEvents?.keys.last ??
+                DateTime(now.year, now.month + 1, now.day)
+            : DateTime(now.year, now.month + 1, now.day),
+        focusedDay: now,
+        calendarFormat: _calendarFormat,
+        availableCalendarFormats: const {
+          CalendarFormat.month: 'Month',
+        },
+        rangeSelectionMode: _rangeSelectionMode,
+        eventLoader: _getEventsForDay,
+        startingDayOfWeek: StartingDayOfWeek.sunday,
+        daysOfWeekHeight: 56,
+        rowHeight: 128.4,
+        daysOfWeekStyle: DaysOfWeekStyle(
+          weekendStyle: CustomStyles.med16Black363636,
+          weekdayStyle: CustomStyles.med16Black363636,
+        ),
+        calendarStyle: const CalendarStyle(
+          // Use `CalendarStyle` to customize the UI
+          outsideDaysVisible: false, cellPadding: EdgeInsets.all(16),
+          tableBorder: TableBorder(
+              horizontalInside:
+                  BorderSide(width: 1, color: CustomColors.grayCFCFCF),
+              verticalInside:
+                  BorderSide(width: 1, color: CustomColors.grayCFCFCF),
+              left: BorderSide(width: 1, color: CustomColors.grayCFCFCF),
+              right: BorderSide(width: 1, color: CustomColors.grayCFCFCF),
+              top: BorderSide(width: 1, color: CustomColors.grayCFCFCF),
+              bottom: BorderSide(
+                width: 1,
               ),
-            ),
-          );
+              borderRadius: BorderRadius.all(Radius.circular(8.0))),
+        ),
+        onDaySelected: _onDaySelected,
+        onRangeSelected: _onRangeSelected,
+        onFormatChanged: (format) {
+          if (_calendarFormat != format) {
+            setState(() {
+              _calendarFormat = format;
+            });
+          }
         },
-        outsideBuilder: (context, day, event) {
-          return Container(
-              decoration: const BoxDecoration(
-                shape: BoxShape.rectangle,
-                color: CustomColors.grayF3F3F3,
+        onPageChanged: (focusedDay) {
+          // _focusedDay = focusedDay;
+        },
+        calendarBuilders: CalendarBuilders(
+          todayBuilder: (context, day, focusedDay) {
+            return TextButton(
+              onPressed: () {},
+              child: Container(
+                padding: const EdgeInsets.only(left: 20, top: 20),
+                alignment: Alignment.topLeft,
+                child: Text(
+                  day.day.toString(),
+                  style: CustomStyles.med16Black363636
+                      .copyWith(fontWeight: FontWeight.bold),
+                ),
               ),
-              padding: const EdgeInsets.only(left: 20, top: 20),
-              alignment: Alignment.topLeft,
-              child: Text(
-                day.day.toString(),
-                style: CustomStyles.med16Black363636.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: CustomColors.gray878787),
-              ));
-        },
-        disabledBuilder: (context, day, focusedDay) {
-          return TextButton(
-            onPressed: () {},
-            child: Container(
-              padding: const EdgeInsets.only(left: 20, top: 20),
-              alignment: Alignment.topLeft,
-              child: Text(
-                day.day.toString(),
-                style: CustomStyles.med16Black363636
-                    .copyWith(fontWeight: FontWeight.bold),
+            );
+          },
+          outsideBuilder: (context, day, event) {
+            return Container(
+                decoration: const BoxDecoration(
+                  shape: BoxShape.rectangle,
+                  color: CustomColors.grayF3F3F3,
+                ),
+                padding: const EdgeInsets.only(left: 20, top: 20),
+                alignment: Alignment.topLeft,
+                child: Text(
+                  day.day.toString(),
+                  style: CustomStyles.med16Black363636.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: CustomColors.gray878787),
+                ));
+          },
+          disabledBuilder: (context, day, focusedDay) {
+            return TextButton(
+              onPressed: () {},
+              child: Container(
+                padding: const EdgeInsets.only(left: 20, top: 20),
+                alignment: Alignment.topLeft,
+                child: Text(
+                  day.day.toString(),
+                  style: CustomStyles.med16Black363636
+                      .copyWith(fontWeight: FontWeight.bold),
+                ),
               ),
-            ),
-          );
-        },
-        defaultBuilder: (context, day, event) {
-          return TextButton(
-            onPressed: () {},
-            child: Container(
-              padding: const EdgeInsets.only(left: 20, top: 20),
-              alignment: Alignment.topLeft,
-              child: Text(
-                day.day.toString(),
-                style: CustomStyles.med16Black363636
-                    .copyWith(fontWeight: FontWeight.bold),
+            );
+          },
+          defaultBuilder: (context, day, event) {
+            return TextButton(
+              onPressed: () {},
+              child: Container(
+                padding: const EdgeInsets.only(left: 20, top: 20),
+                alignment: Alignment.topLeft,
+                child: Text(
+                  day.day.toString(),
+                  style: CustomStyles.med16Black363636
+                      .copyWith(fontWeight: FontWeight.bold),
+                ),
               ),
-            ),
-          );
-        },
-        selectedBuilder: (context, day, focusedDay) {
-          // return Container(
-          //   padding: const EdgeInsets.only(left: 20, top: 20),
-          //   height: 200,
-          //   width: 200,
-          //   color: CustomColors.green125924,
-          //   alignment: Alignment.topLeft,
-          // );
-        },
-        markerBuilder: (context, day, event) {
-          if (event.isNotEmpty && day.isAfter(DateTime.now())) {
-            return SingleChildScrollView(
-              child: Column(
-                children: [
-                  S.h(0),
-                  if (event.isNotEmpty) ...[
-                    InkWell(
-                      onTap: () async {},
-                      child: Container(
+            );
+          },
+          markerBuilder: (context, day, event) {
+            if (event.isNotEmpty && day.isAfter(DateTime.now())) {
+              return SingleChildScrollView(
+                child: Column(
+                  children: [
+                    S.h(0),
+                    if (event.isNotEmpty) ...[
+                      InkWell(
+                        onTap: () async {
+                          await showDialog(
+                            context: context,
+                            builder: (context) => _eventList(day, event),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 5.0, vertical: 0.0),
+                          margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: CustomColors.gray878787,
+                              width: 1,
+                            ),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(20.0)),
+                            shape: BoxShape.rectangle,
+                            color: _getWeekColor(day.weekday),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            event.first.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontFamily: CustomFontFamily.NotoSansMed,
+                              fontSize: _util.addMinusFontSize(10),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                    S.h(5),
+                    if (event.length > 1)
+                      Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 5.0, vertical: 0.0),
                         margin: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -1214,61 +1218,60 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                             borderRadius:
                                 const BorderRadius.all(Radius.circular(20.0)),
                             shape: BoxShape.rectangle,
-                            color: CustomColors.greenPrimary),
+                            color: CustomColors.white),
                         alignment: Alignment.center,
-                        child: Text(
-                          event.first.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: CustomStyles.med12GreenPrimary
-                              .copyWith(color: Colors.white),
+                        child: Column(
+                          children: [
+                            InkWell(
+                              onTap: () async {
+                                await showDialog(
+                                    context: context,
+                                    builder: (context) =>
+                                        _eventList(day, event));
+                              },
+                              child: Text(
+                                '+${event.length - 1} รายการ',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: CustomStyles.med12GreenPrimary,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
+                    S.h(5),
                   ],
-                  S.h(5),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 5.0, vertical: 0.0),
-                    margin: const EdgeInsets.symmetric(horizontal: 8.0),
-                    decoration: BoxDecoration(
-                        border: Border.all(
-                          color: CustomColors.gray878787,
-                          width: 1,
-                        ),
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(20.0)),
-                        shape: BoxShape.rectangle,
-                        color: CustomColors.white),
-                    alignment: Alignment.center,
-                    child: Column(
-                      children: [
-                        InkWell(
-                          onTap: () async {
-                            await showDialog(
-                                context: context,
-                                builder: (context) => _eventList(day, event));
-                          },
-                          child: Text(
-                            '+${event.length} รายการ',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: CustomStyles.med12GreenPrimary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  S.h(5),
-                ],
-              ),
-            );
-          } else {
-            return const SizedBox();
-          }
-        },
-      ),
-    );
+                ),
+              );
+            } // now + future
+            else {
+              return const SizedBox();
+            } // past
+          },
+        ),
+      );
+    });
+  }
+
+  Color _getWeekColor(int weekday) {
+    switch (weekday) {
+      case 1:
+        return Colors.orange;
+      case 2:
+        return Colors.pinkAccent;
+      case 3:
+        return CustomColors.greenPrimary;
+      case 4:
+        return const Color(0xffFF9800);
+      case 5:
+        return Colors.blueAccent;
+      case 6:
+        return const Color(0xff8B5CF6);
+      case 7:
+        return const Color(0xffF44336);
+      default:
+        return Colors.black; // Should never be reached.
+    }
   }
 
   Widget tableCalendarMobile() {
@@ -1317,7 +1320,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
         }
       },
       onPageChanged: (focusedDay) {
-        _focusedDay = focusedDay;
+        // _focusedDay = focusedDay;
       },
       calendarBuilders: CalendarBuilders(
         disabledBuilder: (context, day, focusedDay) => SizedBox(
@@ -1531,22 +1534,21 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
     );
   }
 
-  Widget _learned() {
-    // if (tag.isEmpty) return const SizedBox();
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 5.0),
-      decoration: BoxDecoration(
-        color: CustomColors.orangeFFE0B2,
-        borderRadius: BorderRadius.circular(20.0),
-      ),
-      child: Text(
-        'เรียนแล้ว: 5 / 50',
-        style: CustomStyles.med12gray878787.copyWith(
-          color: CustomColors.orangeCC6700,
-        ),
-      ),
-    );
-  }
+  // Widget _learned() {
+  //   return Container(
+  //     padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 5.0),
+  //     decoration: BoxDecoration(
+  //       color: CustomColors.orangeFFE0B2,
+  //       borderRadius: BorderRadius.circular(20.0),
+  //     ),
+  //     child: Text(
+  //       'เรียนแล้ว: 5 / 50',
+  //       style: CustomStyles.med12gray878787.copyWith(
+  //         color: CustomColors.orangeCC6700,
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _topicText(String text) {
     return Padding(

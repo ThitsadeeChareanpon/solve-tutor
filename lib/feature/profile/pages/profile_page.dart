@@ -16,6 +16,8 @@ import 'package:solve_tutor/widgets/confirm_action_widget.dart';
 import 'package:solve_tutor/widgets/dialogs.dart';
 import 'package:solve_tutor/widgets/sizer.dart';
 
+import '../../../db_test.dart';
+
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
   @override
@@ -275,44 +277,55 @@ class _ProfilePageState extends State<ProfilePage> {
                 const SizedBox(height: 10),
                 settingCard(title: 'นโยบายความเป็นส่วนตัว'),
                 Divider(thickness: 2),
-                const SizedBox(height: 60),
+                const SizedBox(height: 20),
                 Center(
-                    child: Column(
-                  children: [
-                    TextButton(
-                      onPressed: () async {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return ConfirmActionWidget(
-                              title: 'ออกจากระบบ',
-                              content: 'ออกจากระบบบัญชีของคุณใช่หรือไม่',
-                              confirmText: 'ออกจากระบบ',
-                              confirmColor: Colors.red,
-                              onPressed: () async {
-                                await authprovider.signOut().then((value) {
-                                  Navigator.of(context)
-                                      .popUntil((route) => route.isFirst);
-                                  var route = MaterialPageRoute(
-                                      builder: (context) => Authenticate());
-                                  Navigator.pushReplacement(context, route);
-                                });
-                              },
-                            );
-                          },
-                        );
-                      },
-                      child: const Text("ออกจากระบบ"),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      authprovider.user?.email ?? "",
-                      style: TextStyle(
-                        color: greyColor,
+                  child: Column(
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const DbTest()),
+                          );
+                        },
+                        child: const Text('DB Test'),
                       ),
-                    ),
-                  ],
-                )),
+                      TextButton(
+                        onPressed: () async {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return ConfirmActionWidget(
+                                title: 'ออกจากระบบ',
+                                content: 'ออกจากระบบบัญชีของคุณใช่หรือไม่',
+                                confirmText: 'ออกจากระบบ',
+                                confirmColor: Colors.red,
+                                onPressed: () async {
+                                  await authprovider.signOut().then((value) {
+                                    Navigator.of(context)
+                                        .popUntil((route) => route.isFirst);
+                                    var route = MaterialPageRoute(
+                                        builder: (context) => Authenticate());
+                                    Navigator.pushReplacement(context, route);
+                                  });
+                                },
+                              );
+                            },
+                          );
+                        },
+                        child: const Text("ออกจากระบบ"),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        authprovider.user?.email ?? "",
+                        style: TextStyle(
+                          color: greyColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),

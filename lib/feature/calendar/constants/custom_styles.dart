@@ -489,6 +489,11 @@ class CustomStyles {
     fontFamily: CustomFontFamily.NotoSansMed,
     fontSize: _util.addMinusFontSize(16),
   );
+  static TextStyle weekendStyle = TextStyle(
+    color: CustomColors.redB71C1C,
+    fontFamily: CustomFontFamily.NotoSansMed,
+    fontSize: _util.addMinusFontSize(16),
+  );
 
   static TextStyle med16Black36363606 = TextStyle(
     color: CustomColors.black.withOpacity(0.6),

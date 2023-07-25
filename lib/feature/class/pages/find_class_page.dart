@@ -445,9 +445,10 @@ class _FindClassPageState extends State<FindClassPage> {
   }
 
   OutlineInputBorder borderStyle() => OutlineInputBorder(
-          borderSide: BorderSide(
-        color: Colors.grey.shade400,
-      ));
+        borderSide: BorderSide(
+          color: Colors.grey.shade400,
+        ),
+      );
 
   double getMaxWidth(int totalPage) {
     double result = 350;

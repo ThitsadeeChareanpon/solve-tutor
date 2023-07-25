@@ -51,6 +51,7 @@ class _DialogFileManagerLiveState extends State<DialogFileManagerLive> {
   void dispose() {
     super.dispose();
     courseController.courseFilter.clear();
+    courseController.selectedDocumentIndex = null;
   }
 
   @override
@@ -63,7 +64,7 @@ class _DialogFileManagerLiveState extends State<DialogFileManagerLive> {
           backgroundColor: CustomColors.grayE5E6E9,
           elevation: 6,
           title: Text(
-            'กรุณาเลือกเอกสารประกอบการเรียน',
+            'กรุณาเลือกเอกสารประกอบการสอน',
             style: CustomStyles.bold18Black363636,
           ),
           leading: InkWell(
@@ -97,11 +98,11 @@ class _DialogFileManagerLiveState extends State<DialogFileManagerLive> {
                 ] else ...[
                   Container(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Column(children: [])),
+                      child: const Column(children: [])),
                 ],
                 Expanded(
                   child: document.isLoading
-                      ? Column(
+                      ? const Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
@@ -243,7 +244,7 @@ class _DialogFileManagerLiveState extends State<DialogFileManagerLive> {
           crossAxisSpacing: 8,
           children: List.generate(documents.length, (index) {
             return GestureDetector(onTap: () async {
-              courseController.setSelectedDocuemnt(index);
+              await courseController.setSelectedDocument(index);
               courseController.courseData?.document = documents[index];
               courseController.courseData?.documentId = documents[index].id;
             }, child:
@@ -289,7 +290,7 @@ class _DialogFileManagerLiveState extends State<DialogFileManagerLive> {
                                 Container(
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(5.0),
-                                    color: course.slectedDocumentIndex != index
+                                    color: course.selectedDocumentIndex != index
                                         ? Colors.transparent
                                         : Colors.black.withOpacity(0.5),
                                   ),
@@ -303,7 +304,7 @@ class _DialogFileManagerLiveState extends State<DialogFileManagerLive> {
                     child: Text(
                       documents[index].data?.documentName ?? '',
                       style: CustomStyles.med14Gray878787.copyWith(
-                        color: course.slectedDocumentIndex != index
+                        color: course.selectedDocumentIndex != index
                             ? Colors.black
                             : Colors.grey,
                       ),
@@ -355,7 +356,7 @@ class _DialogFileManagerLiveState extends State<DialogFileManagerLive> {
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       ),
       onPressed: () {
-        if (courseController.courseData?.document != null) {
+        if (courseController.selectedDocumentIndex != null) {
           Navigator.of(context).pop(courseController.courseData?.document?.id);
         }
       },

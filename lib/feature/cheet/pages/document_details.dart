@@ -116,6 +116,8 @@ class _DocumentDetailsState extends State<DocumentDetails> {
                                   ],
                                 ),
                                 S.h(10),
+
+                                /// TODO: removed on first launch
                                 Expanded(
                                   child: ReorderableBuilder(
                                     enableDraggable: false,

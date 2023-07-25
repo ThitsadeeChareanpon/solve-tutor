@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:collection';
-import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -29,7 +28,7 @@ class CourseLiveController extends ChangeNotifier {
   var selectedLevel = '';
   var selectedSubject = '';
   var indexSelected = 0;
-  var slectedDocumentIndex = 0;
+  int? selectedDocumentIndex;
   var isLoading = false;
   var isLoadingCalendarListAll = false;
   var isLoadingCourseTutorToday = false;
@@ -53,11 +52,24 @@ class CourseLiveController extends ChangeNotifier {
   var skipWeekTextEditing = TextEditingController();
   var startDateController = TextEditingController();
   var endDateController = TextEditingController();
-  var slectedDateController = TextEditingController();
+  var selectedDateController = TextEditingController();
   var startTimeController = TextEditingController();
   var endTimeController = TextEditingController();
   var findStudentController = TextEditingController();
   var haveErrorText = '';
+
+  final StreamController _updateController = StreamController.broadcast();
+  Stream get updateStream => _updateController.stream;
+
+  @override
+  void dispose() {
+    _updateController.close();
+    super.dispose();
+  }
+
+  void refresh() {
+    _updateController.add(null);
+  }
 
   setHaveError(String text) {
     haveErrorText = text;
@@ -154,14 +166,12 @@ class CourseLiveController extends ChangeNotifier {
       equals: isSameDay,
       hashCode: getHashCode,
     )..addAll(kEventSource);
-    print(kEvents);
     // setState(() {});
     notifyListeners();
   }
 
-  setSelectedDocuemnt(int index) {
-    slectedDocumentIndex = index;
-
+  setSelectedDocument(int index) {
+    selectedDocumentIndex = index;
     notifyListeners();
   }
 
@@ -197,7 +207,7 @@ class CourseLiveController extends ChangeNotifier {
     notifyListeners();
   }
 
-  claerData() {
+  clearData() {
     if (courseNameTextEditing.text.isNotEmpty) {
       courseNameTextEditing.text = '';
     }
@@ -354,11 +364,13 @@ class CourseLiveController extends ChangeNotifier {
   getLevels() async {
     levels.clear();
     final List<LevelModel> data = await CourseLiveService().getLevelsList();
-    levels.addAll(List.generate(
-      data.length,
-      (index) => SelectOptionItem(
-          id: data[index].levelId, name: data[index].levelName),
-    ));
+    levels.addAll(
+      List.generate(
+        data.length,
+        (index) => SelectOptionItem(
+            id: data[index].levelId, name: data[index].levelName),
+      ),
+    );
 
     notifyListeners();
   }
@@ -399,7 +411,7 @@ class CourseLiveController extends ChangeNotifier {
     }
   }
 
-  Future<void> updateCourseDestails(CourseModel? courseData) async {
+  Future<void> updateCourseDetails(CourseModel? courseData) async {
     try {
       if (courseData == null) return;
       if (courseData.id?.isNotEmpty == true &&
@@ -411,9 +423,8 @@ class CourseLiveController extends ChangeNotifier {
     }
   }
 
-  Future<void> updateCourseDestailsOnlyStudent(CourseModel courseData) async {
+  Future<void> updateCourseDetailsOnlyStudent(CourseModel courseData) async {
     try {
-      log("in updateCourseDestails 1");
       await CourseLiveService().updateCourseLiveDestails(courseData);
     } catch (error) {
       debugPrint(error.toString());

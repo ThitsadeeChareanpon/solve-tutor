@@ -15,6 +15,8 @@ import 'package:solve_tutor/feature/calendar/widgets/divider.dart';
 import 'package:solve_tutor/feature/calendar/widgets/format_date.dart';
 import 'package:solve_tutor/feature/calendar/widgets/sizebox.dart';
 
+import '../../../firebase/database.dart';
+
 class CourseDetailPage extends StatefulWidget {
   CourseDetailPage({Key? key, required this.courseData}) : super(key: key);
   CourseModel courseData;
@@ -26,12 +28,26 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
   final _util = UtilityHelper();
   double? _ratingValue;
   var courseController = CourseLiveController();
+  DatabaseService dbService = DatabaseService();
+  String tutorName = 'ติวเตอร์ ติวเตอร์';
+  String tutorAbout = '';
+  String tutorImage = '';
   @override
   void initState() {
     super.initState();
-    SchedulerBinding.instance.addPostFrameCallback((_) => callAlertPopup());
+    // SchedulerBinding.instance.addPostFrameCallback((_) => callAlertPopup());
     courseController =
         Provider.of<CourseLiveController>(context, listen: false);
+    initDB();
+  }
+
+  void initDB() async {
+    var user = await dbService.getUserById(widget.courseData.tutorId);
+    setState(() {
+      tutorName = user['name'];
+      tutorAbout = user['about'];
+      tutorImage = user['image'];
+    });
   }
 
   Future<void> callAlertPopup() async {
@@ -99,48 +115,48 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                       ],
                     ),
                     S.h(12.0),
-                    Row(
-                      children: [
-                        Image.asset(
-                          ImageAssets.icUser2,
-                          width: 16,
-                          height: 16,
-                        ),
-                        S.w(8.0),
-                        Text(
-                          '${widget.courseData.studentIds?.length ?? 0}',
-                          style: CustomStyles.reg12Gray878787,
-                        ),
-                        S.w(8.0),
-                        const SizedBox(
-                          height: 21,
-                          child: VerticalDivider(
-                            color: CustomColors.grayE5E6E9,
-                            thickness: 2,
-                            indent: 5,
-                            endIndent: 0,
-                            width: 8,
-                          ),
-                        ),
-                        S.w(8.0),
-                        Text(
-                          '4.3',
-                          style: CustomStyles.reg12yellowFF9800,
-                        ),
-                        S.w(8.0),
-                        const Icon(
-                          Icons.star,
-                          color: CustomColors.yellowFF9800,
-                          size: 22,
-                        ),
-                        S.w(8.0),
-                        Text(
-                          '3,324 รีวิว',
-                          style: CustomStyles.reg12Gray878787,
-                        ),
-                      ],
-                    ),
-                    S.h(13.0),
+                    // Row(
+                    //   children: [
+                    //     Image.asset(
+                    //       ImageAssets.icUser2,
+                    //       width: 16,
+                    //       height: 16,
+                    //     ),
+                    //     S.w(8.0),
+                    //     Text(
+                    //       '${widget.courseData.studentIds?.length ?? 0}',
+                    //       style: CustomStyles.reg12Gray878787,
+                    //     ),
+                    //     S.w(8.0),
+                    //     const SizedBox(
+                    //       height: 21,
+                    //       child: VerticalDivider(
+                    //         color: CustomColors.grayE5E6E9,
+                    //         thickness: 2,
+                    //         indent: 5,
+                    //         endIndent: 0,
+                    //         width: 8,
+                    //       ),
+                    //     ),
+                    //     S.w(8.0),
+                    //     Text(
+                    //       '4.3',
+                    //       style: CustomStyles.reg12yellowFF9800,
+                    //     ),
+                    //     S.w(8.0),
+                    //     const Icon(
+                    //       Icons.star,
+                    //       color: CustomColors.yellowFF9800,
+                    //       size: 22,
+                    //     ),
+                    //     S.w(8.0),
+                    //     Text(
+                    //       '3,324 รีวิว',
+                    //       style: CustomStyles.reg12Gray878787,
+                    //     ),
+                    //   ],
+                    // ),
+                    // S.h(13.0),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -150,7 +166,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                         ),
                         S.w(16.0),
                         Text(
-                          widget.courseData.tutorId ?? '',
+                          tutorName,
                           style: CustomStyles.med14greenPrimary,
                         ),
                       ],
@@ -170,7 +186,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'เรียนเป็นกลุ่มกับติวเตอร์ผ่านการ LIVE สดด้วย SOLVEPAD',
+                          'เรียนเป็นกลุ่มกับติวเตอร์ผ่านระบบ SOLVE LIVE',
                           style: CustomStyles.reg16Black363636,
                         ),
                         // S.w(8.0),
@@ -214,7 +230,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                         ),
                         S.w(8.0),
                         Text(
-                          'มีติวเตอร์ตอบคำถามที่ไม่เข้าใจระหว่างเรียน',
+                          'ทบทวนหลังจบ Live และถามคำถามได้ทันที',
                           style: CustomStyles.reg16Black363636,
                         ),
                       ],
@@ -233,81 +249,87 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                           .copyWith(fontSize: _util.addMinusFontSize(16)),
                     ),
                     S.h(16.0),
-                    InkWell(
-                      onTap: () {},
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'ดูแบบละเอียดในปฏิทิน',
-                          style: CustomStyles.bold14greenPrimary,
-                        ),
-                      ),
-                    ),
-                    S.h(16.0),
-                    Text(
-                      'ดูแบบละเอียดในปฏิทิน',
-                      style: CustomStyles.bold18Black363636,
-                    ),
-                    Text(
-                      widget.courseData.detailsText ?? '',
-                      textAlign: TextAlign.start,
-                      style: CustomStyles.med14Black363636
-                          .copyWith(color: CustomColors.gray363636)
-                          .copyWith(fontSize: _util.addMinusFontSize(16)),
-                    ),
+                    // InkWell(
+                    //   onTap: () {},
+                    //   child: Align(
+                    //     alignment: Alignment.centerLeft,
+                    //     child: Text(
+                    //       'ดูแบบละเอียดในปฏิทิน',
+                    //       style: CustomStyles.bold14greenPrimary,
+                    //     ),
+                    //   ),
+                    // ),
+                    // S.h(16.0),
+                    // Text(
+                    //   'ดูแบบละเอียดในปฏิทิน',
+                    //   style: CustomStyles.bold18Black363636,
+                    // ),
+                    // Text(
+                    //   widget.courseData.detailsText ?? '',
+                    //   textAlign: TextAlign.start,
+                    //   style: CustomStyles.med14Black363636
+                    //       .copyWith(color: CustomColors.gray363636)
+                    //       .copyWith(fontSize: _util.addMinusFontSize(16)),
+                    // ),
                   ],
                 ),
               ),
-              Align(
-                alignment: Alignment.center,
-                child: Text(
-                  'ดูเพิ่มเติม',
-                  style: CustomStyles.bold14greenPrimary,
-                ),
-              ),
-              S.h(32.0),
-              Padding(
-                padding: const EdgeInsets.only(left: 24.0),
-                child: Text(
-                  'นอกจากนี้ผู้เรียนยังดู',
-                  style: CustomStyles.bold18Black363636,
-                ),
-              ),
-              S.h(16.0),
-              Padding(
-                padding: const EdgeInsets.only(left: 24.0),
-                child: ListView.builder(
-                    physics: const NeverScrollableScrollPhysics(),
-                    scrollDirection: Axis.vertical,
-                    shrinkWrap: true,
-                    // the number of items in the list
-                    itemCount: 4,
-
-                    // display each item of the product list
-                    itemBuilder: (context, index) {
-                      return BuildCourse(
-                        util: _util,
-                      );
-                    }),
-              ),
-              Align(
-                alignment: Alignment.center,
-                child: Text(
-                  'ดูเพิ่มเติม',
-                  style: CustomStyles.bold14greenPrimary,
-                ),
-              ),
+              // Align(
+              //   alignment: Alignment.center,
+              //   child: Text(
+              //     'ดูเพิ่มเติม',
+              //     style: CustomStyles.bold14greenPrimary,
+              //   ),
+              // ),
+              // S.h(32.0),
+              // Padding(
+              //   padding: const EdgeInsets.only(left: 24.0),
+              //   child: Text(
+              //     'นอกจากนี้ผู้เรียนยังดู',
+              //     style: CustomStyles.bold18Black363636,
+              //   ),
+              // ),
+              // S.h(16.0),
+              // Padding(
+              //   padding: const EdgeInsets.only(left: 24.0),
+              //   child: ListView.builder(
+              //       physics: const NeverScrollableScrollPhysics(),
+              //       scrollDirection: Axis.vertical,
+              //       shrinkWrap: true,
+              //       // the number of items in the list
+              //       itemCount: 4,
+              //
+              //       // display each item of the product list
+              //       itemBuilder: (context, index) {
+              //         return BuildCourse(
+              //           util: _util,
+              //         );
+              //       }),
+              // ),
+              // Align(
+              //   alignment: Alignment.center,
+              //   child: Text(
+              //     'ดูเพิ่มเติม',
+              //     style: CustomStyles.bold14greenPrimary,
+              //   ),
+              // ),
               S.h(32),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   S.w(20.39),
                   ClipOval(
-                    child: Image.network(
-                      "https://images.unsplash.com/photo-1633332755192-727a05c4013d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlcnxlbnwwfHwwfHw%3D&w=1000&q=80",
-                      height: _util.isTablet() ? 102.71 : 50,
-                      fit: BoxFit.cover,
-                    ),
+                    child: (tutorImage == '')
+                        ? Image.asset(
+                            'assets/images/profile2.png',
+                            height: _util.isTablet() ? 102.71 : 50,
+                            fit: BoxFit.cover,
+                          )
+                        : Image.network(
+                            tutorImage,
+                            height: _util.isTablet() ? 102.71 : 50,
+                            fit: BoxFit.cover,
+                          ),
                   ),
                   S.w(12.39),
                   Column(
@@ -325,161 +347,161 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                         // ),
                         onTap: () {},
                         child: Text(
-                          'เจียมพจน์ ปิ่นแก้ว',
+                          tutorName,
                           style: CustomStyles.reg16greenPrimary,
                         ),
                       ),
                       S.h(9.0),
-                      Text('รับสอนพิเศษวิชาคณิตศาสตร์ ทุกระดับชั้น',
-                          style: CustomStyles.reg12Black363636),
+                      Text(tutorAbout, style: CustomStyles.reg12Black363636),
                       S.h(9.0),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'คอร์สทั้งหมด: 6',
-                            style: _util.isTablet()
-                                ? CustomStyles.reg14Gray878787
-                                : CustomStyles.reg12Gray878787,
-                          ),
-                          S.w(_util.isTablet() ? 8 : 4),
-                          buildVerticalDividerGray(20.0, 8.0),
-                          S.w(_util.isTablet() ? 8 : 4),
-                          Text(
-                            'จำนวนผู้เรียน: 220,00',
-                            style: _util.isTablet()
-                                ? CustomStyles.reg14Gray878787
-                                : CustomStyles.reg12Gray878787,
-                          ),
-                          S.w(_util.isTablet() ? 8 : 4),
-                          buildVerticalDividerGray(20.0, 8.0),
-                          S.w(_util.isTablet() ? 8 : 4),
-                          Text(
-                            'จำนวนรีวิว: 500',
-                            style: _util.isTablet()
-                                ? CustomStyles.reg14Gray878787
-                                : CustomStyles.reg12Gray878787,
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Image.asset(
-                            ImageAssets.icThumbUp,
-                            height: _util.isTablet() ? 20 : 10,
-                          ),
-                          S.w(8.0),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 5.0),
-                            child: Text(
-                              '160 คะแนน',
-                              style: CustomStyles.reg12greenPrimary,
-                            ),
-                          )
-                        ],
-                      )
+                      // Row(
+                      //   crossAxisAlignment: CrossAxisAlignment.start,
+                      //   children: [
+                      //     Text(
+                      //       'คอร์สทั้งหมด: xx',
+                      //       style: _util.isTablet()
+                      //           ? CustomStyles.reg14Gray878787
+                      //           : CustomStyles.reg12Gray878787,
+                      //     ),
+                      //     S.w(_util.isTablet() ? 8 : 4),
+                      //     buildVerticalDividerGray(20.0, 8.0),
+                      //     S.w(_util.isTablet() ? 8 : 4),
+                      //     Text(
+                      //       'จำนวนผู้เรียน: xx,xxx',
+                      //       style: _util.isTablet()
+                      //           ? CustomStyles.reg14Gray878787
+                      //           : CustomStyles.reg12Gray878787,
+                      //     ),
+                      //     S.w(_util.isTablet() ? 8 : 4),
+                      //     buildVerticalDividerGray(20.0, 8.0),
+                      //     S.w(_util.isTablet() ? 8 : 4),
+                      //     Text(
+                      //       'จำนวนรีวิว: xxx',
+                      //       style: _util.isTablet()
+                      //           ? CustomStyles.reg14Gray878787
+                      //           : CustomStyles.reg12Gray878787,
+                      //     ),
+                      //   ],
+                      // ),
+                      // Row(
+                      //   children: [
+                      //     Image.asset(
+                      //       ImageAssets.icThumbUp,
+                      //       height: _util.isTablet() ? 20 : 10,
+                      //     ),
+                      //     S.w(8.0),
+                      //     Padding(
+                      //       padding: const EdgeInsets.only(top: 5.0),
+                      //       child: Text(
+                      //         'xxx คะแนน',
+                      //         style: CustomStyles.reg12greenPrimary,
+                      //       ),
+                      //     )
+                      //   ],
+                      // ),
                     ],
                   ),
                 ],
               ),
+              // S.h(32.0),
+              // Padding(
+              //   padding: const EdgeInsets.only(left: 24.0),
+              //   child: Text(
+              //     'รีวิวจากผู้เรียน',
+              //     style: CustomStyles.bold18Black363636,
+              //   ),
+              // ),
+              // S.h(16.0),
+              // Padding(
+              //   padding: const EdgeInsets.only(left: 24.0),
+              //   child: Row(
+              //     children: [
+              //       Text(
+              //         '4.7',
+              //         style: CustomStyles.bold14yellowFF9800,
+              //       ),
+              //       S.w(8.0),
+              //       RatingBar(
+              //           ignoreGestures: true,
+              //           initialRating: 4.5,
+              //           direction: Axis.horizontal,
+              //           allowHalfRating: true,
+              //           itemCount: 5,
+              //           itemSize: 24,
+              //           ratingWidget: RatingWidget(
+              //               full: const Icon(
+              //                 Icons.star,
+              //                 color: CustomColors.yellowFF9800,
+              //               ),
+              //               half: const Icon(
+              //                 Icons.star_half,
+              //                 color: CustomColors.yellowFF9800,
+              //               ),
+              //               empty: const Icon(
+              //                 Icons.star_outline,
+              //                 color: Colors.orange,
+              //               )),
+              //           onRatingUpdate: (value) {
+              //             setState(() {
+              //               _ratingValue = value;
+              //             });
+              //           }),
+              //       S.w(8.0),
+              //       Text(
+              //         '3,324 รีวิว',
+              //         style: CustomStyles.reg11Gray878787,
+              //       ),
+              //     ],
+              //   ),
+              // ),
+              // S.h(18.0),
+              // percentPoint(5, 0.8, "55"),
+              // S.h(18.0),
+              // percentPoint(4, 0.8, "33"),
+              // S.h(18.0),
+              // percentPoint(3, 0.8, "10"),
+              // S.h(18.0),
+              // percentPoint(2, 0.8, "2"),
+              // S.h(18.0),
+              // percentPoint(1, 0.1, "1"),
+              // S.h(34.0),
+              // comment(),
+              // comment(),
+              // comment(),
+              // Align(
+              //   alignment: Alignment.center,
+              //   child: Text(
+              //     'แสดงเพิ่มเติม',
+              //     style: CustomStyles.bold14greenPrimary,
+              //   ),
+              // ),
+              // S.h(100.0),
               S.h(32.0),
-              Padding(
-                padding: const EdgeInsets.only(left: 24.0),
-                child: Text(
-                  'รีวิวจากผู้เรียน',
-                  style: CustomStyles.bold18Black363636,
-                ),
-              ),
-              S.h(16.0),
-              Padding(
-                padding: const EdgeInsets.only(left: 24.0),
-                child: Row(
-                  children: [
-                    Text(
-                      '4.7',
-                      style: CustomStyles.bold14yellowFF9800,
-                    ),
-                    S.w(8.0),
-                    RatingBar(
-                        ignoreGestures: true,
-                        initialRating: 4.5,
-                        direction: Axis.horizontal,
-                        allowHalfRating: true,
-                        itemCount: 5,
-                        itemSize: 24,
-                        ratingWidget: RatingWidget(
-                            full: const Icon(
-                              Icons.star,
-                              color: CustomColors.yellowFF9800,
-                            ),
-                            half: const Icon(
-                              Icons.star_half,
-                              color: CustomColors.yellowFF9800,
-                            ),
-                            empty: const Icon(
-                              Icons.star_outline,
-                              color: Colors.orange,
-                            )),
-                        onRatingUpdate: (value) {
-                          setState(() {
-                            _ratingValue = value;
-                          });
-                        }),
-                    S.w(8.0),
-                    Text(
-                      '3,324 รีวิว',
-                      style: CustomStyles.reg11Gray878787,
-                    ),
-                  ],
-                ),
-              ),
-              S.h(18.0),
-              percentPoint(5, 0.8, "55"),
-              S.h(18.0),
-              percentPoint(4, 0.8, "33"),
-              S.h(18.0),
-              percentPoint(3, 0.8, "10"),
-              S.h(18.0),
-              percentPoint(2, 0.8, "2"),
-              S.h(18.0),
-              percentPoint(1, 0.1, "1"),
-              S.h(34.0),
-              comment(),
-              comment(),
-              comment(),
-              Align(
-                alignment: Alignment.center,
-                child: Text(
-                  'แสดงเพิ่มเติม',
-                  style: CustomStyles.bold14greenPrimary,
-                ),
-              ),
-              S.h(100.0)
             ],
           ),
         ),
       ),
-      floatingActionButton: InkWell(
-        onTap: () {
-          // showSnackBar(context, "เพิ่มคอร์สเข้ารายการของคุณเรียบร้อย");
-          // Navigator.push(
-          //   context,
-          //   MaterialPageRoute(
-          //       builder: (context) => const SubscribeRegisterPage()),
-          // );
-        },
-        child: Container(
-          width: 165,
-          height: 40.0,
-          decoration: BoxDecoration(
-            color: CustomColors.greenPrimary,
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-          child: Center(
-              child:
-                  Text("ฉันอยากเรียนคอร์สนี้", style: CustomStyles.med14White)),
-        ),
-      ),
+      // floatingActionButton: InkWell(
+      //   onTap: () {
+      //     // showSnackBar(context, "เพิ่มคอร์สเข้ารายการของคุณเรียบร้อย");
+      //     // Navigator.push(
+      //     //   context,
+      //     //   MaterialPageRoute(
+      //     //       builder: (context) => const SubscribeRegisterPage()),
+      //     // );
+      //   },
+      //   child: Container(
+      //     width: 165,
+      //     height: 40.0,
+      //     decoration: BoxDecoration(
+      //       color: CustomColors.greenPrimary,
+      //       borderRadius: BorderRadius.circular(8.0),
+      //     ),
+      //     child: Center(
+      //         child:
+      //             Text("ฉันอยากเรียนคอร์สนี้", style: CustomStyles.med14White)),
+      //   ),
+      // ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }

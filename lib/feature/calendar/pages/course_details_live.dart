@@ -13,6 +13,7 @@ import 'package:solve_tutor/feature/calendar/widgets/alert_overlay.dart';
 import 'package:solve_tutor/feature/calendar/widgets/dropdown.dart';
 import 'package:solve_tutor/feature/calendar/widgets/format_date.dart';
 import 'package:solve_tutor/feature/calendar/widgets/sizebox.dart';
+import 'package:solve_tutor/firebase/database.dart';
 
 class CourseDetailsLive extends StatefulWidget {
   const CourseDetailsLive({
@@ -26,17 +27,11 @@ class CourseDetailsLive extends StatefulWidget {
 class _CourseDetailsLiveState extends State<CourseDetailsLive> {
   final _util = UtilityHelper();
   var courseController = CourseLiveController();
+  DatabaseService dbService = DatabaseService();
   List<StudentModel> filterStudent = [];
   String textErrorAddStudent = '';
   DateTime? startTime;
   DateTime? endTime;
-
-  List<StudentModel> studentMock = [
-    StudentModel(id: '00001', name: 'Test 01'),
-    StudentModel(id: '00002', name: 'Test 02'),
-    StudentModel(id: '00003', name: 'Test 03'),
-    StudentModel(id: '00004', name: 'Test 04')
-  ];
 
   @override
   void initState() {
@@ -189,7 +184,7 @@ class _CourseDetailsLiveState extends State<CourseDetailsLive> {
                                                       CircularProgressIndicator()),
                                           errorWidget: (context, url, error) =>
                                               const Icon(Icons.error),
-                                        )
+                                        ),
                                       ] else ...[
                                         Text(
                                           "อัพโหลดรูป",
@@ -206,16 +201,14 @@ class _CourseDetailsLiveState extends State<CourseDetailsLive> {
                         );
                       }),
                       S.h(20),
-                      _textAera(courseController.courseRecommendTextEditing,
+                      _textArea(courseController.courseRecommendTextEditing,
                           title: "แนะนำคอร์สเรียน*",
                           // labelText: 'คำอธิบายคอร์ส',
                           hintText: 'รายละเอียด...'),
                       S.h(20),
-                      _textAera(courseController.courseDetailTextEditing,
+                      _textArea(courseController.courseDetailTextEditing,
                           title: "รายละเอียดคอร์ส*", hintText: 'รายละเอียด...'),
                       S.h(20),
-                      // if (widgcourseControlleret.courseActionType ==
-                      //     CourseActionType.update) ...[
                       _managementStudent(),
                       S.h(20),
                       _deleteCourse(),
@@ -247,7 +240,7 @@ class _CourseDetailsLiveState extends State<CourseDetailsLive> {
     );
   }
 
-  Widget _textAera(TextEditingController controller,
+  Widget _textArea(TextEditingController controller,
       {String? title, String? labelText, String? hintText}) {
     return Column(
       children: [
@@ -300,7 +293,7 @@ class _CourseDetailsLiveState extends State<CourseDetailsLive> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'รายชื่อนักเรียนทีลงทะเบียน',
+                    'รายชื่อนักเรียนที่ลงทะเบียน',
                     style: CustomStyles.med14Black363636,
                   ),
                   Text(
@@ -319,17 +312,17 @@ class _CourseDetailsLiveState extends State<CourseDetailsLive> {
                 elevation: 5,
                 child: ListTile(
                     title: Text(
-                      'id : ${course.courseData?.studentDetails?[index].id}',
+                      'Name : ${course.courseData?.studentDetails?[index].name}',
                       style: CustomStyles.med14Black363636,
                     ),
                     subtitle: (_util.isTablet())
                         ? Row(
                             children: [
                               Text(
-                                  'ชื่อ-นามสกุล: ${course.courseData?.studentDetails?[index].name}'),
+                                  'ID: ${course.courseData?.studentDetails?[index].id}'),
                               S.w(20),
-                              Text(
-                                  'ลงทะเบียนวันที่: ${FormatDate.dt(course.courseData?.studentDetails?[index].createTime)}'),
+                              // Text(
+                              //     'ลงทะเบียนวันที่: ${FormatDate.dt(course.courseData?.studentDetails?[index].createTime)}'),
                             ],
                           )
                         : Column(
@@ -491,12 +484,13 @@ class _CourseDetailsLiveState extends State<CourseDetailsLive> {
                         S.w(20),
                         TextButton(
                           onPressed: () async {
-                            filterStudent = studentMock
-                                .where((element) =>
-                                    (element.id ?? '') ==
-                                    (courseController
-                                        .findStudentController.text))
-                                .toList();
+                            var user = await dbService.getUserById(
+                                courseController.findStudentController.text);
+                            if (user['role'] != 'student') return;
+                            filterStudent.add(StudentModel(
+                              id: user['id'],
+                              name: user['name'],
+                            ));
                             setState(() {});
                           },
                           child: Text(
@@ -513,7 +507,7 @@ class _CourseDetailsLiveState extends State<CourseDetailsLive> {
                       Card(
                         elevation: 5,
                         child: ListTile(
-                            title: Text(filterStudent.first.id ?? ''),
+                            title: Text(filterStudent.first.name ?? ''),
                             trailing: InkWell(
                               onTap: () {
                                 courseController.courseData?.studentIds ??= [];

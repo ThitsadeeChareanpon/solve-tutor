@@ -75,23 +75,23 @@ class _ManageCoursePageState extends State<ManageCoursePage> {
                   //   content:
                   //       "ดูคอร์สขายดี, รายได้ของคุณ, จำนวนนักเรียนในคอร์ส, รีวิว, และคะแนนของคุณ",
                   // ),
-                  gridCard(
-                    context,
-                    onTap: () async {
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => MyCourseVDOPage(
-                            tutorId: auth?.uid ?? "",
-                          ),
-                        ),
-                      );
-                    },
-                    image: 'assets/images/course1.png',
-                    title: "สร้างคอร์ส Marketplace",
-                    content:
-                        "สร้างคอร์สสอนพิเศษของคุณ เพื่อลงขายใน Market Place ของเรา",
-                  ),
+                  // gridCard(
+                  //   context,
+                  //   onTap: () async {
+                  //     await Navigator.push(
+                  //       context,
+                  //       MaterialPageRoute(
+                  //         builder: (context) => MyCourseVDOPage(
+                  //           tutorId: auth?.uid ?? "",
+                  //         ),
+                  //       ),
+                  //     );
+                  //   },
+                  //   image: 'assets/images/course1.png',
+                  //   title: "สร้างคอร์ส Marketplace",
+                  // content:
+                  //     "สร้างคอร์สสอนพิเศษของคุณ เพื่อลงขายใน Market Place ของเรา",
+                  // ),
                   gridCard(
                     context,
                     onTap: () async {
@@ -105,9 +105,9 @@ class _ManageCoursePageState extends State<ManageCoursePage> {
                       );
                     },
                     image: 'assets/images/course1.png',
-                    title: "สร้างคอร์สสอนสด",
-                    content:
-                        "สร้างคอร์สสอนพิเศษของคุณ เพื่อลงขายใน Market Place ของเรา",
+                    title: "คอร์สของฉัน",
+                    // content:
+                    //     "สร้างคอร์สสอนพิเศษของคุณ เพื่อลงขายใน Market Place ของเรา",
                   ),
                   // gridCard(
                   //   context,
@@ -129,16 +129,16 @@ class _ManageCoursePageState extends State<ManageCoursePage> {
                     },
                     image: 'assets/images/cheet1.png',
                     title: "สร้างชีท",
-                    content:
-                        "สร้างคลังเอกสารประกอบการเรียน เพื่อให้คุณสามารถแชร์เอกสารกับคอร์สอื่นๆได้",
+                    // content:
+                    //     "สร้างคลังเอกสารประกอบการเรียน เพื่อให้คุณสามารถแชร์เอกสารกับคอร์สอื่นๆได้",
                   ),
                   gridCard(
                     context,
                     onTap: () {},
                     image: 'assets/images/qa1.png',
                     title: "ตอบคำถามนักเรียน",
-                    content:
-                        "คำถามระหว่างเรียนของนักเรียนของคุณ ที่ต้องการให้คุณช่วยตอบ",
+                    // content:
+                    //     "คำถามระหว่างเรียนของนักเรียนของคุณ ที่ต้องการให้คุณช่วยตอบ",
                   ),
                   gridCard(
                     context,
@@ -149,8 +149,8 @@ class _ManageCoursePageState extends State<ManageCoursePage> {
                     },
                     image: 'assets/images/find1.png',
                     title: "ค้นหางานติวเตอร์",
-                    content:
-                        "ประกาศของนักเรียนที่กำลังมองหาติวเตอร์ คุณสามารถเข้า ไปเสนอราคาเพื่อรับงานได้",
+                    // content:
+                    //     "ประกาศของนักเรียนที่กำลังมองหาติวเตอร์ คุณสามารถเข้า ไปเสนอราคาเพื่อรับงานได้",
                   ),
                 ],
               ),
@@ -162,12 +162,13 @@ class _ManageCoursePageState extends State<ManageCoursePage> {
     );
   }
 
+  /// TODO: FIX THIS UGLY THING
   Widget gridCard(
     BuildContext context, {
     required Function()? onTap,
     required String image,
     required String title,
-    required String content,
+    // required String content,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -186,7 +187,7 @@ class _ManageCoursePageState extends State<ManageCoursePage> {
           ],
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Expanded(
               child: SizedBox(
@@ -199,7 +200,7 @@ class _ManageCoursePageState extends State<ManageCoursePage> {
             const SizedBox(height: 20),
             Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
                     title,
@@ -209,13 +210,13 @@ class _ManageCoursePageState extends State<ManageCoursePage> {
                       fontSize: 16,
                     ),
                   ),
-                  Text(
-                    content,
-                    style: const TextStyle(
-                      color: appTextSecondaryColor,
-                      fontSize: 14,
-                    ),
-                  ),
+                  // Text(
+                  //   content,
+                  //   style: const TextStyle(
+                  //     color: appTextSecondaryColor,
+                  //     fontSize: 14,
+                  //   ),
+                  // ),
                 ],
               ),
             ),

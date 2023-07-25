@@ -82,11 +82,11 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
           child: Scaffold(
             appBar: PreferredSize(
               preferredSize: widget.order.fromMarketPlace
-                  ? Size.fromHeight(70)
-                  : Size.fromHeight(110),
+                  ? const Size.fromHeight(70)
+                  : const Size.fromHeight(110),
               child: AppBar(
                 backgroundColor: Colors.white,
-                leading: SizedBox(),
+                leading: const SizedBox(),
                 flexibleSpace: _appBar(),
               ),
             ),
@@ -178,7 +178,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
               data?.map((e) => UserModel.fromJson(e.data())).toList() ?? [];
           return Column(
             children: [
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Row(
                 children: [
                   IconButton(
@@ -302,7 +302,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                   padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
                   child: Row(
                     children: [
-                      Expanded(child: SizedBox()),
+                      const Expanded(child: SizedBox()),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
@@ -363,8 +363,9 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                       keyboardType: TextInputType.multiline,
                       maxLines: null,
                       onTap: () {
-                        if (_showEmoji)
+                        if (_showEmoji) {
                           setState(() => _showEmoji = !_showEmoji);
+                        }
                       },
                       decoration: const InputDecoration(
                         hintText: 'พิมพ์ข้อความ',

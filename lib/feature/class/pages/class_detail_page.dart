@@ -101,7 +101,7 @@ class _OrderDetailPageState extends State<ClassDetailPage> {
                         Expanded(
                           child: Text(
                             widget.classDetail.name ?? "",
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: appTextPrimaryColor,
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -134,7 +134,7 @@ class _OrderDetailPageState extends State<ClassDetailPage> {
                               borderRadius: BorderRadius.circular(10),
                             ),
                             alignment: Alignment.center,
-                            child: Text(
+                            child: const Text(
                               "แชท",
                               style: TextStyle(
                                 color: Colors.white,
@@ -148,14 +148,14 @@ class _OrderDetailPageState extends State<ClassDetailPage> {
                     const SizedBox(height: 10),
                     Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.money,
                           color: greyColor,
                         ),
                         const SizedBox(width: 10),
                         Text(
                           widget.classDetail.price ?? "",
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: primaryColor,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -163,7 +163,7 @@ class _OrderDetailPageState extends State<ClassDetailPage> {
                         )
                       ],
                     ),
-                    Text(
+                    const Text(
                       "UUID: 00000001",
                       style: TextStyle(
                         color: greyColor,
@@ -172,7 +172,7 @@ class _OrderDetailPageState extends State<ClassDetailPage> {
                     ),
                     Text(
                       widget.classDetail.detail ?? "",
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: appTextPrimaryColor,
                         fontSize: 15,
                       ),
@@ -190,7 +190,7 @@ class _OrderDetailPageState extends State<ClassDetailPage> {
                           padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
                           child: Text(
                             widget.classDetail.schoolSubject ?? "",
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 15,
                             ),
                             maxLines: 1,
@@ -205,7 +205,7 @@ class _OrderDetailPageState extends State<ClassDetailPage> {
                           padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
                           child: Text(
                             widget.classDetail.classLevel ?? "",
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 15,
                             ),
                             maxLines: 1,
@@ -238,7 +238,7 @@ class _OrderDetailPageState extends State<ClassDetailPage> {
                     const SizedBox(height: 5),
                     Text(
                       widget.classDetail.creatorName ?? "",
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: appTextPrimaryColor,
                         fontSize: 15,
                       ),
@@ -259,7 +259,7 @@ class _OrderDetailPageState extends State<ClassDetailPage> {
                     const SizedBox(height: 5),
                     Text(
                       widget.classDetail.detail ?? "",
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: appTextPrimaryColor,
                         fontSize: 15,
                       ),
@@ -279,11 +279,11 @@ class _OrderDetailPageState extends State<ClassDetailPage> {
                               Container(
                                 height: 80,
                                 width: 80,
-                                decoration: BoxDecoration(
+                                decoration: const BoxDecoration(
                                   color: Colors.white,
                                   shape: BoxShape.circle,
                                 ),
-                                padding: EdgeInsets.all(5),
+                                padding: const EdgeInsets.all(5),
                                 child: StreamBuilder(
                                     stream: chat.getUserInfo(
                                         "${widget.classDetail.userId}"),
@@ -313,7 +313,7 @@ class _OrderDetailPageState extends State<ClassDetailPage> {
                                       );
                                     }),
                               ),
-                              SizedBox(width: 10),
+                              const SizedBox(width: 10),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -339,7 +339,7 @@ class _OrderDetailPageState extends State<ClassDetailPage> {
                                   }),
                                   Text(
                                     "${widget.classDetail.creatorName ?? ""} ",
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       color: primaryColor,
                                       fontSize: 18,
                                     ),
@@ -368,17 +368,17 @@ class _OrderDetailPageState extends State<ClassDetailPage> {
         shrinkWrap: true,
         padding: EdgeInsets.zero,
         itemCount: 5,
-        physics: NeverScrollableScrollPhysics(),
+        physics: const NeverScrollableScrollPhysics(),
         scrollDirection: Axis.horizontal,
         itemBuilder: (context, index) {
           if (double.parse(index.toString()) < num) {
-            return Icon(
+            return const Icon(
               CupertinoIcons.star_fill,
               color: Colors.orange,
               size: 20,
             );
           } else {
-            return Icon(
+            return const Icon(
               CupertinoIcons.star,
               color: Colors.grey,
               size: 20,

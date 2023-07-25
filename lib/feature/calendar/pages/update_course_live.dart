@@ -43,10 +43,8 @@ class _UpdateCourseLiveTabState extends State<UpdateCourseLiveTab>
       await Alert.showOverlay(
         loadingWidget: Alert.getOverlayScreen(),
         asyncFunction: () async {
-          // ues courseId get cours edetails
           final course = await courseController.getCourseById(widget.courseId);
           await courseController.setInitData(course);
-          // await courseController.(course);
           await courseController
               .getCalendarListAll(courseController.courseData?.tutorId ?? '');
           await courseController.getDataCalendarList(
@@ -67,7 +65,7 @@ class _UpdateCourseLiveTabState extends State<UpdateCourseLiveTab>
   void dispose() {
     super.dispose();
     courseController.courseData = null;
-    courseController.claerData();
+    courseController.clearData();
   }
 
   @override
@@ -79,13 +77,14 @@ class _UpdateCourseLiveTabState extends State<UpdateCourseLiveTab>
         backgroundColor: CustomColors.white,
         elevation: 6,
         leading: InkWell(
-            onTap: () {
-              Navigator.of(context).pop();
-            },
-            child: const Icon(
-              Icons.arrow_back,
-              color: CustomColors.gray878787,
-            )),
+          onTap: () {
+            Navigator.of(context).pop();
+          },
+          child: const Icon(
+            Icons.arrow_back,
+            color: CustomColors.gray878787,
+          ),
+        ),
         title: Text(
           courseController.courseData?.courseName ?? '',
           style: CustomStyles.bold22Black363636,
@@ -264,7 +263,9 @@ class _UpdateCourseLiveTabState extends State<UpdateCourseLiveTab>
           scale: 2.5,
         ),
         label: Text(
-          "เผยแพร่",
+          courseController.courseData?.publishing == true
+              ? 'ยกเลิก'
+              : 'เผยแพร่',
           style: CustomStyles.med14White.copyWith(
             color: CustomColors.white,
           ),
@@ -292,12 +293,18 @@ class _UpdateCourseLiveTabState extends State<UpdateCourseLiveTab>
             );
           }
           // ignore: use_build_context_synchronously
-          showSnackBar(context, 'อัwเดทสำเร็จ');
+          showSnackBar(
+            context,
+            courseController.courseData?.publishing == true
+                ? 'เผยแพร่สำเร็จ'
+                : 'ยกเลิกเผยแพร่คอร์สนี้แล้ว',
+            'red',
+          );
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: courseController.courseData?.publishing == true
-              ? CustomColors.yellowFF9800
-              : CustomColors.grayCFCFCF,
+              ? CustomColors.redB71C1C
+              : CustomColors.yellowFF9800,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
         ),
@@ -318,13 +325,13 @@ class _UpdateCourseLiveTabState extends State<UpdateCourseLiveTab>
         await Alert.showOverlay(
           asyncFunction: () async {
             await courseController
-                .updateCourseDestails(courseController.courseData);
+                .updateCourseDetails(courseController.courseData);
           },
           context: context,
           loadingWidget: Alert.getOverlayScreen(),
         );
-        // ignore: use_build_context_synchronously
         showSnackBar(context, 'อัwเดทสำเร็จ');
+        courseController.refresh();
       },
       child: Text(
         "บันทึก",

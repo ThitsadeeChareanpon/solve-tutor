@@ -2,21 +2,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:number_paginator/number_paginator.dart';
 import 'package:provider/provider.dart';
 import 'package:solve_tutor/authentication/models/user_model.dart';
 import 'package:solve_tutor/authentication/service/auth_provider.dart';
 import 'package:solve_tutor/constants/school_subject_constants.dart';
 import 'package:solve_tutor/constants/theme.dart';
 import 'package:solve_tutor/feature/class/models/class_model.dart';
-import 'package:solve_tutor/feature/class/models/filter_class_model.dart';
-import 'package:solve_tutor/feature/class/pages/class_detail_page.dart';
 import 'package:solve_tutor/feature/class/pages/create_class_page.dart';
 import 'package:solve_tutor/feature/class/pages/find_class_page.dart';
 import 'package:solve_tutor/feature/class/pages/my_class_page.dart';
 import 'package:solve_tutor/feature/class/services/class_provider.dart';
-import 'package:solve_tutor/feature/class/widgets/filter_class_widget.dart';
-import 'package:solve_tutor/feature/order/pages/order_mock_detail_page.dart';
 import 'package:solve_tutor/widgets/date_time_format_util.dart';
 import 'package:solve_tutor/widgets/sizer.dart';
 
@@ -192,7 +187,7 @@ class _ClassListPageState extends State<ClassListPage>
               Container(
                 height: 30,
                 // color: Colors.red,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
                       color: greyColor,
@@ -224,7 +219,7 @@ class _ClassListPageState extends State<ClassListPage>
               Expanded(
                 child: TabBarView(
                   controller: _tabController,
-                  children: <Widget>[
+                  children: const <Widget>[
                     // tabView1(),
                     // tabView2(),
                     FindClassPage(),
@@ -250,7 +245,7 @@ class _ClassListPageState extends State<ClassListPage>
       backgroundColor: Colors.white,
       leading: IconButton(
         onPressed: () => Navigator.pop(context),
-        icon: Icon(
+        icon: const Icon(
           Icons.chevron_left,
           color: Colors.black,
         ),

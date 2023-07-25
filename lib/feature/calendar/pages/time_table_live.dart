@@ -57,8 +57,6 @@ class _TimeTableLiveState extends State<TimeTableLive> {
           loadingWidget: Alert.getOverlayScreen(),
           context: context,
           asyncFunction: () async {
-            //       //light = true คือเเสดงตารางเรียนทุกคอร๋ส
-            //       //light = false คือเเสดงตารางเรียนเฉพาะในคอร์ส
             await courseController.getDataCalendarList(
                 courseController.courseData?.calendars ?? []);
             setState(() {});
@@ -144,72 +142,78 @@ class _TimeTableLiveState extends State<TimeTableLive> {
     return Scaffold(
       body: SingleChildScrollView(
         child: Consumer<CourseLiveController>(builder: (_, course, child) {
-          return Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _periodTime(),
-                S.h(20),
-                if (_util.isTablet()) ...[
-                  // _buttonAddClassTime(),
-                ] else ...[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          return StreamBuilder(
+              stream: course.updateStream,
+              builder: (context, snapshot) {
+                return Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _topicText('จัดการตารางเรียน'),
-                      _buttonAddClassTime(),
+                      _periodTime(),
+                      S.h(20),
+                      if (_util.isTablet()) ...[
+                        // _buttonAddClassTime(),
+                      ] else ...[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _topicText('จัดการตารางเรียน'),
+                            _buttonAddClassTime(),
+                          ],
+                        ),
+                      ],
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          solveIcon(),
+                          S.w(20),
+                          Text(
+                            "ระยะเวลาเรียน:  ${courseController.startDateController.text} - ${courseController.endDateController.text}",
+                            textAlign: TextAlign.center,
+                            style: CustomStyles.med14Black363636
+                                .copyWith(color: CustomColors.gray878787)
+                                .copyWith(fontSize: _util.addMinusFontSize(14)),
+                          ),
+                          Expanded(child: Container()),
+                          // if (courseController.filterCreateCalendar == '1' &&
+                          //     courseController.startDateController.text.isNotEmpty &&
+                          //     courseController.endDateController.text.isNotEmpty) ...[
+                          if (_util.isTablet()) ...[
+                            _buttonAddClassTime(),
+                          ]
+                          // ],
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          _switchCalendar(),
+                          Text(
+                            'แสดงตารางเรียนทุกคอร์ส',
+                            style: CustomStyles.med14Black363636
+                                .copyWith(color: CustomColors.gray878787)
+                                .copyWith(fontSize: _util.addMinusFontSize(14)),
+                          )
+                        ],
+                      ),
+                      S.h(20),
+                      if (courseController
+                                  .startDateController.text.isNotEmpty &&
+                              courseController
+                                  .endDateController.text.isNotEmpty ||
+                          courseController.calendarListAll.isNotEmpty) ...[
+                        if (_util.isTablet()) ...[
+                          _tableCalendarTablet(),
+                        ] else ...[
+                          tableCalendarMobile()
+                        ],
+                      ]
                     ],
-                  ),
-                ],
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    solveIcon(),
-                    S.w(20),
-                    Text(
-                      "ระยะเวลาเรียน:  ${courseController.startDateController.text} - ${courseController.endDateController.text}",
-                      textAlign: TextAlign.center,
-                      style: CustomStyles.med14Black363636
-                          .copyWith(color: CustomColors.gray878787)
-                          .copyWith(fontSize: _util.addMinusFontSize(14)),
-                    ),
-                    Expanded(child: Container()),
-                    // if (courseController.filterCreateCalendar == '1' &&
-                    //     courseController.startDateController.text.isNotEmpty &&
-                    //     courseController.endDateController.text.isNotEmpty) ...[
-                    if (_util.isTablet()) ...[
-                      _buttonAddClassTime(),
-                    ]
                     // ],
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    _switchCalendar(),
-                    Text(
-                      'แสดงตารางเรียนทุกคอร์ส',
-                      style: CustomStyles.med14Black363636
-                          .copyWith(color: CustomColors.gray878787)
-                          .copyWith(fontSize: _util.addMinusFontSize(14)),
-                    )
-                  ],
-                ),
-                S.h(20),
-                if (courseController.startDateController.text.isNotEmpty &&
-                        courseController.endDateController.text.isNotEmpty ||
-                    courseController.calendarListAll.isNotEmpty) ...[
-                  if (_util.isTablet()) ...[
-                    _tableCalendarTablet(),
-                  ] else ...[
-                    tableCalendarMobile()
-                  ],
-                ]
-              ],
-              // ],
-            ),
-          );
+                  ),
+                );
+              });
         }),
       ),
     );
@@ -217,42 +221,44 @@ class _TimeTableLiveState extends State<TimeTableLive> {
 
   Widget _tableCalendarTablet() {
     return Consumer<CourseLiveController>(builder: (_, course, child) {
+      DateTime today = DateTime(
+          DateTime.now().year, DateTime.now().month, DateTime.now().day);
+      var firstDay = course.courseData?.firstDay ?? DateTime.now();
+      var lastDay = course.courseData?.lastDay ?? DateTime.now();
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: TableCalendar<Event>(
           availableGestures: AvailableGestures.horizontalSwipe,
           locale: 'en_US',
-          firstDay: course.courseData?.firstDay ?? DateTime.now(),
-          lastDay: course.courseData?.lastDay ?? DateTime.now(),
-          focusedDay: course.courseData?.firstDay ?? DateTime.now(),
+          firstDay: firstDay,
+          lastDay: lastDay,
+          focusedDay: firstDay,
           calendarFormat: _calendarFormat,
           availableCalendarFormats: const {
             CalendarFormat.month: 'Month',
           },
           rangeSelectionMode: _rangeSelectionMode,
           eventLoader: _getEventsForDay,
-          startingDayOfWeek: StartingDayOfWeek.monday,
+          startingDayOfWeek: StartingDayOfWeek.sunday,
           daysOfWeekHeight: 56,
           rowHeight: 128.4,
           daysOfWeekStyle: DaysOfWeekStyle(
-            weekendStyle: CustomStyles.med16Black363636,
+            weekendStyle: CustomStyles.weekendStyle,
             weekdayStyle: CustomStyles.med16Black363636,
           ),
           calendarStyle: const CalendarStyle(
-            // Use `CalendarStyle` to customize the UI
             outsideDaysVisible: true,
             tableBorder: TableBorder(
-                horizontalInside:
-                    BorderSide(width: 1, color: CustomColors.grayCFCFCF),
-                verticalInside:
-                    BorderSide(width: 1, color: CustomColors.grayCFCFCF),
-                left: BorderSide(width: 1, color: CustomColors.grayCFCFCF),
-                right: BorderSide(width: 1, color: CustomColors.grayCFCFCF),
-                top: BorderSide(width: 1, color: CustomColors.grayCFCFCF),
-                bottom: BorderSide(
-                  width: 1,
-                ),
-                borderRadius: BorderRadius.all(Radius.circular(8.0))),
+              horizontalInside:
+                  BorderSide(width: 1, color: CustomColors.grayCFCFCF),
+              verticalInside:
+                  BorderSide(width: 1, color: CustomColors.grayCFCFCF),
+              left: BorderSide(width: 1, color: CustomColors.grayCFCFCF),
+              right: BorderSide(width: 1, color: CustomColors.grayCFCFCF),
+              top: BorderSide(width: 1, color: CustomColors.grayCFCFCF),
+              bottom: BorderSide(width: 1, color: CustomColors.grayCFCFCF),
+              borderRadius: BorderRadius.all(Radius.circular(8.0)),
+            ),
           ),
           onDaySelected: _onDaySelected,
           onRangeSelected: _onRangeSelected,
@@ -263,74 +269,10 @@ class _TimeTableLiveState extends State<TimeTableLive> {
               });
             }
           },
-          onPageChanged: (focusedDay) {
-            // _focusedDay = focusedDay;
-          },
           calendarBuilders: CalendarBuilders(
             todayBuilder: (context, day, focusedDay) {
-              return TextButton(
-                onPressed: () {},
-                child: Container(
-                  padding: const EdgeInsets.only(left: 20, top: 20),
-                  alignment: Alignment.topLeft,
-                  child: Text(
-                    day.day.toString(),
-                    style: CustomStyles.med16Black363636
-                        .copyWith(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              );
-            },
-            outsideBuilder: (context, day, event) {
-              return Container(
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.rectangle,
-                    color: CustomColors.grayF3F3F3,
-                  ),
-                  padding: const EdgeInsets.only(left: 20, top: 20),
-                  alignment: Alignment.topCenter,
-                  child: Text(
-                    day.day.toString(),
-                    style: CustomStyles.med16Black363636.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: CustomColors.gray878787),
-                  ));
-            },
-            disabledBuilder: (context, day, focusedDay) {
-              return TextButton(
-                  onPressed: () {},
-                  child: Container(
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.rectangle,
-                        color: CustomColors.grayF3F3F3,
-                      ),
-                      padding: const EdgeInsets.only(left: 20, top: 20),
-                      alignment: Alignment.topLeft,
-                      child: Text(
-                        day.day.toString(),
-                        style: CustomStyles.med16Black363636.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: CustomColors.gray878787),
-                      )));
-            },
-            defaultBuilder: (context, day, event) {
-              if (DateTime.now().isAfter(day)) {
-                return TextButton(
-                    onPressed: () {},
-                    child: Container(
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.rectangle,
-                          color: CustomColors.grayF3F3F3,
-                        ),
-                        padding: const EdgeInsets.only(left: 20, top: 20),
-                        alignment: Alignment.topLeft,
-                        child: Text(
-                          day.day.toString(),
-                          style: CustomStyles.med16Black363636.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: CustomColors.gray878787),
-                        )));
-              } else {
+              if ((today.isAfter(firstDay) || today == firstDay) &&
+                  (today.isBefore(lastDay) || today == lastDay)) {
                 return TextButton(
                   onPressed: () {
                     _clearTime();
@@ -341,6 +283,7 @@ class _TimeTableLiveState extends State<TimeTableLive> {
                     );
                   },
                   child: Container(
+                    color: const Color(0xffB9E7C9),
                     padding: const EdgeInsets.only(left: 20, top: 20),
                     alignment: Alignment.topLeft,
                     child: Text(
@@ -350,6 +293,152 @@ class _TimeTableLiveState extends State<TimeTableLive> {
                     ),
                   ),
                 );
+                // return GestureDetector(
+                //   onTap: () {
+                //     _clearTime();
+                //     courseController.haveErrorText = '';
+                //     showDialog(
+                //       context: context,
+                //       builder: (context) => _addClassTime(day),
+                //     );
+                //   },
+                //   child: Container(
+                //     color: const Color(0xffB9E7C9),
+                //     padding: const EdgeInsets.only(left: 20, top: 20),
+                //     alignment: Alignment.topLeft,
+                //     child: Text(
+                //       day.day.toString(),
+                //       style: CustomStyles.med16Black363636
+                //           .copyWith(fontWeight: FontWeight.bold),
+                //     ),
+                //   ),
+                // );
+              }
+            },
+            outsideBuilder: (context, day, event) {
+              return TextButton(
+                onPressed: () {
+                  _clearTime();
+                  courseController.haveErrorText = '';
+                  showDialog(
+                    context: context,
+                    builder: (context) => _addClassTime(day),
+                  );
+                },
+                child: Container(
+                  color: const Color(0xffB9E7C9),
+                  padding: const EdgeInsets.only(left: 20, top: 20),
+                  alignment: Alignment.topLeft,
+                  child: Text(
+                    day.day.toString(),
+                    style: CustomStyles.med16Black363636
+                        .copyWith(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              );
+              // return GestureDetector(
+              //   onTap: () {
+              //     _clearTime();
+              //     courseController.haveErrorText = '';
+              //     showDialog(
+              //       context: context,
+              //       builder: (context) => _addClassTime(day),
+              //     );
+              //   },
+              //   child: Container(
+              //     color: const Color(0xffB9E7C9),
+              //     padding: const EdgeInsets.only(left: 20, top: 20),
+              //     alignment: Alignment.topLeft,
+              //     child: Text(
+              //       day.day.toString(),
+              //       style: CustomStyles.med16Black363636
+              //           .copyWith(fontWeight: FontWeight.bold),
+              //     ),
+              //   ),
+              // );
+            },
+            disabledBuilder: (context, day, focusedDay) {
+              return TextButton(
+                onPressed: () {},
+                child: Container(
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.rectangle,
+                    color: CustomColors.grayF3F3F3,
+                  ),
+                  padding: const EdgeInsets.only(left: 20, top: 20),
+                  alignment: Alignment.topLeft,
+                  child: Text(
+                    day.day.toString(),
+                    style: CustomStyles.med16Black363636.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: CustomColors.gray878787),
+                  ),
+                ),
+              );
+            },
+            defaultBuilder: (context, day, event) {
+              DateTime selectedDay =
+                  DateTime(day.year, day.month, day.day, day.hour);
+              if (today.isAfter(selectedDay)) {
+                return TextButton(
+                  onPressed: () {},
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.rectangle,
+                      color: CustomColors.grayF3F3F3,
+                    ),
+                    padding: const EdgeInsets.only(left: 20, top: 20),
+                    alignment: Alignment.topLeft,
+                    child: Text(
+                      day.day.toString(),
+                      style: CustomStyles.med16Black363636.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: CustomColors.gray878787),
+                    ),
+                  ),
+                );
+              } // the past
+              else {
+                return TextButton(
+                  onPressed: () {
+                    _clearTime();
+                    courseController.haveErrorText = '';
+                    showDialog(
+                      context: context,
+                      builder: (context) => _addClassTime(day),
+                    );
+                  },
+                  child: Container(
+                    color: const Color(0xffB9E7C9),
+                    padding: const EdgeInsets.only(left: 20, top: 20),
+                    alignment: Alignment.topLeft,
+                    child: Text(
+                      day.day.toString(),
+                      style: CustomStyles.med16Black363636
+                          .copyWith(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                );
+                // return GestureDetector(
+                //   onTap: () {
+                //     _clearTime();
+                //     courseController.haveErrorText = '';
+                //     showDialog(
+                //       context: context,
+                //       builder: (context) => _addClassTime(day),
+                //     );
+                //   },
+                //   child: Container(
+                //     color: const Color(0xffB9E7C9),
+                //     padding: const EdgeInsets.only(left: 20, top: 20),
+                //     alignment: Alignment.topLeft,
+                //     child: Text(
+                //       day.day.toString(),
+                //       style: CustomStyles.med16Black363636
+                //           .copyWith(fontWeight: FontWeight.bold),
+                //     ),
+                //   ),
+                // );
               }
             },
             selectedBuilder: (context, day, focusedDay) {
@@ -367,7 +456,9 @@ class _TimeTableLiveState extends State<TimeTableLive> {
               );
             },
             markerBuilder: (context, day, event) {
-              if (event.isNotEmpty && day.isAfter(DateTime.now())) {
+              DateTime markerDay = DateTime(day.year, day.month, day.day);
+              if (event.isNotEmpty &&
+                  (today.isBefore(markerDay) || (today == markerDay))) {
                 return Column(
                   children: [
                     S.h(70),
@@ -389,6 +480,9 @@ class _TimeTableLiveState extends State<TimeTableLive> {
                         children: [
                           InkWell(
                             onTap: () async {
+                              print('event');
+                              print(event);
+                              print(event.isNotEmpty);
                               await showDialog(
                                   context: context,
                                   builder: (context) => _eventList(day, event));
@@ -399,6 +493,47 @@ class _TimeTableLiveState extends State<TimeTableLive> {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: CustomStyles.med12GreenPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              } else if (event.isNotEmpty && today.isAfter(markerDay)) {
+                return Column(
+                  children: [
+                    S.h(70),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 5.0, vertical: 5.0),
+                      margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                      decoration: BoxDecoration(
+                          border: Border.all(
+                            color: CustomColors.gray878787,
+                            width: 1,
+                          ),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(20.0)),
+                          shape: BoxShape.rectangle,
+                          color: CustomColors.white),
+                      alignment: Alignment.center,
+                      child: Column(
+                        children: [
+                          InkWell(
+                            onTap: () async {
+                              print('event');
+                              print(event);
+                              await showDialog(
+                                  context: context,
+                                  builder: (context) => _eventList(day, event));
+                              setState(() {});
+                            },
+                            child: Text(
+                              '+${event.length} รายการ',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: CustomStyles.med11gray878787,
                             ),
                           ),
                         ],
@@ -661,29 +796,6 @@ class _TimeTableLiveState extends State<TimeTableLive> {
         _topicText('รูปแบบการเรียน'),
         Row(
           children: [
-            // Expanded(
-            //   flex: 2,
-            //   child: Column(
-            //     children: [
-            //       Padding(
-            //         padding: const EdgeInsets.only(bottom: 16.0),
-            //         child: Align(
-            //           alignment: Alignment.centerLeft,
-            //           child: Text(
-            //             'รูปแบบการสอน*',
-            //             style: CustomStyles.med16Black36363606,
-            //           ),
-            //         ),
-            //       ),
-            //       Row(
-            //         children: [
-            //           Expanded(flex: 1, child: _dropdownFilter()),
-            //         ],
-            //       ),
-            //     ],
-            //   ),
-            // ),
-
             Expanded(
               flex: 3,
               child: Column(
@@ -722,8 +834,19 @@ class _TimeTableLiveState extends State<TimeTableLive> {
 
   Widget _startDate() {
     return TextFormField(
-      onTap: () {
-        _showDatePicker(context: context, dateType: 'start');
+      onTap: () async {
+        // _showDatePicker(context: context, dateType: 'start');
+        if (courseController.courseData != null &&
+            courseController.courseData!.firstDay!.isBefore(DateTime.now())) {
+          return;
+        }
+        DateTime? getDate = await showPopupSelectDate(context,
+            firstDate: courseController.courseData?.firstDay);
+        if (getDate == null) return;
+        courseController.startDateController.text =
+            FormatDate.dayOnlyNumber(getDate);
+        courseController.courseData?.firstDay = getDate;
+        courseController.refresh();
       },
       controller: courseController.startDateController,
       decoration: const InputDecoration(
@@ -745,8 +868,15 @@ class _TimeTableLiveState extends State<TimeTableLive> {
 
   Widget _endDate() {
     return TextFormField(
-      onTap: () {
-        _showDatePicker(context: context, dateType: 'end');
+      onTap: () async {
+        // _showDatePicker(context: context, dateType: 'end');
+        DateTime? getDate = await showPopupSelectDate(context,
+            firstDate: courseController.courseData?.firstDay);
+        if (getDate == null) return;
+        courseController.endDateController.text =
+            FormatDate.dayOnlyNumber(getDate);
+        courseController.courseData?.lastDay = getDate;
+        courseController.refresh();
       },
       controller: courseController.endDateController,
       decoration: const InputDecoration(
@@ -766,16 +896,49 @@ class _TimeTableLiveState extends State<TimeTableLive> {
     );
   }
 
+  Future<DateTime?> showPopupSelectDate(BuildContext context,
+      {DateTime? initialDate, DateTime? firstDate, DateTime? lastDate}) async {
+    DateTime now = DateTime.now();
+    initialDate ??= now;
+    lastDate ??= now.add(const Duration(days: 366));
+    if (firstDate == null) {
+      firstDate = now;
+    } else if (firstDate.isAfter(now)) {
+      initialDate = firstDate;
+      firstDate = now;
+    }
+    DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: firstDate,
+      lastDate: lastDate,
+    );
+    return picked;
+  }
+
+  Future<dynamic> showPopupSelectTime(
+    BuildContext context,
+  ) async {
+    var picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    return picked;
+  }
+
   Widget _startTime({DateTime? dateTime}) {
     return Consumer<CourseLiveController>(
       builder: (_, course, child) => TextFormField(
-        onTap: () {
-          _showTimePicker(
-              context: context,
-              dateType: 'start',
-              time: DateTime(dateTime?.year ?? 0, dateTime?.month ?? 0,
-                  dateTime?.day ?? 0, 8, 0),
-              setState: setState);
+        onTap: () async {
+          DateTime date = dateTime ?? DateTime.now();
+          TimeOfDay time = await showPopupSelectTime(context);
+          DateTime selectedTime =
+              DateTime(date.year, date.month, date.day, time.hour, time.minute);
+          _startSetTime?.clear();
+          startTime = selectedTime;
+          courseController.startTimeController.text =
+              FormatDate.timeOnlyNumber(selectedTime) + ' น.'.toString();
+          courseController.endTimeController.clear();
         },
         controller: course.startTimeController,
         decoration: InputDecoration(
@@ -801,12 +964,15 @@ class _TimeTableLiveState extends State<TimeTableLive> {
   Widget _endTime({DateTime? dateTime}) {
     return Consumer<CourseLiveController>(
       builder: (_, course, child) => TextFormField(
-        onTap: () {
-          _showTimePicker(
-              context: context,
-              dateType: 'end',
-              time: startTime,
-              setState: setState);
+        onTap: () async {
+          DateTime date = dateTime ?? DateTime.now();
+          TimeOfDay time = await showPopupSelectTime(context);
+          DateTime selectedTime =
+              DateTime(date.year, date.month, date.day, time.hour, time.minute);
+          _endSetTime?.clear();
+          endTime = selectedTime;
+          courseController.endTimeController.text =
+              FormatDate.timeOnlyNumber(selectedTime) + ' น.'.toString();
         },
         controller: course.endTimeController,
         decoration: InputDecoration(
@@ -830,112 +996,13 @@ class _TimeTableLiveState extends State<TimeTableLive> {
     );
   }
 
-  void _showDatePicker(
-      {required BuildContext context, String dateType = 'start'}) {
-    var now = DateTime.now();
-    showCupertinoModalPopup(
-        context: context,
-        builder: (_) => Container(
-              color: const Color.fromARGB(255, 255, 255, 255),
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    SizedBox(
-                      height: 200,
-                      child: CupertinoDatePicker(
-                          mode: CupertinoDatePickerMode.date,
-                          minimumYear: 2023,
-                          minimumDate: DateTime(now.year, now.month, now.day),
-                          initialDateTime: dateType == 'end'
-                              ? courseController.courseData?.firstDay
-                              : courseController.courseData?.firstDay,
-                          // use24hFormat: true,
-                          onDateTimeChanged: (val) {
-                            if (dateType == 'start') {
-                              courseController.startDateController.text =
-                                  FormatDate.dayOnlyNumber(val);
-                              courseController.courseData?.firstDay = val;
-                              courseController.endDateController.text =
-                                  FormatDate.dayOnlyNumber(val);
-                              courseController.courseData?.lastDay = val;
-                            } else if (dateType == 'end') {
-                              courseController.endDateController.text =
-                                  FormatDate.dayOnlyNumber(val);
-                              courseController.courseData?.lastDay = val;
-                            }
-                            setState(() {});
-                          }),
-                    ),
-                    CupertinoButton(
-                      child: const Text('ตกลง'),
-                      onPressed: () => Navigator.of(context).pop(),
-                    )
-                  ],
-                ),
-              ),
-            ));
-  }
-
   void _clearTime() {
     courseController.startTimeController.clear();
     courseController.endTimeController.clear();
   }
 
-  void _showTimePicker(
-      {required BuildContext context,
-      String dateType = 'start',
-      DateTime? time,
-      required StateSetter setState}) {
-    _startSetTime?.clear();
-    startTime = time;
-    courseController.startTimeController.text =
-        FormatDate.timeOnlyNumber(time) + ' น.'.toString();
-    showCupertinoModalPopup(
-        context: context,
-        builder: (_) => Container(
-              color: const Color.fromARGB(255, 255, 255, 255),
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    SizedBox(
-                      height: 200,
-                      child: CupertinoDatePicker(
-                          use24hFormat: true,
-                          initialDateTime: time,
-                          minimumDate: dateType == 'end' ? time : null,
-                          mode: CupertinoDatePickerMode.time,
-                          minuteInterval: 10,
-                          onDateTimeChanged: (val) {
-                            if (dateType == 'start') {
-                              _startSetTime?.clear();
-                              startTime = val;
-                              courseController.startTimeController.text =
-                                  FormatDate.timeOnlyNumber(val) +
-                                      ' น.'.toString();
-                              courseController.endTimeController.clear();
-                            }
-                            if (dateType == 'end') {
-                              _endSetTime?.clear();
-                              endTime = val;
-                              courseController.endTimeController.text =
-                                  FormatDate.timeOnlyNumber(val) +
-                                      ' น.'.toString();
-                            }
-                            setState(() {});
-                          }),
-                    ),
-                    CupertinoButton(
-                      child: const Text('ตกลง'),
-                      onPressed: () => Navigator.of(context).pop(),
-                    )
-                  ],
-                ),
-              ),
-            ));
-  }
-
-  Widget _slectedDate(DateTime dt) {
-    courseController.slectedDateController.text = FormatDate.dayOnlyNumber(dt);
+  Widget _selectedDate(DateTime dt) {
+    courseController.selectedDateController.text = FormatDate.dayOnlyNumber(dt);
 
     return TextFormField(
       onTap: () {
@@ -943,7 +1010,7 @@ class _TimeTableLiveState extends State<TimeTableLive> {
         //   context: context,
         // );
       },
-      controller: courseController.slectedDateController,
+      controller: courseController.selectedDateController,
       decoration: const InputDecoration(
         hintText: '',
         suffixIcon: Icon(
@@ -961,73 +1028,42 @@ class _TimeTableLiveState extends State<TimeTableLive> {
     );
   }
 
-  void _slectedDatePicker({required BuildContext context}) {
-    showCupertinoModalPopup(
-        context: context,
-        builder: (_) => Container(
-              color: const Color.fromARGB(255, 255, 255, 255),
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    SizedBox(
-                      height: 200,
-                      child: CupertinoDatePicker(
-                          mode: CupertinoDatePickerMode.date,
-                          minimumYear: 2023,
-                          minimumDate: DateTime.now(),
-                          initialDateTime: DateTime.now(),
-                          onDateTimeChanged: (val) {
-                            setState(() {
-                              courseController.slectedDateController.text =
-                                  FormatDate.dayOnlyNumber(val);
-                              val;
-                            });
-                          }),
-                    ),
-                    CupertinoButton(
-                      child: const Text('ตกลง'),
-                      onPressed: () => Navigator.of(context).pop(),
-                    )
-                  ],
-                ),
-              ),
-            ));
-  }
-
   Widget _buttonDay(
     Days days, {
     required Function onTap,
   }) {
     return InkWell(
-        onTap: () => onTap(),
-        child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: CustomColors.grayCFCFCF,
-                width: 1,
-              ),
-              color: days.selected == true
-                  ? CustomColors.green20B153.withOpacity(0.8)
-                  : CustomColors.white,
-              borderRadius: days.day == 'อา'
+      onTap: () => onTap(),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: CustomColors.grayCFCFCF,
+            width: 1,
+          ),
+          color: days.selected == true
+              ? CustomColors.green20B153.withOpacity(0.8)
+              : CustomColors.white,
+          borderRadius: days.day == 'อา'
+              ? const BorderRadius.only(
+                  topLeft: Radius.circular(8.0),
+                  bottomLeft: Radius.circular(8.0))
+              : days.day == 'ส'
                   ? const BorderRadius.only(
-                      topLeft: Radius.circular(8.0),
-                      bottomLeft: Radius.circular(8.0))
-                  : days.day == 'ส'
-                      ? const BorderRadius.only(
-                          topRight: Radius.circular(8.0),
-                          bottomRight: Radius.circular(8.0))
-                      : BorderRadius.circular(0.0),
-            ),
-            padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20),
-            child: Text(
-              days.day,
-              style: CustomStyles.med16Black363636.copyWith(
-                color: days.selected == true
-                    ? CustomColors.white
-                    : CustomColors.gray363636,
-              ),
-            )));
+                      topRight: Radius.circular(8.0),
+                      bottomRight: Radius.circular(8.0))
+                  : BorderRadius.circular(0.0),
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20),
+        child: Text(
+          days.day,
+          style: CustomStyles.med16Black363636.copyWith(
+            color: days.selected == true
+                ? CustomColors.white
+                : CustomColors.gray363636,
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _filterForm() {
@@ -1168,25 +1204,27 @@ class _TimeTableLiveState extends State<TimeTableLive> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _slectedDate(dt),
+                    _selectedDate(dt),
                     S.h(20),
                     Row(
                       children: [
                         Expanded(
-                            flex: 1,
-                            child: _startTime(
-                              dateTime: dt,
-                            )),
+                          flex: 1,
+                          child: _startTime(
+                            dateTime: dt,
+                          ),
+                        ),
                         Container(
                           width: 20.0,
                           alignment: Alignment.center,
                           child: const Text('-'),
                         ),
                         Expanded(
-                            flex: 1,
-                            child: _endTime(
-                              dateTime: dt,
-                            )),
+                          flex: 1,
+                          child: _endTime(
+                            dateTime: dt,
+                          ),
+                        ),
                       ],
                     ),
                     S.h(20),
@@ -1194,10 +1232,13 @@ class _TimeTableLiveState extends State<TimeTableLive> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(courseController.haveErrorText,
-                              textAlign: TextAlign.center,
-                              style: CustomStyles.reg16gray878787
-                                  .copyWith(color: Colors.red)),
+                          Text(
+                            courseController.haveErrorText,
+                            textAlign: TextAlign.center,
+                            style: CustomStyles.reg16gray878787.copyWith(
+                              color: Colors.red,
+                            ),
+                          ),
                         ],
                       ),
                       S.h(20),
@@ -1526,17 +1567,17 @@ class _TimeTableLiveState extends State<TimeTableLive> {
             var dayFilterList = await getWeekdaysBetweenDates();
             var dontAddTime = dayFilterList.where((df) {
               var startSelected = df.start?.millisecondsSinceEpoch ?? 0;
-              var endtSelected = df.end?.millisecondsSinceEpoch ?? 0;
+              var endSelected = df.end?.millisecondsSinceEpoch ?? 0;
               return courseController.calendarListAll.any((calendars) {
                 var start = calendars.start?.millisecondsSinceEpoch ?? 0;
                 var end = calendars.end?.millisecondsSinceEpoch ?? 0;
                 // print(
                 //     '${calendars.start}  :: ${df.start}  && ${calendars.start} :: ${df.end}');
-                var stutasStart =
-                    (start >= startSelected && start < endtSelected);
-                var stutasEnd = (end > startSelected && end < endtSelected);
-                print('${stutasStart}|| ${stutasEnd}');
-                if (stutasStart || stutasEnd) {
+                var statusStart =
+                    (start >= startSelected && start < endSelected);
+                var stutasEnd = (end > startSelected && end < endSelected);
+                print('${statusStart}|| ${stutasEnd}');
+                if (statusStart || stutasEnd) {
                   return true;
                 } else {
                   return false;
@@ -1644,17 +1685,3 @@ class _TimeTableLiveState extends State<TimeTableLive> {
     return true;
   }
 }
-
-// class Days {
-//   int id;
-//   String day;
-//   bool selected;
-//   int sum;
-
-//   Days({
-//     required this.id,
-//     required this.day,
-//     this.selected = false,
-//     this.sum = 0,
-//   });
-// }

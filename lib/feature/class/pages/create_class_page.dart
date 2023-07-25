@@ -694,9 +694,10 @@ class _CreateClassPageState extends State<CreateClassPage>
                   color: Colors.grey,
                 )),
           errorBorder: const OutlineInputBorder(
-              borderSide: BorderSide(
-            color: Colors.red,
-          )),
+            borderSide: BorderSide(
+              color: Colors.red,
+            ),
+          ),
           icon: icon == null
               ? null
               : Icon(

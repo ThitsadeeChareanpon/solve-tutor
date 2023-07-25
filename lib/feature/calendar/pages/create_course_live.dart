@@ -47,7 +47,7 @@ class _CreateCourseLivePageState extends State<CreateCourseLivePage> {
         setState(() {});
         log("data : ${courseData.toJson()}");
         // courseController.courseData?.studentDetails?.add(filterStudent.first);
-        await courseController.updateCourseDestailsOnlyStudent(courseData);
+        await courseController.updateCourseDetailsOnlyStudent(courseData);
         log("initStudent3");
       } else {
         log("error : ไม่มีนักเรียนเริ่มต้น");

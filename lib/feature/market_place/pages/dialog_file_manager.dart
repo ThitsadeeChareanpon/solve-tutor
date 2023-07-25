@@ -241,7 +241,7 @@ class _DialogFileManagerState extends State<DialogFileManager> {
           crossAxisSpacing: 8,
           children: List.generate(documents.length, (index) {
             return GestureDetector(onTap: () async {
-              courseController.setSelectedDocuemnt(index);
+              courseController.setSelectedDocument(index);
               courseController.courseData?.document = documents[index];
               courseController.courseData?.documentId = documents[index].id;
             }, child: Consumer<CourseController>(builder: (_, course, child) {
@@ -277,7 +277,7 @@ class _DialogFileManagerState extends State<DialogFileManager> {
                                       ),
                                       fit: BoxFit.cover,
                                       colorFilter: ColorFilter.mode(
-                                          course.slectedDocumentIndex != index
+                                          course.selectedDocumentIndex != index
                                               ? Colors.black
                                               : Colors.grey,
                                           BlendMode.screen),
@@ -288,7 +288,7 @@ class _DialogFileManagerState extends State<DialogFileManager> {
                                       ),
                                       fit: BoxFit.cover,
                                       colorFilter: ColorFilter.mode(
-                                          course.slectedDocumentIndex != index
+                                          course.selectedDocumentIndex != index
                                               ? Colors.black
                                               : Colors.grey,
                                           BlendMode.screen),
@@ -317,7 +317,7 @@ class _DialogFileManagerState extends State<DialogFileManager> {
                     child: Text(
                       documents[index].data?.documentName ?? '',
                       style: CustomStyles.med14Gray878787.copyWith(
-                        color: course.slectedDocumentIndex != index
+                        color: course.selectedDocumentIndex != index
                             ? Colors.black
                             : Colors.grey,
                       ),

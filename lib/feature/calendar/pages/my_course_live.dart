@@ -154,7 +154,7 @@ class _MyCourseLivePageState extends State<MyCourseLivePage> {
                 _rowDropdown(),
                 Expanded(
                   child: courseController.isLoading
-                      ? Column(
+                      ? const Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
@@ -202,7 +202,6 @@ class _MyCourseLivePageState extends State<MyCourseLivePage> {
             ),
           ),
           prefixIcon: Icon(Icons.search),
-
           // suffix: Text('${controller.courseNames.length}/70'),
         ),
         onChanged: (value) {

@@ -154,7 +154,7 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
                                 fileId: id,
                               );
                               lesson?.videoFiles = '';
-                              await courseController.updateCourseDestails(
+                              await courseController.updateCourseDetails(
                                   courseController.courseData);
                             } catch (e) {
                               Navigator.of(context).pop();
@@ -207,7 +207,7 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
                                 }
                                 courseController.courseData?.lessons
                                     ?.removeAt(index);
-                                await courseController.updateCourseDestails(
+                                await courseController.updateCourseDetails(
                                     courseController.courseData);
                               },
                               context: context,
@@ -589,7 +589,7 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
                   courseData: courseController.courseData ?? CourseModel());
               lesson?.videoFiles = videoUrl ?? '';
               await courseController
-                  .updateCourseDestails(courseController.courseData);
+                  .updateCourseDetails(courseController.courseData);
             });
 
         setState(() {});

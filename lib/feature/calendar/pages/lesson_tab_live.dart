@@ -8,7 +8,6 @@ import 'package:solve_tutor/feature/calendar/model/chapter_model.dart';
 import 'package:solve_tutor/feature/calendar/model/document_model.dart';
 import 'package:solve_tutor/feature/calendar/pages/dialog_file_manager_live.dart';
 import 'package:solve_tutor/feature/calendar/pages/preview_document.dart';
-import 'package:solve_tutor/feature/calendar/widgets/sizebox.dart';
 import 'package:solve_tutor/feature/calendar/widgets/widgets.dart';
 
 enum Select { form, quiz, video }
@@ -84,7 +83,7 @@ class _LessonTabLiveState extends State<LessonTabLive> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "เอกสารประกอบการเรียน",
+                "เอกสารประกอบการสอน",
                 style: _util.isTablet()
                     ? CustomStyles.bold22Black363636
                     : CustomStyles.bold18Black363636,
@@ -100,12 +99,14 @@ class _LessonTabLiveState extends State<LessonTabLive> {
             children: [
               solveIcon(),
               S.w(10),
-              Text(
-                "เอกสารประกอบการเรียน: ${courseController.courseData?.document != null ? courseController.courseData?.document?.data?.documentName : courseController.courseData?.document?.data?.documentName}",
-                textAlign: TextAlign.center,
-                style: CustomStyles.med14Black363636
-                    .copyWith(fontSize: _util.addMinusFontSize(18)),
-              ),
+
+              /// TODO: Removed from first launch
+              // Text(
+              //   "เอกสารประกอบการเรียน: ${courseController.courseData?.document != null ? courseController.courseData?.document?.data?.documentName : courseController.courseData?.document?.data?.documentName}",
+              //   textAlign: TextAlign.center,
+              //   style: CustomStyles.med14Black363636
+              //       .copyWith(fontSize: _util.addMinusFontSize(18)),
+              // ),
               const SizedBox(width: 20),
               if (_util.isTablet() == true) ...[
                 _buttonChangeDoc(),
@@ -174,12 +175,12 @@ class _LessonTabLiveState extends State<LessonTabLive> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
-          "เอกสารประกอบการเรียน",
+          "เอกสารประกอบการสอน",
           style: CustomStyles.med14Black363636.copyWith(fontSize: 22),
         ),
         S.h(10),
         Text(
-          "เอกสารประกอบการเรียนเป็นเอกสารที่คุณใช้สำหรับบันทึกบทเรียน\nนักเรียนของคุณจะสามารถเปิดอ่านเอกสารนี้ และจดบันทึกบนเอกสาระหว่างเรียนได้",
+          "เอกสารประกอบการสอนเป็นเอกสารที่คุณใช้สำหรับบันทึกบทเรียน\nนักเรียนของคุณจะสามารถเปิดอ่านเอกสารนี้ และจดบันทึกบนเอกสารระหว่างเรียนได้",
           textAlign: TextAlign.center,
           style: CustomStyles.med14Gray878787,
         ),

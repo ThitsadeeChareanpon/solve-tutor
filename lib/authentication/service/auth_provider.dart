@@ -124,6 +124,9 @@ class AuthProvider extends ChangeNotifier {
           .collection('users')
           .doc(_auth.currentUser!.uid)
           .set(user!.toJson());
+      if (user?.role == null || user?.role == "") {
+        await updateRoleFirestore('tutor');
+      }
       notifyListeners();
       return user;
     } catch (e) {

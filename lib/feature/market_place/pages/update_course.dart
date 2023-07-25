@@ -67,7 +67,7 @@ class _UpdateCourseTabState extends State<UpdateCourseTab>
   void dispose() {
     super.dispose();
     courseController.courseData = null;
-    courseController.claerData();
+    courseController.clearData();
   }
 
   @override
@@ -317,7 +317,7 @@ class _UpdateCourseTabState extends State<UpdateCourseTab>
         await Alert.showOverlay(
           asyncFunction: () async {
             await courseController
-                .updateCourseDestails(courseController.courseData);
+                .updateCourseDetails(courseController.courseData);
           },
           context: context,
           loadingWidget: Alert.getOverlayScreen(),

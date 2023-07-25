@@ -623,7 +623,7 @@ class _TimeTableLiveOnlyState extends State<TimeTableLiveOnly> {
   }
 
   Widget _slectedDate(DateTime dt) {
-    courseController.slectedDateController.text = FormatDate.dayOnlyNumber(dt);
+    courseController.selectedDateController.text = FormatDate.dayOnlyNumber(dt);
 
     return TextFormField(
       onTap: () {
@@ -631,7 +631,7 @@ class _TimeTableLiveOnlyState extends State<TimeTableLiveOnly> {
         //   context: context,
         // );
       },
-      controller: courseController.slectedDateController,
+      controller: courseController.selectedDateController,
       decoration: const InputDecoration(
         hintText: '',
         suffixIcon: Icon(
@@ -666,7 +666,7 @@ class _TimeTableLiveOnlyState extends State<TimeTableLiveOnly> {
                           initialDateTime: DateTime.now(),
                           onDateTimeChanged: (val) {
                             setState(() {
-                              courseController.slectedDateController.text =
+                              courseController.selectedDateController.text =
                                   FormatDate.dayOnlyNumber(val);
                               val;
                             });

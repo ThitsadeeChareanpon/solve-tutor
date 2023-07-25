@@ -4,8 +4,15 @@ import 'package:solve_tutor/feature/calendar/helper/utility_helper.dart';
 
 import 'sizebox.dart';
 
-void showSnackBar(BuildContext context, String msg) async {
+void showSnackBar(BuildContext context, String msg,
+    [String color = 'green']) async {
+  Color snackColor = CustomColors.greenPrimary;
   final util = UtilityHelper();
+  if (color == 'green') {
+    snackColor = CustomColors.greenPrimary;
+  } else if (color == 'red') {
+    snackColor = CustomColors.redB71C1C;
+  }
   final snackBar = SnackBar(
     content: Row(
       children: [
@@ -24,7 +31,7 @@ void showSnackBar(BuildContext context, String msg) async {
       ],
     ),
     behavior: SnackBarBehavior.floating,
-    backgroundColor: CustomColors.greenPrimary,
+    backgroundColor: snackColor,
     padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
     margin: const EdgeInsets.fromLTRB(16.0, 32.0, 16.0, 32),
   );
