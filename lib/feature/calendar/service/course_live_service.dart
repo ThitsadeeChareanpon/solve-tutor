@@ -87,7 +87,7 @@ class CourseLiveService {
     }
   }
 
-  Future<void> updateCourseLiveDestails(
+  Future<void> updateCourseLiveDetails(
     CourseModel courseData,
   ) async {
     try {

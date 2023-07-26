@@ -237,8 +237,6 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                                       showCourseTutor: courseController
                                           .showCourseTutorFilterToday[index],
                                       onTap: () async {
-                                        print('tap today course');
-                                        print(auth?.uid);
                                         await Navigator.push(
                                           context,
                                           MaterialPageRoute(
@@ -404,11 +402,12 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                             topRight: Radius.circular(8),
                           ),
                           image: DecorationImage(
-                              image: imageProvider,
-                              fit: BoxFit.cover,
-                              colorFilter: ColorFilter.mode(
-                                  Colors.black.withOpacity(0.5),
-                                  BlendMode.srcOver)),
+                            image: imageProvider,
+                            fit: BoxFit.cover,
+                            colorFilter: ColorFilter.mode(
+                                Colors.black.withOpacity(0.5),
+                                BlendMode.srcOver),
+                          ),
                         ),
                       ),
                       height: 180,
@@ -1631,8 +1630,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
         ),
         S.w(5),
         Text(
-          // '${showCourseTutor.subjectId?.length ?? 0}',
-          '${0}',
+          '${showCourseTutor.studentCount ?? 0}',
           style: CustomStyles.med12gray878787,
         ),
       ],

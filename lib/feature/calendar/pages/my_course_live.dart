@@ -257,22 +257,22 @@ class _MyCourseLivePageState extends State<MyCourseLivePage> {
     );
   }
 
-  Widget listMyCourse(List<CourseModel> courselist, BuildContext context) {
+  Widget listMyCourse(List<CourseModel> courseList, BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: GridView.count(
         crossAxisCount: util.isTablet() ? 2 : 1,
         crossAxisSpacing: 16,
-        children: List.generate(courselist.length, (index) {
+        children: List.generate(courseList.length, (index) {
           return card(
-              courseModel: courselist[index],
+              courseModel: courseList[index],
               onTap: () async {
-                if (courselist[index].id?.isNotEmpty == true) {
+                if (courseList[index].id?.isNotEmpty == true) {
                   await Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => UpdateCourseLiveTab(
-                        courseId: courselist[index].id ?? '',
+                        courseId: courseList[index].id ?? '',
                       ),
                     ),
                   );

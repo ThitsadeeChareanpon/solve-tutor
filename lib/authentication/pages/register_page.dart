@@ -18,17 +18,17 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _password = TextEditingController();
   bool isLoading = false;
 
-  AuthProvider? authprovider;
+  AuthProvider? authProvider;
   @override
   Widget build(BuildContext context) {
-    authprovider = Provider.of<AuthProvider>(context);
+    authProvider = Provider.of<AuthProvider>(context);
     return Scaffold(
       body: isLoading
           ? Center(
               child: Container(
                 height: Sizer(context).h / 20,
                 width: Sizer(context).h / 20,
-                child: CircularProgressIndicator(),
+                child: const CircularProgressIndicator(),
               ),
             )
           : SingleChildScrollView(
@@ -129,7 +129,7 @@ class _RegisterPageState extends State<RegisterPage> {
             isLoading = true;
           });
 
-          authprovider!
+          authProvider!
               .createAccount(_name.text, _email.text, _password.text)
               .then(
             (user) {

@@ -416,7 +416,7 @@ class CourseLiveController extends ChangeNotifier {
       if (courseData == null) return;
       if (courseData.id?.isNotEmpty == true &&
           courseData.tutorId?.isNotEmpty == true) {
-        await CourseLiveService().updateCourseLiveDestails(courseData);
+        await CourseLiveService().updateCourseLiveDetails(courseData);
       }
     } catch (error) {
       debugPrint(error.toString());
@@ -425,7 +425,7 @@ class CourseLiveController extends ChangeNotifier {
 
   Future<void> updateCourseDetailsOnlyStudent(CourseModel courseData) async {
     try {
-      await CourseLiveService().updateCourseLiveDestails(courseData);
+      await CourseLiveService().updateCourseLiveDetails(courseData);
     } catch (error) {
       debugPrint(error.toString());
     }

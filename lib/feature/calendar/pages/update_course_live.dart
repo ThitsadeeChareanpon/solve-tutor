@@ -298,7 +298,7 @@ class _UpdateCourseLiveTabState extends State<UpdateCourseLiveTab>
             courseController.courseData?.publishing == true
                 ? 'เผยแพร่สำเร็จ'
                 : 'ยกเลิกเผยแพร่คอร์สนี้แล้ว',
-            'red',
+            courseController.courseData?.publishing == true ? 'green' : 'red',
           );
         },
         style: ElevatedButton.styleFrom(

@@ -11,6 +11,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../calendar/constants/custom_styles.dart';
+import '../../calendar/controller/create_course_live_controller.dart';
 import '../../calendar/widgets/sizebox.dart';
 import '../components/close_dialog.dart';
 import '../components/divider.dart';
@@ -29,7 +30,7 @@ import '../utils/api.dart';
 import '../utils/responsive.dart';
 
 class TutorLiveClassroom extends StatefulWidget {
-  final String meetingId, userId, token, displayName;
+  final String meetingId, userId, token, displayName, courseId;
   final bool micEnabled, camEnabled, chatEnabled, isHost, isMock;
   const TutorLiveClassroom({
     Key? key,
@@ -38,6 +39,7 @@ class TutorLiveClassroom extends StatefulWidget {
     required this.token,
     required this.displayName,
     required this.isHost,
+    required this.courseId,
     this.micEnabled = true,
     this.camEnabled = false,
     this.chatEnabled = false,
@@ -174,78 +176,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   );
   int focusQuestion = 0;
   int radioTest = 0;
-  List students = [
-    {
-      "image": ImageAssets.avatarWomen,
-      "name": "ชัยทอง ยิ่งเพียร",
-      'id': 'stu001',
-      "status_share": "disable",
-      'solvepad_size': '1059,547',
-    },
-    {
-      "image": ImageAssets.avatarMen,
-      "name": "Robert Fox",
-      'id': 'stu002',
-      "status_share": "disable",
-      'solvepad_size': '1059,547',
-    },
-    {
-      "image": ImageAssets.avatarMen,
-      "name": "Ron Faraday",
-      'id': 'stu003',
-      "status_share": "disable",
-      'solvepad_size': '1059,547',
-    },
-    {
-      "image": ImageAssets.avatarWomen,
-      "name": "Arlene McCoy",
-      'id': 'stu004',
-      "status_share": "disable",
-      'solvepad_size': '1059,547',
-    },
-    {
-      "image": ImageAssets.avatarMen,
-      "name": "Brooklyn Simmons",
-      'id': 'stu005',
-      "status_share": "disable",
-      'solvepad_size': '1059,547',
-    },
-    {
-      "image": ImageAssets.avatarMen,
-      "name": "Dianne Russell",
-      'id': 'stu006',
-      "status_share": "disable",
-      'solvepad_size': '1059,547',
-    },
-    {
-      "image": ImageAssets.avatarMen,
-      "name": "Floyd Miles",
-      'id': 'stu007',
-      "status_share": "disable",
-      'solvepad_size': '1059,547',
-    },
-    {
-      "image": ImageAssets.avatarWomen,
-      "name": "Ronald Richards",
-      'id': 'stu008',
-      "status_share": "disable",
-      'solvepad_size': '1059,547',
-    },
-    {
-      "image": ImageAssets.avatarMen,
-      "name": "Theresa Webb",
-      'id': 'stu009',
-      "status_share": "disable",
-      'solvepad_size': '1059,547',
-    },
-    {
-      "image": ImageAssets.avatarMen,
-      "name": "Wade Warren",
-      'id': 'stu010',
-      "status_share": "disable",
-      'solvepad_size': '1059,547',
-    },
-  ];
+  List students = [];
   List studentsDisplay = [
     {
       "image": ImageAssets.avatarMen,
@@ -306,12 +237,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   ];
 
   // ---------- VARIABLE: Solve Pad data
-  final List<String> _pages = [
-    'https://firebasestorage.googleapis.com/v0/b/solve-f1778.appspot.com/o/test(gun)%2FexampleSheet1.jpg?alt=media&token=27676570-4031-4c6b-b6bc-4280fbbcd116',
-    'https://firebasestorage.googleapis.com/v0/b/solve-f1778.appspot.com/o/test(gun)%2FexampleSheet2.jpg?alt=media&token=8ec3a135-85a6-4cac-abdd-b8d0df094ce3',
-    'https://firebasestorage.googleapis.com/v0/b/solve-f1778.appspot.com/o/test(gun)%2FexampleSheet1.jpg?alt=media&token=27676570-4031-4c6b-b6bc-4280fbbcd116',
-    'https://firebasestorage.googleapis.com/v0/b/solve-f1778.appspot.com/o/test(gun)%2FexampleSheet2.jpg?alt=media&token=8ec3a135-85a6-4cac-abdd-b8d0df094ce3',
-  ];
+  late List<String> _pages = [];
   final List<List<SolvepadStroke?>> _penPoints = [[]];
   final List<List<SolvepadStroke?>> _laserPoints = [[]];
   final List<List<SolvepadStroke?>> _highlighterPoints = [[]];
@@ -351,10 +277,12 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   int _currentPage = 0;
   final PageController _pageController = PageController();
   final List<TransformationController> _transformationController = [];
+  var courseController = CourseLiveController();
 
   // ---------- VARIABLE: message control
   late Map<String, Function(String)> handlers;
 
+  /// TODO: Get rid of all Mockup reference
   @override
   void initState() {
     super.initState();
@@ -372,9 +300,20 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   }
 
   Future<void> initPagesData() async {
+    await courseController.getCourseById(widget.courseId);
+    setState(() {
+      _pages = courseController.courseData!.document!.data!.docFiles!;
+    });
     for (int i = 1; i < _pages.length; i++) {
       _addPage();
     }
+    var courseStudents = courseController.courseData!.studentDetails;
+    List<Map<String, dynamic>>? studentsJson =
+        courseStudents?.map((student) => student.toJson()).toList();
+    String studentsJsonString = jsonEncode(studentsJson);
+    setState(() {
+      students = jsonDecode(studentsJsonString);
+    });
   }
 
   void initTimer() {
@@ -3216,10 +3155,19 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                         1,
                                         0,
                                       ]),
-                                child: Image.asset(
+                                child: Image.network(
                                   students[index]['image'],
                                   height: 62,
                                   width: 62,
+                                  errorBuilder: (BuildContext context,
+                                      Object exception,
+                                      StackTrace? stackTrace) {
+                                    return Image.asset(
+                                      ImageAssets.avatarMen,
+                                      height: 62,
+                                      width: 62,
+                                    );
+                                  },
                                 ),
                               ),
                             ),

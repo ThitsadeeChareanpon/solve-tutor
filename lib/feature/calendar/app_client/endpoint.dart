@@ -1,6 +1,5 @@
 class Endpoint {
   final apiHost = "https://us-central1-solve-f1778.cloudfunctions.net";
-
   final mode = "dev";
 
   Uri getCourseList() {
@@ -71,13 +70,13 @@ class Endpoint {
     return Uri.parse('$apiHost/$mode/course_live/calendar/tutor/$tutorId');
   }
 
-  Uri getCourseTutorPast(String studentId) {
-    var id = studentId.trim();
+  Uri getCourseTutorPast(String tutorId) {
+    var id = tutorId.trim();
     return Uri.parse('$apiHost/$mode/course_live/past/tutor/$id');
   }
 
-  Uri getCourseTutorToday(String studentId) {
-    var id = studentId.trim();
+  Uri getCourseTutorToday(String tutorId) {
+    var id = tutorId.trim();
     return Uri.parse('$apiHost/$mode/course_live/upcoming/tutor/$id');
   }
 

@@ -63,18 +63,21 @@ class ShowCourseTutor {
   String? levelId;
   String? detailsText;
   String? documentId;
+  int? studentCount;
 
-  ShowCourseTutor(
-      {this.courseId,
-      this.courseName,
-      this.start,
-      this.end,
-      this.thumbnailUrl,
-      this.tutorId,
-      this.subjectId,
-      this.levelId,
-      this.detailsText,
-      this.documentId});
+  ShowCourseTutor({
+    this.courseId,
+    this.courseName,
+    this.start,
+    this.end,
+    this.thumbnailUrl,
+    this.tutorId,
+    this.subjectId,
+    this.levelId,
+    this.detailsText,
+    this.documentId,
+    this.studentCount,
+  });
 
   ShowCourseTutor.fromJson(Map<String, dynamic> json) {
     courseId = json['course_id'];
@@ -88,5 +91,6 @@ class ShowCourseTutor {
     levelId = json['level_id'];
     detailsText = json['details_text'];
     documentId = json['document_id'];
+    studentCount = json['student_list'].length;
   }
 }

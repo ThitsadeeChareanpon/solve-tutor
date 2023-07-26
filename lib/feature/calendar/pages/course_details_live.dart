@@ -488,9 +488,9 @@ class _CourseDetailsLiveState extends State<CourseDetailsLive> {
                                 courseController.findStudentController.text);
                             if (user['role'] != 'student') return;
                             filterStudent.add(StudentModel(
-                              id: user['id'],
-                              name: user['name'],
-                            ));
+                                id: user['id'],
+                                name: user['name'],
+                                image: user['image']));
                             setState(() {});
                           },
                           child: Text(
@@ -513,7 +513,6 @@ class _CourseDetailsLiveState extends State<CourseDetailsLive> {
                                 courseController.courseData?.studentIds ??= [];
                                 courseController.courseData?.studentDetails ??=
                                     [];
-
                                 if (!(courseController.courseData?.studentIds
                                         ?.contains(filterStudent.first.id) ??
                                     false)) {

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
@@ -20,6 +21,7 @@ import 'package:solve_tutor/widgets/sizer.dart';
 import '../../live_classroom/page/live_classroom.dart';
 import '../../live_classroom/utils/api.dart';
 import '../../live_classroom/utils/toast.dart';
+import '../controller/create_course_live_controller.dart';
 
 class WaitingJoinRoom extends StatefulWidget {
   const WaitingJoinRoom({super.key, required this.course});
@@ -31,7 +33,6 @@ class WaitingJoinRoom extends StatefulWidget {
 class _WaitingJoinRoomState extends State<WaitingJoinRoom>
     with TickerProviderStateMixin {
   var documentController = DocumentController();
-  var courseController = CourseController();
   static final _util = UtilityHelper();
   late AuthProvider authProvider;
   late AnimationController _controller;
@@ -93,7 +94,8 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
           MaterialPageRoute(
             builder: (context) => TutorLiveClassroom(
               token: _token,
-              userId: 'tut001',
+              userId: widget.course.tutorId!,
+              courseId: widget.course.courseId!,
               meetingId: meetingID,
               isHost: true,
               displayName: displayName,
@@ -157,10 +159,6 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
                 ),
               ),
               S.h(_util.isTablet() ? 20 : 5),
-              // Text(
-              //   'UUID: ${authprovider.uid}',
-              //   style: CustomStyles.med14Black363636,
-              // ),
               S.h(10),
               SizedBox(
                 width: 300,
@@ -187,6 +185,8 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
                 S.h(10),
                 _tutorTitle(),
                 S.h(30),
+
+                /// TODO: make Countdown widget change active status
                 isActive
                     ? S.h(30)
                     : Countdown(courseStart: widget.course.start!),
