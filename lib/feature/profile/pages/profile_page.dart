@@ -17,6 +17,7 @@ import 'package:solve_tutor/widgets/dialogs.dart';
 import 'package:solve_tutor/widgets/sizer.dart';
 
 import '../../../db_test.dart';
+import '../../live_classroom/components/room_loading_screen.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -283,16 +284,16 @@ class _ProfilePageState extends State<ProfilePage> {
                     children: [
                       ElevatedButton(
                         onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const DbTest()),
-                          );
                           // Navigator.push(
                           //   context,
                           //   MaterialPageRoute(
-                          //       builder: (context) => const JoinScreen()),
+                          //       builder: (context) => const DbTest()),
                           // );
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const LoadingScreen()),
+                          );
                         },
                         child: const Text('DB Test'),
                       ),
