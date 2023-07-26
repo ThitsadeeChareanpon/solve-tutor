@@ -26,8 +26,8 @@ class _CreateClassPageState extends State<CreateClassPage>
   AuthProvider? authProvider;
   ClassProvider? classProvider;
 
-  String selectClass = SchoolSubJectConstants.schoolSubJectList.first;
-  String selectClassLevel = SchoolSubJectConstants.schoolClassLevel.first;
+  String selectClass = SchoolSubjectConstants.schoolSubjectList.first;
+  String selectClassLevel = SchoolSubjectConstants.schoolClassLevel.first;
 
   TextEditingController txtName = TextEditingController();
   TextEditingController txtDetail = TextEditingController();
@@ -537,7 +537,7 @@ class _CreateClassPageState extends State<CreateClassPage>
           selectClass = value!;
         });
       },
-      items: SchoolSubJectConstants.schoolSubJectList
+      items: SchoolSubjectConstants.schoolSubjectList
           .map<DropdownMenuItem<String>>((String value) {
         return DropdownMenuItem<String>(
           value: value,
@@ -594,7 +594,7 @@ class _CreateClassPageState extends State<CreateClassPage>
           selectClassLevel = value!;
         });
       },
-      items: SchoolSubJectConstants.schoolClassLevel
+      items: SchoolSubjectConstants.schoolClassLevel
           .map<DropdownMenuItem<String>>((String value) {
         return DropdownMenuItem<String>(
           value: value,

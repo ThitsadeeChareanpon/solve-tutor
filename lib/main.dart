@@ -1,7 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:sizer/sizer.dart';
 import 'package:solve_tutor/constants/app_constants.dart';
 import 'package:solve_tutor/constants/state_index.dart';
 import 'package:solve_tutor/constants/theme.dart';
@@ -13,6 +14,10 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // initializeDateFormatting();
   await Firebase.initializeApp();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
   runApp(const MyApp());
 }
 
@@ -21,22 +26,21 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: stateIndex,
-      child: MaterialApp(
-        title: AppConstants.appTitle,
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          primaryColor: primaryColor,
-          primarySwatch: getMaterialColor(primaryColor),
-          scaffoldBackgroundColor: Colors.grey.shade100,
-          fontFamily: 'NotoSans',
-          // textTheme: GoogleFonts.kanitTextTheme(
-          //   Theme.of(context).textTheme,
-          // ),
+    return Sizer(builder: (context, orientation, deviceType) {
+      return MultiProvider(
+        providers: stateIndex,
+        child: MaterialApp(
+          title: AppConstants.appTitle,
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            primaryColor: primaryColor,
+            primarySwatch: getMaterialColor(primaryColor),
+            scaffoldBackgroundColor: Colors.grey.shade100,
+            fontFamily: 'NotoSans',
+          ),
+          home: SplashPage(),
         ),
-        home: SplashPage(),
-      ),
-    );
+      );
+    });
   }
 }

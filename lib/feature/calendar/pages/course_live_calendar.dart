@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:solve_tutor/authentication/service/auth_provider.dart';
 import 'package:solve_tutor/feature/calendar/constants/assets_manager.dart';
@@ -9,6 +10,7 @@ import 'package:solve_tutor/feature/calendar/controller/create_course_live_contr
 import 'package:solve_tutor/feature/calendar/helper/utility_helper.dart';
 import 'package:solve_tutor/feature/calendar/model/show_course.dart';
 import 'package:solve_tutor/feature/calendar/pages/utils.dart';
+import 'package:solve_tutor/feature/calendar/pages/waiting_join_room.dart';
 import 'package:solve_tutor/feature/calendar/widgets/format_date.dart';
 import 'package:solve_tutor/feature/calendar/widgets/sizebox.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -53,6 +55,13 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
     getTableCalendarList();
     await courseController.getLevels();
     await courseController.getSubjects();
+  }
+
+  setRefreshPreferredOrientations() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
   }
 
   Future<void> getCalendarList() async {
@@ -227,15 +236,36 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                                   ? cardTablet(
                                       showCourseTutor: courseController
                                           .showCourseTutorFilterToday[index],
-                                      onTap: () {
+                                      onTap: () async {
                                         print('tap today course');
                                         print(auth?.uid);
+                                        await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => WaitingJoinRoom(
+                                                course: courseController
+                                                        .showCourseTutorFilterToday[
+                                                    index]),
+                                          ),
+                                        );
+                                        setRefreshPreferredOrientations();
                                       },
                                     )
                                   : cardMobile(
                                       showCourseTutor: courseController
                                           .showCourseTutorFilterToday[index],
-                                      onTap: () {},
+                                      onTap: () async {
+                                        await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => WaitingJoinRoom(
+                                                course: courseController
+                                                        .showCourseTutorFilterToday[
+                                                    index]),
+                                          ),
+                                        );
+                                        setRefreshPreferredOrientations();
+                                      },
                                     );
                             }),
                       )
@@ -528,8 +558,12 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                       imageUrl: showCourseTutor.thumbnailUrl ?? '',
                       placeholder: (context, url) =>
                           const Center(child: CircularProgressIndicator()),
-                      errorWidget: (context, url, error) =>
-                          const Icon(Icons.error),
+                      errorWidget: (context, url, error) => Image.asset(
+                        ImageAssets.emptyCourse,
+                        height: 200,
+                        width: double.infinity,
+                        fit: BoxFit.fitHeight,
+                      ),
                     ),
                     if (joinReady(showCourseTutor.start ?? DateTime.now())) ...[
                       Text(
@@ -1233,7 +1267,9 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                                 '+${event.length - 1} รายการ',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: CustomStyles.med12GreenPrimary,
+                                style: CustomStyles.med12GreenPrimary.copyWith(
+                                  fontSize: _util.addMinusFontSize(10),
+                                ),
                               ),
                             ),
                           ],
@@ -1256,7 +1292,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
   Color _getWeekColor(int weekday) {
     switch (weekday) {
       case 1:
-        return Colors.orange;
+        return Colors.black;
       case 2:
         return Colors.pinkAccent;
       case 3:

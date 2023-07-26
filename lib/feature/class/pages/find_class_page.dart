@@ -31,8 +31,8 @@ class _FindClassPageState extends State<FindClassPage> {
   // String selectClass = "วิชาคณิตศาสตร์";
   int count = 0;
   final txtSearchName = TextEditingController();
-  String selectClass = SchoolSubJectConstants.schoolSubJectFilterList.first;
-  String selectClassLevel = SchoolSubJectConstants.schoolFilterClassLevel.first;
+  String selectClass = SchoolSubjectConstants.schoolSubjectFilterList.first;
+  String selectClassLevel = SchoolSubjectConstants.schoolFilterClassLevel.first;
   String startDate = "";
   String startTime = "";
 
@@ -48,7 +48,7 @@ class _FindClassPageState extends State<FindClassPage> {
       authProvider = Provider.of<AuthProvider>(context, listen: false);
       classProvider = Provider.of<ClassProvider>(context, listen: false);
       selectClassLevel = authProvider!.user!.classLevel == ""
-          ? SchoolSubJectConstants.schoolFilterClassLevel.first
+          ? SchoolSubjectConstants.schoolFilterClassLevel.first
           : authProvider!.user!.classLevel!;
       initSearchClassList();
       setState(() {});

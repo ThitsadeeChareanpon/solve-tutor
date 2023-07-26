@@ -11,8 +11,8 @@ import 'package:solve_tutor/feature/chat/service/chat_provider.dart';
 import 'package:solve_tutor/feature/order/model/order_class_model.dart';
 
 class ChatOrderCard extends StatefulWidget {
-  ChatOrderCard(this.chat, {super.key});
-  ChatModel chat;
+  const ChatOrderCard(this.chat, {super.key});
+  final ChatModel chat;
   @override
   State<ChatOrderCard> createState() => _ChatOrderCardState();
 }
@@ -119,7 +119,7 @@ class _ChatOrderCardState extends State<ChatOrderCard> {
                 },
               );
             } catch (e) {
-              return const Text("Errod Data..");
+              return const Text("Error Data..");
             }
           },
         ),

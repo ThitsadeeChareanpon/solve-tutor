@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
+import 'feature/calendar/constants/assets_manager.dart';
+
 var db = FirebaseFirestore.instance;
 
 class DbTest extends StatefulWidget {
@@ -19,6 +21,10 @@ class _DbTestState extends State<DbTest> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Image.asset(
+              ImageAssets.micMuteRed,
+              width: 22,
+            ),
             const Text('DB TEST PAGE'),
             ElevatedButton(
               onPressed: () {

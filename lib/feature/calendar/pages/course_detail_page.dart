@@ -707,7 +707,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                           Align(
                             alignment: Alignment.center,
                             child: Image.asset(
-                              ImageAssets.icMainten,
+                              ImageAssets.icMaintain,
                               width: util.isTablet() ? 92.2 : 70,
                               height: util.isTablet() ? 92.2 : 70,
                             ),

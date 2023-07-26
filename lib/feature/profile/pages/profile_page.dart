@@ -288,6 +288,11 @@ class _ProfilePageState extends State<ProfilePage> {
                             MaterialPageRoute(
                                 builder: (context) => const DbTest()),
                           );
+                          // Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //       builder: (context) => const JoinScreen()),
+                          // );
                         },
                         child: const Text('DB Test'),
                       ),
