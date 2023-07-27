@@ -1,12 +1,9 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:solve_tutor/authentication/pages/login_page.dart';
 import 'package:solve_tutor/authentication/pages/role_incorrect_page.dart';
 import 'package:solve_tutor/authentication/service/auth_provider.dart';
 import 'package:solve_tutor/nav.dart';
-import 'package:solve_tutor/widgets/sizer.dart';
 
 class Authenticate extends StatefulWidget {
   const Authenticate({super.key});
@@ -37,8 +34,7 @@ class _AuthenticateState extends State<Authenticate> {
       builder: (context, con, child) {
         if (con.firebaseAuth.currentUser != null) {
           if (con.user?.role != role) {
-            // return const NoPermissionPage();{
-            return Nav();
+            return const NoPermissionPage();
           } else {
             return Nav();
           }
