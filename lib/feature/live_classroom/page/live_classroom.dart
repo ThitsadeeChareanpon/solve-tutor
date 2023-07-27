@@ -3177,19 +3177,18 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                         1,
                                         0,
                                       ]),
-                                child: Image.network(
-                                  students[index]['image'],
+                                child: Container(
                                   height: 62,
                                   width: 62,
-                                  errorBuilder: (BuildContext context,
-                                      Object exception,
-                                      StackTrace? stackTrace) {
-                                    return Image.asset(
-                                      ImageAssets.avatarMen,
-                                      height: 62,
-                                      width: 62,
-                                    );
-                                  },
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: DecorationImage(
+                                      fit: BoxFit.cover,
+                                      image: NetworkImage(
+                                        students[index]['image'],
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
