@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
@@ -10,7 +9,6 @@ import 'package:solve_tutor/feature/calendar/model/days.dart';
 import 'package:solve_tutor/feature/calendar/pages/utils.dart';
 import 'package:solve_tutor/feature/calendar/widgets/alert_overlay.dart';
 import 'package:solve_tutor/feature/calendar/widgets/format_date.dart';
-import 'package:solve_tutor/feature/calendar/widgets/sizebox.dart';
 import 'package:solve_tutor/feature/calendar/widgets/widgets.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -293,26 +291,6 @@ class _TimeTableLiveState extends State<TimeTableLive> {
                     ),
                   ),
                 );
-                // return GestureDetector(
-                //   onTap: () {
-                //     _clearTime();
-                //     courseController.haveErrorText = '';
-                //     showDialog(
-                //       context: context,
-                //       builder: (context) => _addClassTime(day),
-                //     );
-                //   },
-                //   child: Container(
-                //     color: const Color(0xffB9E7C9),
-                //     padding: const EdgeInsets.only(left: 20, top: 20),
-                //     alignment: Alignment.topLeft,
-                //     child: Text(
-                //       day.day.toString(),
-                //       style: CustomStyles.med16Black363636
-                //           .copyWith(fontWeight: FontWeight.bold),
-                //     ),
-                //   ),
-                // );
               }
             },
             outsideBuilder: (context, day, event) {
@@ -336,26 +314,6 @@ class _TimeTableLiveState extends State<TimeTableLive> {
                   ),
                 ),
               );
-              // return GestureDetector(
-              //   onTap: () {
-              //     _clearTime();
-              //     courseController.haveErrorText = '';
-              //     showDialog(
-              //       context: context,
-              //       builder: (context) => _addClassTime(day),
-              //     );
-              //   },
-              //   child: Container(
-              //     color: const Color(0xffB9E7C9),
-              //     padding: const EdgeInsets.only(left: 20, top: 20),
-              //     alignment: Alignment.topLeft,
-              //     child: Text(
-              //       day.day.toString(),
-              //       style: CustomStyles.med16Black363636
-              //           .copyWith(fontWeight: FontWeight.bold),
-              //     ),
-              //   ),
-              // );
             },
             disabledBuilder: (context, day, focusedDay) {
               return TextButton(
@@ -419,26 +377,6 @@ class _TimeTableLiveState extends State<TimeTableLive> {
                     ),
                   ),
                 );
-                // return GestureDetector(
-                //   onTap: () {
-                //     _clearTime();
-                //     courseController.haveErrorText = '';
-                //     showDialog(
-                //       context: context,
-                //       builder: (context) => _addClassTime(day),
-                //     );
-                //   },
-                //   child: Container(
-                //     color: const Color(0xffB9E7C9),
-                //     padding: const EdgeInsets.only(left: 20, top: 20),
-                //     alignment: Alignment.topLeft,
-                //     child: Text(
-                //       day.day.toString(),
-                //       style: CustomStyles.med16Black363636
-                //           .copyWith(fontWeight: FontWeight.bold),
-                //     ),
-                //   ),
-                // );
               }
             },
             selectedBuilder: (context, day, focusedDay) {
@@ -480,9 +418,6 @@ class _TimeTableLiveState extends State<TimeTableLive> {
                         children: [
                           InkWell(
                             onTap: () async {
-                              print('event');
-                              print(event);
-                              print(event.isNotEmpty);
                               await showDialog(
                                   context: context,
                                   builder: (context) => _eventList(day, event));
@@ -522,8 +457,6 @@ class _TimeTableLiveState extends State<TimeTableLive> {
                         children: [
                           InkWell(
                             onTap: () async {
-                              print('event');
-                              print(event);
                               await showDialog(
                                   context: context,
                                   builder: (context) => _eventList(day, event));
@@ -1677,11 +1610,11 @@ class _TimeTableLiveState extends State<TimeTableLive> {
     return filterList;
   }
 
-  bool _skipWeek(int week, int number) {
-    if (week > 1 && week <= number) {
-      return false;
-    }
-
-    return true;
-  }
+  // bool _skipWeek(int week, int number) {
+  //   if (week > 1 && week <= number) {
+  //     return false;
+  //   }
+  //
+  //   return true;
+  // }
 }

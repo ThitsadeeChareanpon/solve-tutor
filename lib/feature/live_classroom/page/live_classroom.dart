@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:videosdk/videosdk.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:sizer/sizer.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../calendar/constants/custom_styles.dart';
 import '../../calendar/controller/create_course_live_controller.dart';
@@ -702,6 +703,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
         setState(() {
           meeting = _meeting;
           _joined = true;
+          updateMeetingCode();
           // meeting.startRecording(config: {"mode": "audio"});
           initWss();
         });
@@ -810,6 +812,13 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     closeChanel();
     meeting.leave();
     return true;
+  }
+
+  void updateMeetingCode() {
+    FirebaseFirestore.instance
+        .collection('courses')
+        .doc(widget.courseId)
+        .update({'currentMeetingCode': meeting.id});
   }
 
   // ---------- FUNCTION: solve pad feature
@@ -1610,6 +1619,10 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                     showCloseDialog(context, () {
                       meeting.end();
                       closeChanel();
+                      FirebaseFirestore.instance
+                          .collection('courses')
+                          .doc(widget.courseId)
+                          .update({'currentMeetingCode': ''});
                     });
                     // await meeting.stopRecording();
                     // await fetchRecording(widget.meetingId);
