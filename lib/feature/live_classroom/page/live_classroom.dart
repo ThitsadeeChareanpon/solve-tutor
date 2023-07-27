@@ -815,8 +815,10 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   }
 
   void updateMeetingCode() {
+    print('meeting code init');
+    print(meeting.id);
     FirebaseFirestore.instance
-        .collection('courses')
+        .collection('course_live')
         .doc(widget.courseId)
         .update({'currentMeetingCode': meeting.id});
   }
@@ -1620,7 +1622,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                       meeting.end();
                       closeChanel();
                       FirebaseFirestore.instance
-                          .collection('courses')
+                          .collection('course_live')
                           .doc(widget.courseId)
                           .update({'currentMeetingCode': ''});
                     });
