@@ -5,7 +5,7 @@ import '../../calendar/constants/custom_styles.dart';
 import '../../calendar/widgets/sizebox.dart';
 import '../utils/responsive.dart';
 
-Future<void> showCloseDialog(BuildContext context) async {
+Future<void> showCloseDialog(BuildContext context, Function onConfirm) {
   return showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -48,7 +48,8 @@ Future<void> showCloseDialog(BuildContext context) async {
                               ), // NEW
                             ),
                             onPressed: () {
-                              Navigator.of(context).pop();
+                              Navigator.of(context).pop(); // Close the dialog
+                              onConfirm(); // Execute the confirmation function
                             },
                             child: Text('ปิดห้องเรียน',
                                 style: CustomStyles.bold14White)),
@@ -58,14 +59,16 @@ Future<void> showCloseDialog(BuildContext context) async {
                         height: 40,
                         child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                                backgroundColor: CustomColors.whitePrimary,
-                                elevation: 0,
-                                side: const BorderSide(
-                                    width: 1, color: CustomColors.grayE5E6E9),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(
+                              backgroundColor: CustomColors.whitePrimary,
+                              elevation: 0,
+                              side: const BorderSide(
+                                  width: 1, color: CustomColors.grayE5E6E9),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
                                   8.0,
-                                ))),
+                                ),
+                              ),
+                            ),
                             onPressed: () {
                               Navigator.of(context).pop();
                             },

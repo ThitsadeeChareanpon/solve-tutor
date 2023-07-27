@@ -43,22 +43,22 @@ class _ManageCoursePageState extends State<ManageCoursePage> {
               Container(
                   width: 110,
                   height: 50,
-                  child: Image.asset('assets/images/solve1.png')),
+                  child: Image.asset('assets/images/big_solve_logo.png')),
               const Text(
-                "เทคโนโลยีใหม่ในการสอนพิเศษ",
+                "ประสบการณ์ใหม่ของการสอนออนไลน์",
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const Text(
-                "เปลี่ยนวิธีการสอนพิเศษแบบเดิม ด้วยการสอนผ่านแอป SOLVE\nให้นักเรียนของคุณสามารถเรียนได้จากทุกที่ผ่านมือถือ หรือ Tablet",
-                style: TextStyle(
-                  fontSize: 14,
-                  color: appTextSecondaryColor,
-                ),
-                textAlign: TextAlign.center,
-              ),
+              // const Text(
+              //   "เปลี่ยนวิธีการสอนแบบเดิม\nให้นักเรียนของคุณสามารถเรียนได้จากทุกที่ผ่านมือถือ หรือ Tablet",
+              //   style: TextStyle(
+              //     fontSize: 14,
+              //     color: appTextSecondaryColor,
+              //   ),
+              //   textAlign: TextAlign.center,
+              // ),
               GridView.count(
                 shrinkWrap: true,
                 primary: false,
@@ -104,7 +104,7 @@ class _ManageCoursePageState extends State<ManageCoursePage> {
                         ),
                       );
                     },
-                    image: 'assets/images/course1.png',
+                    image: 'assets/images/menu_my_course.png',
                     title: "คอร์สของฉัน",
                     // content:
                     //     "สร้างคอร์สสอนพิเศษของคุณ เพื่อลงขายใน Market Place ของเรา",
@@ -127,7 +127,7 @@ class _ManageCoursePageState extends State<ManageCoursePage> {
                       );
                       await Navigator.push(context, route);
                     },
-                    image: 'assets/images/cheet1.png',
+                    image: 'assets/images/menu_create_sheet.png',
                     title: "สร้างชีท",
                     // content:
                     //     "สร้างคลังเอกสารประกอบการเรียน เพื่อให้คุณสามารถแชร์เอกสารกับคอร์สอื่นๆได้",
@@ -135,7 +135,7 @@ class _ManageCoursePageState extends State<ManageCoursePage> {
                   gridCard(
                     context,
                     onTap: () {},
-                    image: 'assets/images/qa1.png',
+                    image: 'assets/images/menu_qa.png',
                     title: "ตอบคำถามนักเรียน",
                     // content:
                     //     "คำถามระหว่างเรียนของนักเรียนของคุณ ที่ต้องการให้คุณช่วยตอบ",
@@ -147,8 +147,8 @@ class _ManageCoursePageState extends State<ManageCoursePage> {
                           builder: (context) => const ClassListPage());
                       Navigator.push(context, route);
                     },
-                    image: 'assets/images/find1.png',
-                    title: "ค้นหางานติวเตอร์",
+                    image: 'assets/images/menu_find_job.png',
+                    title: "ค้นหางานสอน",
                     // content:
                     //     "ประกาศของนักเรียนที่กำลังมองหาติวเตอร์ คุณสามารถเข้า ไปเสนอราคาเพื่อรับงานได้",
                   ),

@@ -200,14 +200,15 @@ class _ClassListPageState extends State<ClassListPage>
                   labelColor: primaryColor,
                   unselectedLabelColor: greyColor,
                   labelStyle: GoogleFonts.kanit(
-                    fontSize: 16,
+                    fontSize: 18,
                   ),
                   indicatorWeight: 2,
                   tabs: <Widget>[
                     Tab(
                       text: authProvider?.user!.getRoleType() == RoleType.tutor
                           ? 'ค้นหานักเรียน'
-                          : 'ค้นหาติวเตอร์',
+                          : 'ประกาศของนักเรียน',
+
                       // icon: Icon(Icons.account_circle),
                     ),
                     const Tab(
@@ -237,7 +238,7 @@ class _ClassListPageState extends State<ClassListPage>
   AppBar appBar() {
     return AppBar(
       title: const Text(
-        'ค้นหา',
+        'ค้นหางานสอน',
         style: TextStyle(color: appTextPrimaryColor),
       ),
       // elevation: 0,
@@ -275,13 +276,13 @@ class _ClassListPageState extends State<ClassListPage>
                   children: [
                     const Icon(
                       Icons.add,
-                      size: 12,
+                      size: 16,
                     ),
                     Text(
                       authProvider?.user!.getRoleType() == RoleType.tutor
                           ? 'สร้างประกาศหานักเรียน'
-                          : 'สร้างประกาศหาติวเตอร์',
-                      style: const TextStyle(fontSize: 10),
+                          : 'สร้างประกาศหางานสอน',
+                      style: const TextStyle(fontSize: 16),
                     )
                   ],
                 ),

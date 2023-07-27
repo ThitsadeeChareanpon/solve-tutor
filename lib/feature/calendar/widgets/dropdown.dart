@@ -97,12 +97,13 @@ class _DropdownState extends State<Dropdown> {
     return widget.items
         .map(
           (e) => DropdownMenuItem(
-              value: e.id,
-              child: Text(
-                '${e.name}',
-                style: CustomStyles.med14Black363636,
-                overflow: TextOverflow.ellipsis,
-              )),
+            value: e.id,
+            child: Text(
+              '${e.name}',
+              style: CustomStyles.med14Black363636,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         )
         .toList();
   }

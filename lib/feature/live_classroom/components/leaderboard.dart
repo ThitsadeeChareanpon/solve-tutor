@@ -112,7 +112,7 @@ Future<void> showLeader(BuildContext context) async {
                             S.w(16.0),
                             InkWell(
                               onTap: () {
-                                showCloseDialog(context);
+                                showCloseDialog(context, () {});
                               },
                               child: Container(
                                   padding: const EdgeInsets.symmetric(

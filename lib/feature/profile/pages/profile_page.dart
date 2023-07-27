@@ -252,15 +252,16 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 const SizedBox(height: 20),
                 settingCard(title: 'ตั้งค่าบัญชี', icon: Icons.settings),
-                Divider(thickness: 2),
+                const Divider(thickness: 2),
                 const SizedBox(height: 10),
-                settingCard(title: 'ค่าบริการสมาชิก', icon: Icons.list),
-                Divider(thickness: 2),
+                settingCard(
+                    title: 'ค่าบริการสมาชิก (เวอร์ชั่น ฟรี)', icon: Icons.list),
+                const Divider(thickness: 2),
                 const SizedBox(height: 10),
                 settingCard(
                     title: 'ตั้งค่าการแจ้งเตือน',
                     icon: Icons.notifications_active),
-                Divider(thickness: 2),
+                const Divider(thickness: 2),
                 const SizedBox(height: 30),
                 const Padding(
                   padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
@@ -274,29 +275,14 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 const SizedBox(height: 10),
                 settingCard(title: 'เงื่อนไขข้อตกลงการใช้บริการ'),
-                Divider(thickness: 2),
+                const Divider(thickness: 2),
                 const SizedBox(height: 10),
                 settingCard(title: 'นโยบายความเป็นส่วนตัว'),
-                Divider(thickness: 2),
+                const Divider(thickness: 2),
                 const SizedBox(height: 20),
                 Center(
                   child: Column(
                     children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //       builder: (context) => const DbTest()),
-                          // );
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const LoadingScreen()),
-                          );
-                        },
-                        child: const Text('DB Test'),
-                      ),
                       TextButton(
                         onPressed: () async {
                           showDialog(

@@ -17,6 +17,8 @@ import 'package:solve_tutor/feature/calendar/widgets/widgets.dart';
 import 'package:solve_tutor/feature/profile/pages/profile_page.dart';
 import 'package:solve_tutor/widgets/sizer.dart';
 
+import '../../../constants/school_subject_constants.dart';
+
 enum CourseLiveActionType { create, update }
 
 class MyCourseLivePage extends StatefulWidget {
@@ -31,6 +33,8 @@ class _MyCourseLivePageState extends State<MyCourseLivePage> {
   var courseController = CourseLiveController();
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
+  String selectClass = SchoolSubjectConstants.schoolSubjectFilterList.first;
+  String selectClassLevel = SchoolSubjectConstants.schoolClassLevel.first;
 
   var selectedLevel = '';
   var selectedSubject = '';
@@ -78,19 +82,19 @@ class _MyCourseLivePageState extends State<MyCourseLivePage> {
                 Icons.arrow_back,
                 color: CustomColors.gray878787,
               )),
-          actions: const [
-            Padding(
-              padding: EdgeInsets.only(right: 24.55),
-              child: InkWell(
-                child: CircleAvatar(
-                  radius: 20.0,
-                  backgroundImage: NetworkImage(
-                      'https://static.independent.co.uk/s3fs-public/thumbnails/image/2017/09/27/08/jennifer-lawrence.jpg?quality=75&width=982&height=726&auto=webp'),
-                  backgroundColor: Colors.transparent,
-                ),
-              ),
-            ),
-          ],
+          // actions: const [
+          //   Padding(
+          //     padding: EdgeInsets.only(right: 24.55),
+          //     child: InkWell(
+          //       child: CircleAvatar(
+          //         radius: 20.0,
+          //         backgroundImage: NetworkImage(
+          //             'https://static.independent.co.uk/s3fs-public/thumbnails/image/2017/09/27/08/jennifer-lawrence.jpg?quality=75&width=982&height=726&auto=webp'),
+          //         backgroundColor: Colors.transparent,
+          //       ),
+          //     ),
+          //   ),
+          // ],
         ),
         body: SafeArea(
           child: RefreshIndicator(
@@ -329,10 +333,10 @@ class _MyCourseLivePageState extends State<MyCourseLivePage> {
                   ),
                 ] else ...[
                   Image.asset(
-                    ImageAssets.emptyCourse,
+                    'assets/images/img_not_available.jpeg',
                     height: 200,
                     width: double.infinity,
-                    fit: BoxFit.fitHeight,
+                    fit: BoxFit.cover,
                   ),
                 ],
                 S.h(8),
@@ -412,9 +416,9 @@ class _MyCourseLivePageState extends State<MyCourseLivePage> {
         _border(),
         _lastUpdate(course.createTime!),
         Expanded(child: Container()),
-        _videoView(course.lessons?.length ?? 0),
-        S.w(20),
-        _documentView(course.document?.data?.docFiles?.length ?? 0),
+        // _videoView(course.lessons?.length ?? 0),
+        // S.w(20),
+        // _documentView(course.document?.data?.docFiles?.length ?? 0),
       ],
     );
   }
@@ -430,13 +434,13 @@ class _MyCourseLivePageState extends State<MyCourseLivePage> {
           ],
         ),
         S.h(10),
-        Row(
-          children: [
-            _videoView(course.lessons?.length ?? 0),
-            S.w(10),
-            _documentView(course.document?.data?.docFiles?.length ?? 0),
-          ],
-        ),
+        // Row(
+        //   children: [
+        //     _videoView(course.lessons?.length ?? 0),
+        //     S.w(10),
+        //     _documentView(course.document?.data?.docFiles?.length ?? 0),
+        //   ],
+        // ),
       ],
     );
   }

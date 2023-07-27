@@ -12,6 +12,8 @@ import 'package:solve_tutor/feature/order/model/order_class_model.dart';
 import 'package:solve_tutor/feature/order/service/order_mock_provider.dart';
 import 'package:solve_tutor/widgets/sizer.dart';
 
+import '../../calendar/widgets/sizebox.dart';
+
 class ClassDetailPage extends StatefulWidget {
   ClassDetailPage({
     super.key,
@@ -29,6 +31,8 @@ class _OrderDetailPageState extends State<ClassDetailPage> {
   late OrderMockProvider order;
   late ChatProvider chat;
   RoleType me = RoleType.student;
+  bool disableChatButton = false;
+
   @override
   void initState() {
     super.initState();
@@ -64,6 +68,7 @@ class _OrderDetailPageState extends State<ClassDetailPage> {
         ),
       ),
       body: Container(
+        padding: EdgeInsets.all(20),
         width: Sizer(context).w,
         child: SingleChildScrollView(
           child: Column(
@@ -91,6 +96,7 @@ class _OrderDetailPageState extends State<ClassDetailPage> {
                   ),
                 ),
               ),
+              S.h(20),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
@@ -112,18 +118,26 @@ class _OrderDetailPageState extends State<ClassDetailPage> {
                         ),
                         GestureDetector(
                           onTap: () async {
-                            OrderClassModel orderNew =
-                                await order.createOrder(widget.classDetail);
-                            //-----
-                            ChatModel? data =
-                                await order.createChat(orderNew, widget.user);
-                            var route = MaterialPageRoute(
-                              builder: (_) => ChatRoomPage(
-                                chat: data!,
-                                order: orderNew,
-                              ),
-                            );
-                            Navigator.push(context, route);
+                            if (!disableChatButton) {
+                              setState(() {
+                                disableChatButton = true;
+                              });
+                              OrderClassModel orderNew =
+                                  await order.createOrder(widget.classDetail);
+                              //-----
+                              ChatModel? data =
+                                  await order.createChat(orderNew, widget.user);
+                              setState(() {
+                                disableChatButton = false;
+                              });
+                              var route = MaterialPageRoute(
+                                builder: (_) => ChatRoomPage(
+                                  chat: data!,
+                                  order: orderNew,
+                                ),
+                              );
+                              Navigator.push(context, route);
+                            }
                           },
                           onDoubleTap: () {},
                           child: Container(
@@ -163,22 +177,22 @@ class _OrderDetailPageState extends State<ClassDetailPage> {
                         )
                       ],
                     ),
-                    const Text(
-                      "UUID: 00000001",
-                      style: TextStyle(
-                        color: greyColor,
-                        fontSize: 15,
-                      ),
-                    ),
-                    Text(
-                      widget.classDetail.detail ?? "",
-                      style: const TextStyle(
-                        color: appTextPrimaryColor,
-                        fontSize: 15,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    // const Text(
+                    //   "UUID: 00000001",
+                    //   style: TextStyle(
+                    //     color: greyColor,
+                    //     fontSize: 15,
+                    //   ),
+                    // ),
+                    // Text(
+                    //   widget.classDetail.detail ?? "",
+                    //   style: const TextStyle(
+                    //     color: appTextPrimaryColor,
+                    //     fontSize: 15,
+                    //   ),
+                    //   maxLines: 2,
+                    //   overflow: TextOverflow.ellipsis,
+                    // ),
                     Row(
                       children: [
                         Container(
@@ -214,16 +228,16 @@ class _OrderDetailPageState extends State<ClassDetailPage> {
                         ),
                       ],
                     ),
-                    Row(
-                      children: [
-                        const Icon(Icons.account_circle_outlined),
-                        Container(
-                          height: 30,
-                          child: const VerticalDivider(color: Colors.black),
-                        ),
-                        starRateFromNumWidget(4),
-                      ],
-                    ),
+                    // Row(
+                    //   children: [
+                    //     const Icon(Icons.account_circle_outlined),
+                    //     Container(
+                    //       height: 30,
+                    //       child: const VerticalDivider(color: Colors.black),
+                    //     ),
+                    //     starRateFromNumWidget(4),
+                    //   ],
+                    // ),
                     const SizedBox(height: 5),
                     const Text(
                       "สร้างโดย",

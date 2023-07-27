@@ -130,7 +130,7 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
           ),
         ),
         title: Text(
-          'ตั้งค่าเสียงและวิดิโอ',
+          'รอเข้าห้องสอน',
           style: CustomStyles.bold22Black363636,
         ),
       ),
@@ -273,7 +273,7 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
         ),
       ),
       Text(
-        'เปิดไมค์',
+        'เปิด/ปิด ไมโครโฟน',
         style: CustomStyles.bold18Black363636.copyWith(
           color: CustomColors.gray878787,
         ),

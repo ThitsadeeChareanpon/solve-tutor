@@ -250,7 +250,7 @@ class _CourseDetailsLiveState extends State<CourseDetailsLive> {
             style: CustomStyles.med14Black363636,
             controller: controller,
             maxLines: 5,
-            maxLength: 600,
+            maxLength: 200,
             onChanged: (value) {
               if (title == 'แนะนำคอร์สเรียน*') {
                 courseController.courseData?.recommendText = value;
@@ -445,7 +445,7 @@ class _CourseDetailsLiveState extends State<CourseDetailsLive> {
       backgroundColor: Colors.transparent,
       body: AlertDialog(
         title: Text(
-          'เพิ่มรายชื่อนักเรียน',
+          'เพิ่ม ID นักเรียน',
           style: CustomStyles.med18Black363636,
         ),
         content: StatefulBuilder(

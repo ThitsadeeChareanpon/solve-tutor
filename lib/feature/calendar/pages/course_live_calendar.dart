@@ -15,7 +15,9 @@ import 'package:solve_tutor/feature/calendar/widgets/format_date.dart';
 import 'package:solve_tutor/feature/calendar/widgets/sizebox.dart';
 import 'package:table_calendar/table_calendar.dart';
 
+import '../../class/pages/class_list_page.dart';
 import '../constants/custom_fontfamily.dart';
+import 'create_course_live.dart';
 
 class CourseLiveCalendar extends StatefulWidget {
   const CourseLiveCalendar({super.key});
@@ -127,17 +129,17 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
         centerTitle: false,
         backgroundColor: CustomColors.whitePrimary,
         elevation: 6,
-        leading: InkWell(
-          onTap: () {
-            Navigator.of(context).pop();
-          },
-          child: const Icon(
-            Icons.arrow_back,
-            color: Colors.black,
-          ),
-        ),
+        // leading: InkWell(
+        //   onTap: () {
+        //     Navigator.of(context).pop();
+        //   },
+        //   child: const Icon(
+        //     Icons.arrow_back,
+        //     color: Colors.black,
+        //   ),
+        // ),
         title: Text(
-          'คอร์สเรียนสดของฉัน',
+          'คอร์สสอนสดของฉัน',
           style: CustomStyles.bold22Black363636,
         ),
         actions: [
@@ -303,7 +305,15 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                   color: CustomColors.white,
                 ),
               ),
-              onPressed: () async {},
+              onPressed: () async {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        CreateCourseLivePage(tutorId: auth!.user!.id!),
+                  ),
+                );
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: CustomColors.greenPrimary,
                 shape: RoundedRectangleBorder(
@@ -336,12 +346,19 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
             color: CustomColors.gray363636,
           ),
           label: Text(
-            'ค้นหาติวเตอร์',
+            'ค้นหางานสอน',
             style: CustomStyles.med14White.copyWith(
               color: CustomColors.gray363636,
             ),
           ),
-          onPressed: () async {},
+          onPressed: () async {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ClassListPage(),
+              ),
+            );
+          },
           style: ElevatedButton.styleFrom(
             backgroundColor: CustomColors.white,
             shape: RoundedRectangleBorder(
@@ -443,7 +460,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                           ),
                           image: DecorationImage(
                               image: const AssetImage(
-                                ImageAssets.emptyCourse,
+                                'assets/images/img_not_available.jpeg',
                               ),
                               fit: BoxFit.cover,
                               colorFilter: ColorFilter.mode(
@@ -452,7 +469,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                         )),
                     if (joinReady(showCourseTutor.start ?? DateTime.now())) ...[
                       const Text(
-                        '- ยังไม่ถึงเวลาเข้าเรียน -',
+                        '- ยังไม่ถึงเวลาเข้าห้องสอน -',
                         style: TextStyle(color: Colors.white),
                       ),
                     ]
@@ -678,7 +695,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [_topicText('ตารางเรียนสอนของฉัน'), _switch()],
+          children: [_topicText('ตารางสอนของฉัน'), _switch()],
         ),
         if (_isSelected.last == true) ...[
           if (_util.isTablet()) ...[
@@ -1053,7 +1070,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                             ),
                             S.w(10),
                             Text(
-                              listCalendarTab[index].tutorId ?? '',
+                              auth?.user?.name ?? '',
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: CustomStyles.reg16Green,
@@ -1608,7 +1625,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
           color: CustomColors.greenPrimary,
         ),
         Text(
-          'ประวัติการเรียน',
+          'ประวัติการสอน',
           style:
               CustomStyles.bold16Green.copyWith(fontWeight: FontWeight.normal),
         ),

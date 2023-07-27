@@ -190,7 +190,7 @@ class _TimeTableLiveState extends State<TimeTableLive> {
                         children: [
                           _switchCalendar(),
                           Text(
-                            'แสดงตารางเรียนทุกคอร์ส',
+                            'แสดงตารางสอนทุกคอร์ส',
                             style: CustomStyles.med14Black363636
                                 .copyWith(color: CustomColors.gray878787)
                                 .copyWith(fontSize: _util.addMinusFontSize(14)),
@@ -793,7 +793,7 @@ class _TimeTableLiveState extends State<TimeTableLive> {
   Widget _periodTime() {
     return Column(
       children: [
-        _topicText('รูปแบบการเรียน'),
+        _topicText('ตั้งค่าตารางสอน'),
         Row(
           children: [
             Expanded(
@@ -805,7 +805,7 @@ class _TimeTableLiveState extends State<TimeTableLive> {
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        'ระยะเวลาเรียน*',
+                        'วันเริ่มและสิ้นสุดคอร์ส*',
                         style: CustomStyles.med16Black36363606,
                       ),
                     ),
@@ -1262,7 +1262,7 @@ class _TimeTableLiveState extends State<TimeTableLive> {
       backgroundColor: Colors.transparent,
       body: AlertDialog(
         title: Text(
-          'ช่วงเวลาวันนี ${FormatDate.dayOnly(day)}',
+          'คอร์สในวันที่ ${FormatDate.dayOnly(day)}',
           style: _util.isTablet()
               ? CustomStyles.bold22Black363636
               : CustomStyles.bold18Black363636,

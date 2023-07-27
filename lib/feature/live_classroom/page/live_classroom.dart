@@ -278,6 +278,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   final PageController _pageController = PageController();
   final List<TransformationController> _transformationController = [];
   var courseController = CourseLiveController();
+  late String courseName;
 
   // ---------- VARIABLE: message control
   late Map<String, Function(String)> handlers;
@@ -303,6 +304,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     await courseController.getCourseById(widget.courseId);
     setState(() {
       _pages = courseController.courseData!.document!.data!.docFiles!;
+      courseName = courseController.courseData!.courseName!;
+      micEnable = widget.micEnabled;
     });
     for (int i = 1; i < _pages.length; i++) {
       _addPage();
@@ -1512,7 +1515,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
               child: Text(
                 widget.isMock
                     ? "คอร์สปรับพื้นฐานคณิตศาสตร์"
-                    : "คอร์สปรับพื้นฐานคณิตศาสตร์ ${meeting.id}",
+                    : "$courseName ${meeting.id}",
                 style: CustomStyles.bold16Black363636Overflow,
                 maxLines: 1,
               ),
@@ -1523,7 +1526,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
               child: Text(
                 widget.isMock
                     ? "คอร์สปรับพื้นฐานคณิตศาสตร์"
-                    : "คอร์สปรับพื้นฐานคณิตศาสตร์ ${meeting.id}",
+                    : "$courseName ${meeting.id}",
                 style: CustomStyles.bold16Black363636Overflow,
                 maxLines: 1,
               ),
@@ -1532,7 +1535,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             Expanded(
               flex: 2,
               child: Text(
-                "คอร์สปรับพื้นฐานคณิตศาสตร์",
+                courseName,
                 style: CustomStyles.bold16Black363636Overflow,
                 maxLines: 1,
               ),
@@ -1604,11 +1607,12 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                 S.w(16.0),
                 InkWell(
                   onTap: () async {
-                    // showCloseDialog(context);
+                    showCloseDialog(context, () {
+                      meeting.end();
+                      closeChanel();
+                    });
                     // await meeting.stopRecording();
                     // await fetchRecording(widget.meetingId);
-                    meeting.end();
-                    closeChanel();
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(
@@ -2030,7 +2034,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                   S.w(8),
                                   Flexible(
                                     child: Text(
-                                      "คอร์สปรับพื้นฐานคณิตศาสตร์ ก่อนขึ้น ม.4  - 01 ม.ค. 2023",
+                                      courseName,
                                       style: CustomStyles
                                           .bold16Black363636Overflow,
                                       maxLines: 1,
@@ -2651,7 +2655,10 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
           children: [
             InkWell(
               onTap: () {
-                showCloseDialog(context);
+                showCloseDialog(context, () {
+                  meeting.end();
+                  closeChanel();
+                });
               },
               child: Image.asset(
                 ImageAssets.iconOut,
@@ -3558,7 +3565,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                           Expanded(
                             flex: 3,
                             child: Text(
-                              "คอร์สปรับพื้นฐานคณิตศาสตร์ ก่อนขึ้น ม.4  - 01 ม.ค. 2023",
+                              courseName,
                               style: CustomStyles.bold16Black363636Overflow,
                               maxLines: 1,
                             ),
@@ -3567,7 +3574,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                           Expanded(
                             flex: 4,
                             child: Text(
-                              "คอร์สปรับพื้นฐานคณิตศาสตร์ ก่อนขึ้น ม.4  - 01 ม.ค. 2023",
+                              courseName,
                               style: CustomStyles.bold16Black363636Overflow,
                               maxLines: 1,
                             ),
@@ -3576,7 +3583,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                           Expanded(
                             flex: 2,
                             child: Text(
-                              "คอร์สปรับพื้นฐานคณิตศาสตร์ ก่อนขึ้น ม.4  - 01 ม.ค. 2023",
+                              courseName,
                               style: CustomStyles.bold16Black363636Overflow,
                               maxLines: 1,
                             ),
@@ -3643,7 +3650,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                 S.w(16.0),
                                 InkWell(
                                   onTap: () {
-                                    showCloseDialog(context);
+                                    showCloseDialog(context, () {});
                                   },
                                   child: Container(
                                       padding: const EdgeInsets.symmetric(
@@ -3903,7 +3910,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                           Expanded(
                             flex: 3,
                             child: Text(
-                              "คอร์สปรับพื้นฐานคณิตศาสตร์ ก่อนขึ้น ม.4  - 01 ม.ค. 2023",
+                              courseName,
                               style: CustomStyles.bold16Black363636Overflow,
                               maxLines: 1,
                             ),
@@ -3912,7 +3919,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                           Expanded(
                             flex: 4,
                             child: Text(
-                              "คอร์สปรับพื้นฐานคณิตศาสตร์ ก่อนขึ้น ม.4  - 01 ม.ค. 2023",
+                              courseName,
                               style: CustomStyles.bold16Black363636Overflow,
                               maxLines: 1,
                             ),
@@ -3921,7 +3928,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                           Expanded(
                             flex: 2,
                             child: Text(
-                              "คอร์สปรับพื้นฐานคณิตศาสตร์ ก่อนขึ้น ม.4  - 01 ม.ค. 2023",
+                              courseName,
                               style: CustomStyles.bold16Black363636Overflow,
                               maxLines: 1,
                             ),
@@ -3988,7 +3995,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                 S.w(16.0),
                                 InkWell(
                                   onTap: () {
-                                    showCloseDialog(context);
+                                    showCloseDialog(context, () {});
                                   },
                                   child: Container(
                                       padding: const EdgeInsets.symmetric(
@@ -4558,7 +4565,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                         Expanded(
                           flex: 3,
                           child: Text(
-                            "คอร์สปรับพื้นฐานคณิตศาสตร์ ก่อนขึ้น ม.4  - 01 ม.ค. 2023",
+                            courseName,
                             style: CustomStyles.bold16Black363636Overflow,
                             maxLines: 1,
                           ),
@@ -4567,7 +4574,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                         Expanded(
                           flex: 4,
                           child: Text(
-                            "คอร์สปรับพื้นฐานคณิตศาสตร์ ก่อนขึ้น ม.4  - 01 ม.ค. 2023",
+                            courseName,
                             style: CustomStyles.bold16Black363636Overflow,
                             maxLines: 1,
                           ),
@@ -4576,7 +4583,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                         Expanded(
                           flex: 2,
                           child: Text(
-                            "คอร์สปรับพื้นฐานคณิตศาสตร์ ก่อนขึ้น ม.4  - 01 ม.ค. 2023",
+                            courseName,
                             style: CustomStyles.bold16Black363636Overflow,
                             maxLines: 1,
                           ),
@@ -4643,7 +4650,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                               S.w(16.0),
                               InkWell(
                                 onTap: () {
-                                  showCloseDialog(context);
+                                  showCloseDialog(context, () {});
                                 },
                                 child: Container(
                                     padding: const EdgeInsets.symmetric(

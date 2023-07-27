@@ -192,11 +192,9 @@ class _FindClassPageState extends State<FindClassPage> {
             const SizedBox(
               height: 20,
             ),
-            Text(
-              authProvider?.user!.getRoleType() == RoleType.tutor
-                  ? 'ค้นหานักเรียน'
-                  : 'ค้นหาติวเตอร์',
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            const Text(
+              'ค้นหาประกาศของนักเรียน',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(
               height: 10,
@@ -224,8 +222,7 @@ class _FindClassPageState extends State<FindClassPage> {
                         prefixIconConstraints:
                             const BoxConstraints(minWidth: 30, maxWidth: 30),
                         // icon: Icon(Icons.search),
-                        hintText:
-                            "ค้นหา.. (ชื่อคอร์ส ชื่อ${authProvider?.user!.getRoleType() == RoleType.tutor ? 'นักเรียน' : 'ติวเตอร์'})",
+                        hintText: "ค้นหา..",
                         hintStyle: TextStyle(color: Colors.grey.shade400),
                       ),
                       onChanged: (value) {

@@ -118,11 +118,9 @@ class _CreateClassPageState extends State<CreateClassPage>
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          title: Text(
-            authProvider?.user!.getRoleType() == RoleType.tutor
-                ? 'สร้างประกาศหานักเรียน'
-                : 'สร้างประกาศหาติวเตอร์',
-            style: const TextStyle(color: appTextPrimaryColor),
+          title: const Text(
+            'สร้างประกาศ',
+            style: TextStyle(color: appTextPrimaryColor),
           ),
           leading: IconButton(
             onPressed: () {
@@ -198,7 +196,7 @@ class _CreateClassPageState extends State<CreateClassPage>
                   const SizedBox(
                     height: 22,
                   ),
-                  topicLabel2('* ระยะเวลาเรียน'),
+                  topicLabel2('* วันเริ่มและสิ้นสุดคอร์ส'),
                   Row(
                     children: [
                       Expanded(
@@ -243,7 +241,7 @@ class _CreateClassPageState extends State<CreateClassPage>
                   const SizedBox(
                     height: 22,
                   ),
-                  topicLabel2('* เวลาที่ต้องการเรียน'),
+                  topicLabel2('* เวลาที่ต้องการสอน'),
                   Row(
                     children: [
                       Expanded(

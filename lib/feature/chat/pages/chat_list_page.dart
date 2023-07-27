@@ -69,7 +69,7 @@ class _ChatListPageState extends State<ChatListPage> {
           appBar: AppBar(
             backgroundColor: Colors.white,
             title: const Text(
-              'Chat',
+              'แชท',
               style: TextStyle(
                 color: appTextPrimaryColor,
               ),

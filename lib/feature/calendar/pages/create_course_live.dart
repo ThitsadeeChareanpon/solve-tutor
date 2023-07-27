@@ -14,15 +14,15 @@ import 'package:solve_tutor/feature/calendar/widgets/dropdown.dart';
 import 'package:solve_tutor/feature/calendar/widgets/sizebox.dart';
 
 class CreateCourseLivePage extends StatefulWidget {
-  CreateCourseLivePage({
+  const CreateCourseLivePage({
     Key? key,
     required this.tutorId,
     this.studentId,
     this.studentName,
   }) : super(key: key);
-  String tutorId;
-  String? studentId;
-  String? studentName;
+  final String tutorId;
+  final String? studentId;
+  final String? studentName;
   @override
   State<CreateCourseLivePage> createState() => _CreateCourseLivePageState();
 }
