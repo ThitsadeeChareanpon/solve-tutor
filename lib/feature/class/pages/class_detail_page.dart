@@ -68,7 +68,6 @@ class _OrderDetailPageState extends State<ClassDetailPage> {
         ),
       ),
       body: Container(
-        padding: EdgeInsets.all(20),
         width: Sizer(context).w,
         child: SingleChildScrollView(
           child: Column(
@@ -98,7 +97,7 @@ class _OrderDetailPageState extends State<ClassDetailPage> {
               ),
               S.h(20),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
