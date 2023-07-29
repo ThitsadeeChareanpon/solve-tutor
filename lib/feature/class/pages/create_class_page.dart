@@ -674,9 +674,9 @@ class _CreateClassPageState extends State<CreateClassPage>
         decoration: InputDecoration(
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 15, vertical: 0),
-          label: Text(hint),
+          // label: Text(hint),
+          hintStyle: TextStyle(color: Colors.grey),
           hintText: hint,
-          // hintStyle: TextStyle(color: Colors.grey.shade200),
           labelStyle: TextStyle(color: Colors.grey.shade400),
           enabledBorder: const OutlineInputBorder(
               borderSide: BorderSide(
