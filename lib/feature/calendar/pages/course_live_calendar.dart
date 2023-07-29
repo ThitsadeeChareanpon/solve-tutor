@@ -1103,6 +1103,8 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
     var now = DateTime.now();
     return Consumer<CourseLiveController>(
         builder: (context, courseLive, child) {
+      DateTime today = DateTime(
+          DateTime.now().year, DateTime.now().month, DateTime.now().day);
       return TableCalendar<Event>(
         availableGestures: AvailableGestures.horizontalSwipe,
         locale: 'en_US',
@@ -1213,7 +1215,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
             );
           },
           markerBuilder: (context, day, event) {
-            if (event.isNotEmpty && day.isAfter(DateTime.now())) {
+            if (event.isNotEmpty && (day.isAfter(today) || day == today)) {
               return SingleChildScrollView(
                 child: Column(
                   children: [
@@ -1297,7 +1299,88 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
               );
             } // now + future
             else {
-              return const SizedBox();
+              return SingleChildScrollView(
+                child: Column(
+                  children: [
+                    S.h(0),
+                    if (event.isNotEmpty) ...[
+                      InkWell(
+                        onTap: () async {
+                          await showDialog(
+                            context: context,
+                            builder: (context) => _eventList(day, event),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 5.0, vertical: 0.0),
+                          margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: CustomColors.gray878787,
+                              width: 1,
+                            ),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(20.0)),
+                            shape: BoxShape.rectangle,
+                            color: Colors.grey,
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            event.first.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontFamily: CustomFontFamily.NotoSansMed,
+                              fontSize: _util.addMinusFontSize(10),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                    S.h(5),
+                    if (event.length > 1)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 5.0, vertical: 0.0),
+                        margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                        decoration: BoxDecoration(
+                            border: Border.all(
+                              color: CustomColors.gray878787,
+                              width: 1,
+                            ),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(20.0)),
+                            shape: BoxShape.rectangle,
+                            color: CustomColors.white),
+                        alignment: Alignment.center,
+                        child: Column(
+                          children: [
+                            InkWell(
+                              onTap: () async {
+                                await showDialog(
+                                    context: context,
+                                    builder: (context) =>
+                                        _eventList(day, event));
+                              },
+                              child: Text(
+                                '+${event.length - 1} รายการ',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: CustomStyles.med12GreenPrimary.copyWith(
+                                  fontSize: _util.addMinusFontSize(10),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    S.h(5),
+                  ],
+                ),
+              );
+              // return const SizedBox();
             } // past
           },
         ),
@@ -1639,17 +1722,23 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
 
   Widget _buttonCard(ShowCourseTutor showCourseTutor) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Image.asset(
-          'assets/images/student_view.png',
-          scale: 4,
+        Row(
+          children: [
+            Image.asset(
+              'assets/images/student_view.png',
+              scale: 4,
+            ),
+            S.w(5),
+            Text(
+              '${showCourseTutor.studentCount ?? 0}',
+              style: CustomStyles.med12gray878787,
+            ),
+          ],
         ),
-        S.w(5),
-        Text(
-          '${showCourseTutor.studentCount ?? 0}',
-          style: CustomStyles.med12gray878787,
-        ),
+        const SizedBox(),
+        // Text('status: publish'),
       ],
     );
   }

@@ -870,7 +870,8 @@ class _TimeTableLiveState extends State<TimeTableLive> {
       builder: (_, course, child) => TextFormField(
         onTap: () async {
           DateTime date = dateTime ?? DateTime.now();
-          TimeOfDay time = await showPopupSelectTime(context);
+          TimeOfDay? time = await showPopupSelectTime(context);
+          if (time == null) return;
           DateTime selectedTime =
               DateTime(date.year, date.month, date.day, time.hour, time.minute);
           _startSetTime?.clear();
@@ -904,7 +905,8 @@ class _TimeTableLiveState extends State<TimeTableLive> {
       builder: (_, course, child) => TextFormField(
         onTap: () async {
           DateTime date = dateTime ?? DateTime.now();
-          TimeOfDay time = await showPopupSelectTime(context);
+          TimeOfDay? time = await showPopupSelectTime(context);
+          if (time == null) return;
           DateTime selectedTime =
               DateTime(date.year, date.month, date.day, time.hour, time.minute);
           _endSetTime?.clear();

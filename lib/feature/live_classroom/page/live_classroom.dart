@@ -253,7 +253,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   final SolveStopwatch stopwatch = SolveStopwatch();
   Size studentSolvepadSize = const Size(1059.0, 547.0);
   Size? mySolvepadSize;
-  double sheetImageRatio = 0.7373;
+  double sheetImageRatio = 0.708;
   double studentImageWidth = 0;
   double studentExtraSpaceX = 0;
   double myImageWidth = 0;
@@ -280,6 +280,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   final List<TransformationController> _transformationController = [];
   var courseController = CourseLiveController();
   late String courseName;
+  bool isCourseLoaded = false;
 
   // ---------- VARIABLE: message control
   late Map<String, Function(String)> handlers;
@@ -304,16 +305,32 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   Future<void> initPagesData() async {
     await courseController.getCourseById(widget.courseId);
     setState(() {
-      _pages = courseController.courseData!.document!.data!.docFiles!;
+      if (courseController.courseData?.document?.data?.docFiles == null) {
+        _pages = [
+          'https://firebasestorage.googleapis.com/v0/b/solve-f1778.appspot.com/o/default_image%2Fa4.png?alt=media&token=01e0d9ac-15ed-4a62-886d-288c60ec1ee6',
+          'https://firebasestorage.googleapis.com/v0/b/solve-f1778.appspot.com/o/default_image%2Fa4.png?alt=media&token=01e0d9ac-15ed-4a62-886d-288c60ec1ee6',
+          'https://firebasestorage.googleapis.com/v0/b/solve-f1778.appspot.com/o/default_image%2Fa4.png?alt=media&token=01e0d9ac-15ed-4a62-886d-288c60ec1ee6',
+          'https://firebasestorage.googleapis.com/v0/b/solve-f1778.appspot.com/o/default_image%2Fa4.png?alt=media&token=01e0d9ac-15ed-4a62-886d-288c60ec1ee6',
+          'https://firebasestorage.googleapis.com/v0/b/solve-f1778.appspot.com/o/default_image%2Fa4.png?alt=media&token=01e0d9ac-15ed-4a62-886d-288c60ec1ee6',
+        ];
+        for (int i = 1; i < 5; i++) {
+          _addPage();
+        }
+      } else {
+        _pages = courseController.courseData!.document!.data!.docFiles!;
+        for (int i = 1; i < _pages.length; i++) {
+          _addPage();
+        }
+      }
       courseName = courseController.courseData!.courseName!;
       micEnable = widget.micEnabled;
+      isCourseLoaded = true;
     });
-    for (int i = 1; i < _pages.length; i++) {
-      _addPage();
-    }
     var courseStudents = courseController.courseData!.studentDetails;
     List<Map<String, dynamic>>? studentsJson =
         courseStudents?.map((student) => student.toJson()).toList();
+    print('studentsJson');
+    print(studentsJson);
     String studentsJsonString = jsonEncode(studentsJson);
     setState(() {
       students = jsonDecode(studentsJsonString);
@@ -930,7 +947,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: _onWillPopScope,
-      child: _joined
+      child: _joined && isCourseLoaded
           ? Scaffold(
               backgroundColor: CustomColors.grayCFCFCF,
               body: !Responsive.isMobile(context)
