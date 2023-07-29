@@ -1,11 +1,8 @@
-import 'dart:developer';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:number_paginator/number_paginator.dart';
 import 'package:provider/provider.dart';
-import 'package:solve_tutor/authentication/models/user_model.dart';
 import 'package:solve_tutor/authentication/service/auth_provider.dart';
 import 'package:solve_tutor/constants/school_subject_constants.dart';
 import 'package:solve_tutor/feature/class/models/class_model.dart';
@@ -185,225 +182,240 @@ class _FindClassPageState extends State<FindClassPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(
-              height: 20,
-            ),
-            const Text(
-              'ค้นหาประกาศของนักเรียน',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            SizedBox(
-              height: 35,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: txtSearchName,
-                      style: const TextStyle(fontSize: 12),
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 0),
-                        enabledBorder: borderStyle(),
-                        focusedBorder: borderStyle(),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          color: Colors.grey.shade400,
-                          size: 20,
-                        ),
-                        prefixIconConstraints:
-                            const BoxConstraints(minWidth: 30, maxWidth: 30),
-                        // icon: Icon(Icons.search),
-                        hintText: "ค้นหา..",
-                        hintStyle: TextStyle(color: Colors.grey.shade400),
-                      ),
-                      onChanged: (value) {
-                        setState(() {});
-                        initSearchClassList();
-                      },
-                      onFieldSubmitted: (value) {
-                        setState(() {});
-                        initSearchClassList();
-                      },
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  Container(
-                    child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            side:
-                                const BorderSide(color: Colors.grey, width: 1)),
-                        onPressed: () async {
-                          // log("message : $selectClass");
-                          // log("message : $selectClassLevel");
-                          await showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            builder: (context) {
-                              return FilterClassWidget(
-                                data: FilterClassModel(
-                                    schoolSubject: selectClass,
-                                    classLevel: selectClassLevel,
-                                    startDate: startDate,
-                                    startTime: startTime),
-                              );
-                            },
-                          ).then((value) {
-                            if (value != null) {
-                              FilterClassModel item = value;
-                              selectClass = item.schoolSubject;
-                              selectClassLevel = item.classLevel;
-                              startDate = item.startDate;
-                              startTime = item.startTime;
-                              setState(() {});
-                              initSearchClassList();
-                            }
-                            //
-                          });
-                        },
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.filter_list,
-                              color: Colors.grey,
-                            ),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                            const Text(
-                              'Filter',
-                              style: TextStyle(color: Colors.grey),
-                            )
-                          ],
-                        )),
-                  ),
-                ],
+      body: Padding(
+        padding: EdgeInsets.symmetric(horizontal: size.width > 480 ? 40 : 20),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(
+                height: 20,
               ),
-            ),
-            const SizedBox(
-              height: 22,
-            ),
+              const Text(
+                'ค้นหาประกาศของนักเรียน',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              SizedBox(
+                height: 35,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: txtSearchName,
+                        style: const TextStyle(fontSize: 12),
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          contentPadding:
+                              const EdgeInsets.symmetric(horizontal: 0),
+                          enabledBorder: borderStyle(),
+                          focusedBorder: borderStyle(),
+                          prefixIcon: Icon(
+                            Icons.search,
+                            color: Colors.grey.shade400,
+                            size: 20,
+                          ),
+                          prefixIconConstraints:
+                              const BoxConstraints(minWidth: 30, maxWidth: 30),
+                          // icon: Icon(Icons.search),
+                          hintText: "ค้นหา..",
+                          hintStyle: TextStyle(color: Colors.grey.shade400),
+                        ),
+                        onChanged: (value) {
+                          setState(() {});
+                          initSearchClassList();
+                        },
+                        onFieldSubmitted: (value) {
+                          setState(() {});
+                          initSearchClassList();
+                        },
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    Container(
+                      child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              side: const BorderSide(
+                                  color: Colors.grey, width: 1)),
+                          onPressed: () async {
+                            // log("message : $selectClass");
+                            // log("message : $selectClassLevel");
+                            await showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              builder: (context) {
+                                return FilterClassWidget(
+                                  data: FilterClassModel(
+                                      schoolSubject: selectClass,
+                                      classLevel: selectClassLevel,
+                                      startDate: startDate,
+                                      startTime: startTime),
+                                );
+                              },
+                            ).then((value) {
+                              if (value != null) {
+                                FilterClassModel item = value;
+                                selectClass = item.schoolSubject;
+                                selectClassLevel = item.classLevel;
+                                startDate = item.startDate;
+                                startTime = item.startTime;
+                                setState(() {});
+                                initSearchClassList();
+                              }
+                              //
+                            });
+                          },
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.filter_list,
+                                color: Colors.grey,
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              const Text(
+                                'Filter',
+                                style: TextStyle(color: Colors.grey),
+                              )
+                            ],
+                          )),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(
+                height: 22,
+              ),
 
-            Builder(builder: (context) {
-              if (searchClassList.isNotEmpty) {
-                return GridView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: Sizer(context).w <= 600 ? 1 : 2,
-                    crossAxisSpacing: 15,
-                    mainAxisSpacing: 25,
-                  ),
-                  itemCount: searchClassList.length,
-                  itemBuilder: (context, index) {
-                    ClassModel item = searchClassList[index];
-                    return BuildCardClassBodyWidget(
-                      item,
-                      (item) {
-                        var route = MaterialPageRoute(
-                            builder: (context) => ClassDetailPage(
-                                  classDetail: item,
-                                  user: authProvider!.user!,
-                                ));
-                        Navigator.push(context, route);
-                      },
-                    );
-                  },
-                );
-              } else if (searchClassList.isEmpty) {
-                return Center(child: Text("ไม่พบรายการที่ค้นหา"));
-              }
-              return Center(child: Text("Loading..."));
-            }),
-            // StreamBuilder(
-            //   stream: classProvider?.getAllClass(
-            //       isTutor: authProvider?.user!.role! == "tutor" ? true : false),
-            //   // classProvider?.firestore.collection('class_study').snapshots(),
-            //   builder: (context, snapshot) {
-            //     if (!snapshot.hasData) {
-            //       return const Center(
-            //         child: CircularProgressIndicator(),
-            //       );
-            //     }
-            //     var rawData = snapshot.data!.docs;
-            //     var rawDataList = [];
-            //     List<ClassModel> dataList = [];
-            //     if (rawData.isNotEmpty) {
-            //       rawDataList = getDataFilter(rawData);
-            //     }
-            //     if (rawDataList.isNotEmpty) {
-            //       dataList = List<ClassModel>.from(
-            //           rawDataList.map((e) => ClassModel.fromJson(e.data())));
+              Builder(builder: (context) {
+                if (searchClassList.isNotEmpty) {
+                  return GridView.builder(
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: Sizer(context).w <= 600 ? 1 : 2,
+                      crossAxisSpacing: 15,
+                      mainAxisSpacing: 25,
+                    ),
+                    itemCount: searchClassList.length,
+                    itemBuilder: (context, index) {
+                      ClassModel item = searchClassList[index];
+                      return BuildCardClassBodyWidget(
+                        item,
+                        (item) {
+                          var route = MaterialPageRoute(
+                              builder: (context) => ClassDetailPage(
+                                    classDetail: item,
+                                    user: authProvider!.user!,
+                                  ));
+                          Navigator.push(context, route);
+                        },
+                      );
+                    },
+                  );
+                } else if (searchClassList.isEmpty) {
+                  return Center(child: Text("ไม่พบรายการที่ค้นหา"));
+                }
+                return Center(child: Text("Loading..."));
+              }),
+              // StreamBuilder(
+              //   stream: classProvider?.getAllClass(
+              //       isTutor: authProvider?.user!.role! == "tutor" ? true : false),
+              //   // classProvider?.firestore.collection('class_study').snapshots(),
+              //   builder: (context, snapshot) {
+              //     if (!snapshot.hasData) {
+              //       return const Center(
+              //         child: CircularProgressIndicator(),
+              //       );
+              //     }
+              //     var rawData = snapshot.data!.docs;
+              //     var rawDataList = [];
+              //     List<ClassModel> dataList = [];
+              //     if (rawData.isNotEmpty) {
+              //       rawDataList = getDataFilter(rawData);
+              //     }
+              //     if (rawDataList.isNotEmpty) {
+              //       dataList = List<ClassModel>.from(
+              //           rawDataList.map((e) => ClassModel.fromJson(e.data())));
 
-            //       print('=========: ${rawDataList.length} :=========');
+              //       print('=========: ${rawDataList.length} :=========');
 
-            //       // dataList.sort((a, b) => a.classLevel!.compareTo(b.classLevel!));
-            //       dataList.sort((a, b) {
-            //         DateTime d1 = DateTime(a.startDate!.year, a.startDate!.month,
-            //             a.startDate!.day, a.startTime!.hour, a.startTime!.hour);
-            //         DateTime d2 = DateTime(b.startDate!.year, b.startDate!.month,
-            //             b.startDate!.day, b.startTime!.hour, b.startTime!.hour);
-            //         return d1.compareTo(d2);
-            //       });
-            //     }
-            //     count = dataList.length;
-            //     return (snapshot.connectionState == ConnectionState.waiting)
-            //         ? const Center(
-            //             child: CircularProgressIndicator(),
-            //           )
-            //         : GridView.builder(
-            //             physics: const NeverScrollableScrollPhysics(),
-            //             shrinkWrap: true,
-            //             itemCount: dataList.length,
-            //             gridDelegate:
-            //                 const SliverGridDelegateWithFixedCrossAxisCount(
-            //               crossAxisCount: 2,
-            //               crossAxisSpacing: 15,
-            //               mainAxisSpacing: 25,
-            //               // mainAxisExtent: 300
-            //             ),
-            //             itemBuilder: (context, index) {
-            //               ClassModel item = dataList[index];
-            //               // print('object: $index: ${item.image}');
-            //               return buildCardClassBody(
-            //                 item,
-            //                 (item) {
-            //                   // Navigator.push(
-            //                   //   context,
-            //                   //   MaterialPageRoute(
-            //                   //       builder: (context) => CreateClassPage(
-            //                   //             classModelEdit: item,
-            //                   //           )),
-            //                   // );
-            //                 },
-            //               );
-            //             },
-            //           );
-            //   },
-            // ),
-            const SizedBox(
-              height: 60,
-            ),
-          ],
+              //       // dataList.sort((a, b) => a.classLevel!.compareTo(b.classLevel!));
+              //       dataList.sort((a, b) {
+              //         DateTime d1 = DateTime(a.startDate!.year, a.startDate!.month,
+              //             a.startDate!.day, a.startTime!.hour, a.startTime!.hour);
+              //         DateTime d2 = DateTime(b.startDate!.year, b.startDate!.month,
+              //             b.startDate!.day, b.startTime!.hour, b.startTime!.hour);
+              //         return d1.compareTo(d2);
+              //       });
+              //     }
+              //     count = dataList.length;
+              //     return (snapshot.connectionState == ConnectionState.waiting)
+              //         ? const Center(
+              //             child: CircularProgressIndicator(),
+              //           )
+              //         : GridView.builder(
+              //             physics: const NeverScrollableScrollPhysics(),
+              //             shrinkWrap: true,
+              //             itemCount: dataList.length,
+              //             gridDelegate:
+              //                 const SliverGridDelegateWithFixedCrossAxisCount(
+              //               crossAxisCount: 2,
+              //               crossAxisSpacing: 15,
+              //               mainAxisSpacing: 25,
+              //               // mainAxisExtent: 300
+              //             ),
+              //             itemBuilder: (context, index) {
+              //               ClassModel item = dataList[index];
+              //               // print('object: $index: ${item.image}');
+              //               return buildCardClassBody(
+              //                 item,
+              //                 (item) {
+              //                   // Navigator.push(
+              //                   //   context,
+              //                   //   MaterialPageRoute(
+              //                   //       builder: (context) => CreateClassPage(
+              //                   //             classModelEdit: item,
+              //                   //           )),
+              //                   // );
+              //                 },
+              //               );
+              //             },
+              //           );
+              //   },
+              // ),
+              const SizedBox(
+                height: 60,
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: Container(
-        color: Colors.white,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 2,
+              blurRadius: 5,
+              offset: Offset(0, 3), // changes position of shadow
+            ),
+          ],
+        ),
         child: Builder(builder: (context) {
           if (searchClassList.isNotEmpty) {
             return Row(
+              mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ConstrainedBox(

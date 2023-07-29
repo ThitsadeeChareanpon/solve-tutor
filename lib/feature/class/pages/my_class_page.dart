@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:solve_tutor/authentication/service/auth_provider.dart';
@@ -17,14 +15,13 @@ class MyClassPage extends StatefulWidget {
 }
 
 class _MyClassPageState extends State<MyClassPage> {
+  Size size = const Size(0, 0);
   AuthProvider? authProvider;
   ClassProvider? classProvider;
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      authProvider = Provider.of<AuthProvider>(context, listen: false);
-      classProvider = Provider.of<ClassProvider>(context, listen: false);
-    });
+    authProvider = Provider.of<AuthProvider>(context, listen: false);
+    classProvider = Provider.of<ClassProvider>(context, listen: false);
     super.initState();
   }
 
@@ -32,7 +29,7 @@ class _MyClassPageState extends State<MyClassPage> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 5),
+        padding: EdgeInsets.symmetric(horizontal: size.width > 480 ? 40 : 20),
         child: Column(
           children: [
             const SizedBox(

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:solve_tutor/authentication/models/user_model.dart';
 import 'package:solve_tutor/authentication/service/auth_provider.dart';
 import 'package:solve_tutor/constants/theme.dart';
 import 'package:solve_tutor/feature/class/models/class_model.dart';
@@ -370,7 +369,7 @@ class _CreateClassPageState extends State<CreateClassPage>
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
                           ClassModel item = ClassModel(
-                            userId: authProvider!.user!.id!,
+                            userId: authProvider?.user?.id ?? "",
                             name: txtName.text,
                             schoolSubject: selectClass,
                             classLevel: selectClassLevel,

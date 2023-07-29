@@ -177,59 +177,56 @@ class _ClassListPageState extends State<ClassListPage>
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: appBar(),
-        body: Padding(
-          padding: EdgeInsets.symmetric(horizontal: size.width > 480 ? 40 : 20),
-          child: Column(
-            children: [
-              const SizedBox(
-                height: 20,
-              ),
-              Container(
-                height: 30,
-                // color: Colors.red,
-                decoration: const BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: greyColor,
-                    ),
+        body: Column(
+          children: [
+            const SizedBox(
+              height: 20,
+            ),
+            Container(
+              height: 30,
+              // color: Colors.red,
+              decoration: const BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: greyColor,
                   ),
                 ),
-                child: TabBar(
-                  controller: _tabController,
-                  indicatorColor: primaryColor,
-                  labelColor: primaryColor,
-                  unselectedLabelColor: greyColor,
-                  labelStyle: GoogleFonts.kanit(
-                    fontSize: 18,
-                  ),
-                  indicatorWeight: 2,
-                  tabs: <Widget>[
-                    Tab(
-                      text: authProvider?.user!.getRoleType() == RoleType.tutor
-                          ? 'ค้นหานักเรียน'
-                          : 'ประกาศของนักเรียน',
+              ),
+              child: TabBar(
+                controller: _tabController,
+                indicatorColor: primaryColor,
+                labelColor: primaryColor,
+                unselectedLabelColor: greyColor,
+                labelStyle: GoogleFonts.kanit(
+                  fontSize: 18,
+                ),
+                indicatorWeight: 2,
+                tabs: <Widget>[
+                  Tab(
+                    text: authProvider?.user!.getRoleType() == RoleType.tutor
+                        ? 'ค้นหานักเรียน'
+                        : 'ประกาศของนักเรียน',
 
-                      // icon: Icon(Icons.account_circle),
-                    ),
-                    const Tab(
-                      text: "ประกาศของฉัน",
-                    ),
-                  ],
-                ),
+                    // icon: Icon(Icons.account_circle),
+                  ),
+                  const Tab(
+                    text: "ประกาศของฉัน",
+                  ),
+                ],
               ),
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: const <Widget>[
-                    // tabView1(),
-                    // tabView2(),
-                    FindClassPage(),
-                    MyClassPage(),
-                  ],
-                ),
+            ),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: const <Widget>[
+                  // tabView1(),
+                  // tabView2(),
+                  FindClassPage(),
+                  MyClassPage(),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
