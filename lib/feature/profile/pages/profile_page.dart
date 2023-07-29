@@ -97,228 +97,234 @@ class _ProfilePageState extends State<ProfilePage> {
           }),
           backgroundColor: Colors.white,
         ),
-        body: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  margin: const EdgeInsets.all(15),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: Colors.grey,
+        body: SafeArea(
+          child: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: Colors.grey,
+                      ),
                     ),
-                  ),
-                  child: Column(
-                    children: [
-                      SizedBox(
-                          width: Sizer(context).w,
-                          height: Sizer(context).h * .03),
-                      Stack(
-                        children: [
-                          _image != null
-                              ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(
-                                      Sizer(context).h * .1),
-                                  child: Image.asset(
-                                      'assets/images/profile2.png',
+                    child: Column(
+                      children: [
+                        SizedBox(
+                            width: Sizer(context).w,
+                            height: Sizer(context).h * .03),
+                        Stack(
+                          children: [
+                            _image != null
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(
+                                        Sizer(context).h * .1),
+                                    child: Image.asset(
+                                        'assets/images/profile2.png',
+                                        width: Sizer(context).h * .15,
+                                        height: Sizer(context).h * .15,
+                                        fit: BoxFit.cover))
+                                : ClipRRect(
+                                    borderRadius: BorderRadius.circular(
+                                        Sizer(context).h * .1),
+                                    child: CachedNetworkImage(
                                       width: Sizer(context).h * .15,
                                       height: Sizer(context).h * .15,
-                                      fit: BoxFit.cover))
-                              : ClipRRect(
-                                  borderRadius: BorderRadius.circular(
-                                      Sizer(context).h * .1),
-                                  child: CachedNetworkImage(
-                                    width: Sizer(context).h * .15,
-                                    height: Sizer(context).h * .15,
-                                    fit: BoxFit.cover,
-                                    imageUrl: authprovider.user?.image ?? "",
-                                    errorWidget: (context, url, error) =>
-                                        const CircleAvatar(
-                                            child: Icon(CupertinoIcons.person)),
-                                  ),
-                                ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            authprovider.user?.name ?? "",
-                            style: const TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 22,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(width: 5),
-                          IconButton(
-                            onPressed: () {},
-                            icon: const Icon(
-                              Icons.edit,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Container(
-                        padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
-                        decoration: BoxDecoration(
-                          color: greyColor2,
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                        child: Text("${authprovider.user?.role ?? ""} "),
-                      ),
-                      const SizedBox(height: 10),
-                      Container(
-                        padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
-                        child: const Text(
-                          "รหัสของฉัน",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Container(
-                        height: 50,
-                        margin: const EdgeInsets.fromLTRB(30, 0, 30, 30),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                padding:
-                                    const EdgeInsets.fromLTRB(10, 5, 10, 5),
-                                decoration: BoxDecoration(
-                                  color: getMaterialColor(primaryColor).shade50,
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(
-                                    color: primaryColor,
-                                  ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        "${authprovider.uid ?? ""} ",
-                                      ),
+                                      fit: BoxFit.cover,
+                                      imageUrl: authprovider.user?.image ?? "",
+                                      errorWidget: (context, url, error) =>
+                                          const CircleAvatar(
+                                              child:
+                                                  Icon(CupertinoIcons.person)),
                                     ),
-                                    IconButton(
-                                      onPressed: () {
-                                        Clipboard.setData(ClipboardData(
-                                          text: authprovider.uid ?? "",
-                                        ));
-                                        Dialogs.showSnackbar(
-                                            context, "คัดลอกสำเร็จ");
-                                      },
-                                      icon: const Icon(
-                                        Icons.copy_sharp,
-                                        color: primaryColor,
-                                      ),
-                                    )
-                                  ],
-                                ),
+                                  ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              authprovider.user?.name ?? "",
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 22,
                               ),
+                              textAlign: TextAlign.center,
                             ),
-                            const SizedBox(width: 20),
-                            Container(
-                              padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
-                              decoration: BoxDecoration(
-                                color: Colors.transparent,
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color: greyColor,
-                                ),
-                              ),
-                              child: IconButton(
-                                onPressed: () {},
-                                icon: const Icon(
-                                  Icons.ios_share,
-                                  color: Colors.grey,
-                                ),
+                            const SizedBox(width: 5),
+                            IconButton(
+                              onPressed: () {},
+                              icon: const Icon(
+                                Icons.edit,
+                                color: Colors.grey,
                               ),
                             ),
                           ],
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                settingCard(title: 'ตั้งค่าบัญชี', icon: Icons.settings),
-                const Divider(thickness: 2),
-                const SizedBox(height: 10),
-                settingCard(
-                    title: 'ค่าบริการสมาชิก (เวอร์ชั่น ฟรี)', icon: Icons.list),
-                const Divider(thickness: 2),
-                const SizedBox(height: 10),
-                settingCard(
-                    title: 'ตั้งค่าการแจ้งเตือน',
-                    icon: Icons.notifications_active),
-                const Divider(thickness: 2),
-                const SizedBox(height: 30),
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
-                  child: Text(
-                    "เกี่ยวกับ Solve",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                        const SizedBox(height: 10),
+                        Container(
+                          padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
+                          decoration: BoxDecoration(
+                            color: greyColor2,
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                          child: Text("${authprovider.user?.role ?? ""} "),
+                        ),
+                        const SizedBox(height: 10),
+                        Container(
+                          padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
+                          child: const Text(
+                            "รหัสของฉัน",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Container(
+                          height: 50,
+                          margin: const EdgeInsets.fromLTRB(30, 0, 30, 30),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(10, 5, 10, 5),
+                                  decoration: BoxDecoration(
+                                    color:
+                                        getMaterialColor(primaryColor).shade50,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: primaryColor,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          "${authprovider.uid ?? ""} ",
+                                        ),
+                                      ),
+                                      IconButton(
+                                        onPressed: () {
+                                          Clipboard.setData(ClipboardData(
+                                            text: authprovider.uid ?? "",
+                                          ));
+                                          Dialogs.showSnackbar(
+                                              context, "คัดลอกสำเร็จ");
+                                        },
+                                        icon: const Icon(
+                                          Icons.copy_sharp,
+                                          color: primaryColor,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 20),
+                              Container(
+                                padding:
+                                    const EdgeInsets.fromLTRB(10, 5, 10, 5),
+                                decoration: BoxDecoration(
+                                  color: Colors.transparent,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: greyColor,
+                                  ),
+                                ),
+                                child: IconButton(
+                                  onPressed: () {},
+                                  icon: const Icon(
+                                    Icons.ios_share,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                const SizedBox(height: 10),
-                settingCard(title: 'เงื่อนไขข้อตกลงการใช้บริการ'),
-                const Divider(thickness: 2),
-                const SizedBox(height: 10),
-                settingCard(title: 'นโยบายความเป็นส่วนตัว'),
-                const Divider(thickness: 2),
-                const SizedBox(height: 20),
-                Center(
-                  child: Column(
-                    children: [
-                      TextButton(
-                        onPressed: () async {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return ConfirmActionWidget(
-                                title: 'ออกจากระบบ',
-                                content: 'ออกจากระบบบัญชีของคุณใช่หรือไม่',
-                                confirmText: 'ออกจากระบบ',
-                                confirmColor: Colors.red,
-                                onPressed: () async {
-                                  await authprovider.signOut().then((value) {
-                                    Navigator.of(context)
-                                        .popUntil((route) => route.isFirst);
-                                    var route = MaterialPageRoute(
-                                        builder: (context) => Authenticate());
-                                    Navigator.pushReplacement(context, route);
-                                  });
-                                },
-                              );
-                            },
-                          );
-                        },
-                        child: const Text("ออกจากระบบ"),
+                  const SizedBox(height: 20),
+                  settingCard(title: 'ตั้งค่าบัญชี', icon: Icons.settings),
+                  const Divider(thickness: 2),
+                  const SizedBox(height: 10),
+                  settingCard(
+                      title: 'ค่าบริการสมาชิก (เวอร์ชั่น ฟรี)',
+                      icon: Icons.list),
+                  const Divider(thickness: 2),
+                  const SizedBox(height: 10),
+                  settingCard(
+                      title: 'ตั้งค่าการแจ้งเตือน',
+                      icon: Icons.notifications_active),
+                  const Divider(thickness: 2),
+                  const SizedBox(height: 30),
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                    child: Text(
+                      "เกี่ยวกับ Solve",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const SizedBox(height: 10),
-                      Text(
-                        authprovider.user?.email ?? "",
-                        style: TextStyle(
-                          color: greyColor,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 10),
+                  settingCard(title: 'เงื่อนไขข้อตกลงการใช้บริการ'),
+                  const Divider(thickness: 2),
+                  const SizedBox(height: 10),
+                  settingCard(title: 'นโยบายความเป็นส่วนตัว'),
+                  const Divider(thickness: 2),
+                  const SizedBox(height: 20),
+                  Center(
+                    child: Column(
+                      children: [
+                        TextButton(
+                          onPressed: () async {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return ConfirmActionWidget(
+                                  title: 'ออกจากระบบ',
+                                  content: 'ออกจากระบบบัญชีของคุณใช่หรือไม่',
+                                  confirmText: 'ออกจากระบบ',
+                                  confirmColor: Colors.red,
+                                  onPressed: () async {
+                                    await authprovider.signOut().then((value) {
+                                      Navigator.of(context)
+                                          .popUntil((route) => route.isFirst);
+                                      var route = MaterialPageRoute(
+                                          builder: (context) => Authenticate());
+                                      Navigator.pushReplacement(context, route);
+                                    });
+                                  },
+                                );
+                              },
+                            );
+                          },
+                          child: const Text("ออกจากระบบ"),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          authprovider.user?.email ?? "",
+                          style: TextStyle(
+                            color: greyColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
