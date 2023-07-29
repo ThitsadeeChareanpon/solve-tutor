@@ -4,11 +4,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:solve_tutor/authentication/models/user_model.dart';
 import 'package:solve_tutor/authentication/service/auth_provider.dart';
 import 'package:solve_tutor/constants/theme.dart';
 import 'package:solve_tutor/feature/chat/models/chat_model.dart';
-import 'package:solve_tutor/feature/chat/models/message.dart' as msg;
 import 'package:solve_tutor/feature/chat/widgets/chat_order_card.dart';
 import 'package:solve_tutor/feature/chat/service/chat_provider.dart';
 import 'package:solve_tutor/widgets/dialogs.dart';
@@ -21,8 +19,6 @@ class ChatListPage extends StatefulWidget {
 }
 
 class _ChatListPageState extends State<ChatListPage> {
-  List<ChatModel> _list = [];
-  final List<UserModel> _searchList = [];
   // bool _isSearching = false;
   late AuthProvider auth;
   late ChatProvider chat;

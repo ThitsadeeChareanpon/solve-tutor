@@ -46,13 +46,13 @@ class _ChatOrderCardState extends State<ChatOrderCard> {
         child: FutureBuilder(
           future: chat.getOrderInfo(widget.chat.chatId ?? ""),
           builder: (context, snapshot1) {
+            OrderClassModel? order;
             try {
-              OrderClassModel? order;
               if (snapshot1.hasData) {
                 order = OrderClassModel.fromJson(snapshot1.data!.data()!);
               }
               return FutureBuilder(
-                future: chat.getTutorInfo("${order?.studentId ?? ""}"),
+                future: chat.getStudentInfo("${order?.studentId ?? ""}"),
                 builder: (context, snapshot2) {
                   UserModel? tutor;
                   if (snapshot1.hasData && snapshot2.hasData) {
@@ -119,7 +119,38 @@ class _ChatOrderCardState extends State<ChatOrderCard> {
                 },
               );
             } catch (e) {
-              return const Text("Error Data..");
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Chat ${widget.chat.chatId}"),
+                          Text("Error Data.. $e"),
+                        ],
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        chat.deleteChatInfo(widget.chat.chatId ?? "");
+                        setState(() {});
+                      },
+                      onDoubleTap: () {},
+                      child: Container(
+                        width: 50,
+                        child: Text(
+                          "ลบห้องแชทนี้",
+                          style: TextStyle(
+                            color: Colors.red,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
             }
           },
         ),

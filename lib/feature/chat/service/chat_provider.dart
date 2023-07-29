@@ -191,12 +191,19 @@ class ChatProvider extends ChangeNotifier {
         .snapshots();
   }
 
+  Future<void> deleteChatInfo(String id) async {
+    log("deleteChatInfo : $id");
+    await firebaseFirestore.collection('chats').doc(id).delete();
+    notifyListeners();
+  }
+
   Future<DocumentSnapshot<Map<String, dynamic>>> getOrderInfo(String id) async {
     return await firebaseFirestore.collection('orders').doc(id).get();
   }
 
-  Future<DocumentSnapshot<Map<String, dynamic>>> getTutorInfo(String id) async {
-    log("getTutorInfo : $id");
+  Future<DocumentSnapshot<Map<String, dynamic>>> getStudentInfo(
+      String id) async {
+    log("getStudentInfo : $id");
     return await firebaseFirestore.collection('users').doc(id).get();
   }
 
