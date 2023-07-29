@@ -768,11 +768,11 @@ class _TimeTableLiveState extends State<TimeTableLive> {
   Widget _startDate() {
     return TextFormField(
       onTap: () async {
-        // _showDatePicker(context: context, dateType: 'start');
-        if (courseController.courseData != null &&
-            courseController.courseData!.firstDay!.isBefore(DateTime.now())) {
-          return;
-        }
+        /// TODO: reconsider changing start date of ongoing course
+        // if (courseController.courseData != null &&
+        //     courseController.courseData!.firstDay!.isBefore(DateTime.now())) {
+        //   return;
+        // }
         DateTime? getDate = await showPopupSelectDate(context,
             firstDate: courseController.courseData?.firstDay);
         if (getDate == null) return;
@@ -855,6 +855,12 @@ class _TimeTableLiveState extends State<TimeTableLive> {
     var picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
+      builder: (BuildContext context, Widget? child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+          child: child!,
+        );
+      },
     );
     return picked;
   }
@@ -871,7 +877,6 @@ class _TimeTableLiveState extends State<TimeTableLive> {
           startTime = selectedTime;
           courseController.startTimeController.text =
               FormatDate.timeOnlyNumber(selectedTime) + ' น.'.toString();
-          courseController.endTimeController.clear();
         },
         controller: course.startTimeController,
         decoration: InputDecoration(

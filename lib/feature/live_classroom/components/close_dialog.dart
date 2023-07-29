@@ -5,7 +5,14 @@ import '../../calendar/constants/custom_styles.dart';
 import '../../calendar/widgets/sizebox.dart';
 import '../utils/responsive.dart';
 
-Future<void> showCloseDialog(BuildContext context, Function onConfirm) {
+Future<void> showCloseDialog(
+  BuildContext context,
+  Function onConfirm, {
+  String title = 'ต้องการจบการสอน?',
+  String detail = 'นักเรียนในห้องของคุณทั้งหมดจะถูกบังคับให้ออกจากห้อง',
+  String confirm = 'ปิดห้องเรียน',
+  String cancel = 'กลับไปที่ห้องเรียน',
+}) {
   return showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -26,10 +33,9 @@ Future<void> showCloseDialog(BuildContext context, Function onConfirm) {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  Text('ต้องการจบการสอน?',
-                      style: CustomStyles.bold22Black363636),
+                  Text(title, style: CustomStyles.bold22Black363636),
                   S.h(32),
-                  Text("นักเรียนในห้องของคุณทั้งหมดจะถูกบังคับให้ออกจากห้อง",
+                  Text(detail,
                       style: CustomStyles.med14Gray878787,
                       textAlign: TextAlign.center),
                   S.h(32),
@@ -51,8 +57,8 @@ Future<void> showCloseDialog(BuildContext context, Function onConfirm) {
                               Navigator.of(context).pop(); // Close the dialog
                               onConfirm(); // Execute the confirmation function
                             },
-                            child: Text('ปิดห้องเรียน',
-                                style: CustomStyles.bold14White)),
+                            child:
+                                Text(confirm, style: CustomStyles.bold14White)),
                       ),
                       SizedBox(
                         width: 185,
@@ -72,7 +78,7 @@ Future<void> showCloseDialog(BuildContext context, Function onConfirm) {
                             onPressed: () {
                               Navigator.of(context).pop();
                             },
-                            child: Text('กลับไปที่ห้องเรียน',
+                            child: Text(cancel,
                                 style: CustomStyles.bold14Gray878787)),
                       ),
                     ],

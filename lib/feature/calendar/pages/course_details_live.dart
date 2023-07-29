@@ -15,6 +15,9 @@ import 'package:solve_tutor/feature/calendar/widgets/format_date.dart';
 import 'package:solve_tutor/feature/calendar/widgets/sizebox.dart';
 import 'package:solve_tutor/firebase/database.dart';
 
+import '../../live_classroom/components/close_dialog.dart';
+import 'my_course_live.dart';
+
 class CourseDetailsLive extends StatefulWidget {
   const CourseDetailsLive({
     Key? key,
@@ -387,21 +390,31 @@ class _CourseDetailsLiveState extends State<CourseDetailsLive> {
           ),
         ),
         onPressed: () async {
-          await Alert.showOverlay(
-            loadingWidget: Alert.getOverlayScreen(),
-            asyncFunction: () async {
-              try {
-                await context.read<CourseLiveController>().deleteCourseById(
-                      id: courseController.courseData?.id ?? '',
-                    );
-              } catch (e) {
-                rethrow;
-              }
+          showCloseDialog(
+            context,
+            () async {
+              await Alert.showOverlay(
+                loadingWidget: Alert.getOverlayScreen(),
+                asyncFunction: () async {
+                  try {
+                    await context.read<CourseLiveController>().deleteCourseById(
+                          id: courseController.courseData?.id ?? '',
+                        );
+                  } catch (e) {
+                    rethrow;
+                  }
+                },
+                context: context,
+              );
+              if (!mounted) return;
+              Navigator.of(context).pop();
             },
-            context: context,
+            title: 'คุณกำลังจะลบคอร์สเรียนนี้',
+            detail: 'คอร์สเรียนที่ถูกลบไปแล้ว ไม่สามารถกู้คืนได้',
+            confirm: 'ลบคอร์ส',
+            cancel: 'ยกเลิก',
           );
           // ignore: use_build_context_synchronously
-          Navigator.of(context).pop();
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: CustomColors.white,

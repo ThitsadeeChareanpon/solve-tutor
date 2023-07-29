@@ -91,6 +91,7 @@ class ShowCourseTutor {
     levelId = json['level_id'];
     detailsText = json['details_text'];
     documentId = json['document_id'];
-    studentCount = json['student_list'].length;
+    studentCount =
+        json['student_list'] != null ? json['student_list'].length : 0;
   }
 }
