@@ -96,6 +96,7 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
               token: _token,
               userId: widget.course.tutorId!,
               courseId: widget.course.courseId!,
+              startTime: widget.course.start!.millisecondsSinceEpoch,
               meetingId: meetingID,
               isHost: true,
               displayName: displayName,

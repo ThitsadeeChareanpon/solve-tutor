@@ -357,9 +357,6 @@ class _DialogFileManagerLiveState extends State<DialogFileManagerLive> {
       ),
       onPressed: () {
         if (courseController.selectedDocumentIndex != null) {
-          var firstPageUrl =
-              courseController.courseData?.document?.data?.docFiles?.first;
-          // getImageDimensions(firstPageUrl!);
           Navigator.of(context).pop(courseController.courseData?.document?.id);
         }
       },
@@ -382,13 +379,4 @@ class _DialogFileManagerLiveState extends State<DialogFileManagerLive> {
       ),
     );
   }
-
-  // void getImageDimensions(String url) {
-  //   Image image = Image.network(url);
-  //   image.image
-  //       .resolve(const ImageConfiguration())
-  //       .addListener(ImageStreamListener((ImageInfo info, bool _) {
-  //     print('Width: ${info.image.width}, Height: ${info.image.height}');
-  //   }));
-  // }
 }

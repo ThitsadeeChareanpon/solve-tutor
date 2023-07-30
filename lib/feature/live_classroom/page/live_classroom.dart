@@ -33,6 +33,7 @@ import '../utils/responsive.dart';
 class TutorLiveClassroom extends StatefulWidget {
   final String meetingId, userId, token, displayName, courseId;
   final bool micEnabled, camEnabled, chatEnabled, isHost, isMock;
+  final int startTime;
   const TutorLiveClassroom({
     Key? key,
     required this.meetingId,
@@ -41,6 +42,7 @@ class TutorLiveClassroom extends StatefulWidget {
     required this.displayName,
     required this.isHost,
     required this.courseId,
+    required this.startTime,
     this.micEnabled = true,
     this.camEnabled = false,
     this.chatEnabled = false,
@@ -278,7 +280,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   var courseController = CourseLiveController();
   late String courseName;
   bool isCourseLoaded = false;
-  bool isRatioReady = false;
 
   // ---------- VARIABLE: message control
   late Map<String, Function(String)> handlers;
@@ -328,15 +329,9 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     var courseStudents = courseController.courseData!.studentDetails;
     List<Map<String, dynamic>>? studentsJson =
         courseStudents?.map((student) => student.toJson()).toList();
-    print('studentsJson');
-    print(studentsJson);
-    // String studentsJsonString = jsonEncode(studentsJson);
     setState(() {
       students = studentsJson!.cast<dynamic>();
-      // students = jsonDecode(studentsJsonString);
     });
-    print('students');
-    print(students);
   }
 
   void initTimer() {
@@ -395,13 +390,14 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   void initWss() {
     if (!widget.isMock) {
       channel = WebSocketChannel.connect(
-        Uri.parse('ws://35.240.169.164:3000/${widget.meetingId}/${meeting.id}'),
+        Uri.parse(
+            'ws://35.240.169.164:3000/${widget.courseId}/${widget.startTime}'),
       );
     } // use Mockup data
     else {
       channel = WebSocketChannel.connect(
         Uri.parse(
-            'ws://35.240.169.164:3000/${widget.meetingId}/${widget.meetingId}'),
+            'ws://35.240.169.164:3000/${widget.courseId}/${widget.startTime}'),
       );
     }
 
@@ -952,12 +948,11 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     return ' $hours : $minutes : $seconds ';
   }
 
-  final _util = UtilityHelper();
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: _onWillPopScope,
-      child: _joined && isCourseLoaded && isRatioReady
+      child: _joined && isCourseLoaded
           ? Scaffold(
               backgroundColor: CustomColors.grayCFCFCF,
               body: !Responsive.isMobile(context)
@@ -1553,13 +1548,13 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                 InkWell(
                   onTap: () async {
                     showCloseDialog(context, () {
-                      meeting.end();
-                      closeChanel();
                       sendMessage(
                         widget.userId,
                         'EndMeeting',
                         stopwatch.elapsed.inMilliseconds,
                       );
+                      meeting.end();
+                      closeChanel();
                       FirebaseFirestore.instance
                           .collection('course_live')
                           .doc(widget.courseId)
@@ -3259,7 +3254,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                 //           const ViewStudentScreen()),
                                 // );
                               },
-                              child: Image.asset(
+                              child: Image.network(
                                 students[index]['image'],
                                 height: 62,
                                 width: 62,
