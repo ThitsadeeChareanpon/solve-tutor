@@ -99,7 +99,7 @@ class _UpdateDocumentFormState extends State<UpdateDocumentForm> {
 
               if (documentController.document.data?.documentName?.isNotEmpty ==
                   true) {
-                documentController.docmentName.text =
+                documentController.documentName.text =
                     documentController.document.data?.documentName ?? '';
               }
             } catch (e) {
@@ -492,7 +492,7 @@ class _UpdateDocumentFormState extends State<UpdateDocumentForm> {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: SizedBox(
         child: TextFormField(
-          controller: documentController.docmentName,
+          controller: documentController.documentName,
           decoration: InputDecoration(
             labelText: 'ชื่อเอกสาร',
             border: const OutlineInputBorder(
@@ -500,7 +500,7 @@ class _UpdateDocumentFormState extends State<UpdateDocumentForm> {
                 Radius.circular(8.0),
               ),
             ),
-            suffix: Text('${documentController.docmentName.text.length}/70'),
+            suffix: Text('${documentController.documentName.text.length}/70'),
           ),
           inputFormatters: [
             LengthLimitingTextInputFormatter(70),

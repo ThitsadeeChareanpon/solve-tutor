@@ -263,9 +263,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   double scaleY = 0;
 
   // ---------- VARIABLE: Solve Pad features
-  List<Offset?> _currentActionData = [];
-  List<String?> _currentScrollData = [];
-  List<int> _currentActionTimestamp = [];
   bool _isPrevBtnActive = false;
   bool _isNextBtnActive = true;
   int? activePointerId;
@@ -281,6 +278,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   var courseController = CourseLiveController();
   late String courseName;
   bool isCourseLoaded = false;
+  bool isRatioReady = false;
 
   // ---------- VARIABLE: message control
   late Map<String, Function(String)> handlers;
@@ -306,6 +304,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     await courseController.getCourseById(widget.courseId);
     setState(() {
       if (courseController.courseData?.document?.data?.docFiles == null) {
+        updateRatio(0.708);
         _pages = [
           'https://firebasestorage.googleapis.com/v0/b/solve-f1778.appspot.com/o/default_image%2Fa4.png?alt=media&token=01e0d9ac-15ed-4a62-886d-288c60ec1ee6',
           'https://firebasestorage.googleapis.com/v0/b/solve-f1778.appspot.com/o/default_image%2Fa4.png?alt=media&token=01e0d9ac-15ed-4a62-886d-288c60ec1ee6',
@@ -318,6 +317,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
         }
       } else {
         _pages = courseController.courseData!.document!.data!.docFiles!;
+        getRatio(_pages[0]);
+        print(_pages[0]);
         for (int i = 1; i < _pages.length; i++) {
           _addPage();
         }
@@ -331,10 +332,13 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
         courseStudents?.map((student) => student.toJson()).toList();
     print('studentsJson');
     print(studentsJson);
-    String studentsJsonString = jsonEncode(studentsJson);
+    // String studentsJsonString = jsonEncode(studentsJson);
     setState(() {
-      students = jsonDecode(studentsJsonString);
+      students = studentsJson!.cast<dynamic>();
+      // students = jsonDecode(studentsJsonString);
     });
+    print('students');
+    print(students);
   }
 
   void initTimer() {
@@ -554,7 +558,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   void handleMessageChangePage(String data) {
     var parts = data.split(':');
     var pageNumber = int.parse(parts.last);
-    print(pageNumber);
     _pageController.animateToPage(
       pageNumber,
       duration: const Duration(milliseconds: 300),
@@ -808,7 +811,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   }
 
   Future<void> fetchRecording(meetingID) async {
-    print('call fetch Record');
     try {
       var record = await fetchRecordings(widget.token, meetingID);
       print('record url');
@@ -822,7 +824,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   }
 
   Future<bool> _onWillPopScope() async {
-    print('some how I pop');
+    print('somehow I pop');
     if (widget.isMock) {
       Navigator.pop(context);
     }
@@ -838,6 +840,27 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
         .collection('course_live')
         .doc(widget.courseId)
         .update({'currentMeetingCode': meeting.id});
+  }
+
+  void getRatio(String url) {
+    Image image = Image.network(url);
+    image.image
+        .resolve(const ImageConfiguration())
+        .addListener(ImageStreamListener((ImageInfo info, bool _) {
+      // print('Width: ${info.image.width}, Height: ${info.image.height}');
+      double ratio = info.image.width / info.image.height;
+      print(ratio);
+      updateRatio(ratio);
+    }));
+  }
+
+  void updateRatio(double ratio) async {
+    sheetImageRatio = ratio;
+    await FirebaseFirestore.instance
+        .collection('course_live')
+        .doc(widget.courseId)
+        .update({'imageRatio': ratio});
+    isRatioReady = true;
   }
 
   // ---------- FUNCTION: solve pad feature
@@ -947,7 +970,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: _onWillPopScope,
-      child: _joined && isCourseLoaded
+      child: _joined && isCourseLoaded && isRatioReady
           ? Scaffold(
               backgroundColor: CustomColors.grayCFCFCF,
               body: !Responsive.isMobile(context)
@@ -1188,10 +1211,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                   double originalTranslationX = translation.x;
 
                   if (_mode == DrawingMode.drag) {
-                    _currentScrollData = List.from(_currentScrollData)
-                      ..add(originalTranslationY.toStringAsFixed(2));
-                    _currentActionTimestamp = List.from(_currentActionTimestamp)
-                      ..add(stopwatch.elapsed.inMilliseconds);
                     sendMessage(
                       widget.userId,
                       'ScrollZoom:${originalTranslationX.toStringAsFixed(2)}:${originalTranslationY.toStringAsFixed(2)}:${scale.toStringAsFixed(2)}',
@@ -1229,12 +1248,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                         _strokeColors[_selectedIndexColors],
                                         _strokeWidths[_selectedIndexLines]),
                                   );
-                                  _currentActionData =
-                                      List.from(_currentActionData)
-                                        ..add(details.localPosition);
-                                  _currentActionTimestamp =
-                                      List.from(_currentActionTimestamp)
-                                        ..add(stopwatch.elapsed.inMilliseconds);
                                   break;
                                 case DrawingMode.laser:
                                   _laserPoints[_currentPage].add(
@@ -1243,12 +1256,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                         _strokeColors[_selectedIndexColors],
                                         _strokeWidths[_selectedIndexLines]),
                                   );
-                                  _currentActionData =
-                                      List.from(_currentActionData)
-                                        ..add(details.localPosition);
-                                  _currentActionTimestamp =
-                                      List.from(_currentActionTimestamp)
-                                        ..add(stopwatch.elapsed.inMilliseconds);
                                   _laserDrawing();
                                   break;
                                 case DrawingMode.highlighter:
@@ -1258,19 +1265,10 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                         _strokeColors[_selectedIndexColors],
                                         _strokeWidths[_selectedIndexLines]),
                                   );
-                                  _currentActionData =
-                                      List.from(_currentActionData)
-                                        ..add(details.localPosition);
-                                  _currentActionTimestamp =
-                                      List.from(_currentActionTimestamp)
-                                        ..add(stopwatch.elapsed.inMilliseconds);
                                   break;
                                 case DrawingMode.eraser:
                                   _eraserPoints[_currentPage] =
                                       details.localPosition;
-                                  _currentActionData.add(details.localPosition);
-                                  _currentActionTimestamp
-                                      .add(stopwatch.elapsed.inMilliseconds);
                                   int penHit = _penPoints[_currentPage]
                                       .indexWhere((point) =>
                                           (point?.offset != null) &&
@@ -1311,12 +1309,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                         details.localPosition,
                                         _strokeColors[_selectedIndexColors],
                                         _strokeWidths[_selectedIndexLines]));
-                                    _currentActionData =
-                                        List.from(_currentActionData)
-                                          ..add(details.localPosition);
-                                    _currentActionTimestamp = List.from(
-                                        _currentActionTimestamp)
-                                      ..add(stopwatch.elapsed.inMilliseconds);
                                   });
                                   break;
                                 case DrawingMode.laser:
@@ -1327,12 +1319,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                           _strokeColors[_selectedIndexColors],
                                           _strokeWidths[_selectedIndexLines]),
                                     );
-                                    _currentActionData =
-                                        List.from(_currentActionData)
-                                          ..add(details.localPosition);
-                                    _currentActionTimestamp = List.from(
-                                        _currentActionTimestamp)
-                                      ..add(stopwatch.elapsed.inMilliseconds);
                                   });
                                   _laserDrawing();
                                   break;
@@ -1344,22 +1330,12 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                           _strokeColors[_selectedIndexColors],
                                           _strokeWidths[_selectedIndexLines]),
                                     );
-                                    _currentActionData =
-                                        List.from(_currentActionData)
-                                          ..add(details.localPosition);
-                                    _currentActionTimestamp = List.from(
-                                        _currentActionTimestamp)
-                                      ..add(stopwatch.elapsed.inMilliseconds);
                                   });
                                   break;
                                 case DrawingMode.eraser:
                                   setState(() {
                                     _eraserPoints[_currentPage] =
                                         details.localPosition;
-                                    _currentActionData
-                                        .add(details.localPosition);
-                                    _currentActionTimestamp
-                                        .add(stopwatch.elapsed.inMilliseconds);
                                   });
                                   int penHit = _penPoints[_currentPage]
                                       .indexWhere((point) =>
@@ -1397,42 +1373,21 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                               switch (_mode) {
                                 case DrawingMode.pen:
                                   _penPoints[_currentPage].add(null);
-                                  _currentActionData =
-                                      List.from(_currentActionData)..add(null);
-                                  _currentActionTimestamp =
-                                      List.from(_currentActionTimestamp)
-                                        ..add(stopwatch.elapsed.inMilliseconds);
                                   break;
                                 case DrawingMode.laser:
                                   _laserPoints[_currentPage].add(null);
                                   _laserTimer = Timer(
                                       const Duration(milliseconds: 1500),
                                       _stopLaserDrawing);
-                                  _currentActionData =
-                                      List.from(_currentActionData)..add(null);
-                                  _currentActionTimestamp =
-                                      List.from(_currentActionTimestamp)
-                                        ..add(stopwatch.elapsed.inMilliseconds);
                                   break;
                                 case DrawingMode.highlighter:
                                   _highlighterPoints[_currentPage].add(null);
-                                  _currentActionData =
-                                      List.from(_currentActionData)..add(null);
-                                  _currentActionTimestamp =
-                                      List.from(_currentActionTimestamp)
-                                        ..add(stopwatch.elapsed.inMilliseconds);
                                   break;
                                 case DrawingMode.eraser:
                                   setState(() {
                                     _eraserPoints[_currentPage] =
-                                        Offset(-100, -100);
+                                        const Offset(-100, -100);
                                   });
-                                  _currentActionData =
-                                      List.from(_currentActionData)
-                                        ..add(Offset(-100, -100));
-                                  _currentActionTimestamp =
-                                      List.from(_currentActionTimestamp)
-                                        ..add(stopwatch.elapsed.inMilliseconds);
                                   break;
                                 default:
                                   break;
@@ -1449,42 +1404,21 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                               switch (_mode) {
                                 case DrawingMode.pen:
                                   _penPoints[_currentPage].add(null);
-                                  _currentActionData =
-                                      List.from(_currentActionData)..add(null);
-                                  _currentActionTimestamp =
-                                      List.from(_currentActionTimestamp)
-                                        ..add(stopwatch.elapsed.inMilliseconds);
                                   break;
                                 case DrawingMode.laser:
                                   _laserPoints[_currentPage].add(null);
                                   _laserTimer = Timer(
                                       const Duration(milliseconds: 1500),
                                       _stopLaserDrawing);
-                                  _currentActionData =
-                                      List.from(_currentActionData)..add(null);
-                                  _currentActionTimestamp =
-                                      List.from(_currentActionTimestamp)
-                                        ..add(stopwatch.elapsed.inMilliseconds);
                                   break;
                                 case DrawingMode.highlighter:
                                   _highlighterPoints[_currentPage].add(null);
-                                  _currentActionData =
-                                      List.from(_currentActionData)..add(null);
-                                  _currentActionTimestamp =
-                                      List.from(_currentActionTimestamp)
-                                        ..add(stopwatch.elapsed.inMilliseconds);
                                   break;
                                 case DrawingMode.eraser:
                                   setState(() {
                                     _eraserPoints[_currentPage] =
                                         Offset(-100, -100);
                                   });
-                                  _currentActionData =
-                                      List.from(_currentActionData)
-                                        ..add(Offset(-100, -100));
-                                  _currentActionTimestamp =
-                                      List.from(_currentActionTimestamp)
-                                        ..add(stopwatch.elapsed.inMilliseconds);
                                   break;
                                 default:
                                   break;
@@ -1638,6 +1572,11 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                     showCloseDialog(context, () {
                       meeting.end();
                       closeChanel();
+                      sendMessage(
+                        widget.userId,
+                        'EndMeeting',
+                        stopwatch.elapsed.inMilliseconds,
+                      );
                       FirebaseFirestore.instance
                           .collection('course_live')
                           .doc(widget.courseId)
@@ -2862,36 +2801,35 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                           _selectedIndexTools = index;
                                         });
                                         if (index == 0) {
-                                          updateDataHistory(DrawingMode.drag);
+                                          _mode = DrawingMode.drag;
                                           sendMessage(
                                             widget.userId,
                                             'DrawingMode.drag',
                                             stopwatch.elapsed.inMilliseconds,
                                           );
                                         } else if (index == 1) {
-                                          updateDataHistory(DrawingMode.pen);
+                                          _mode = DrawingMode.pen;
                                           sendMessage(
                                             widget.userId,
                                             'DrawingMode.pen',
                                             stopwatch.elapsed.inMilliseconds,
                                           );
                                         } else if (index == 2) {
-                                          updateDataHistory(
-                                              DrawingMode.highlighter);
+                                          _mode = DrawingMode.highlighter;
                                           sendMessage(
                                             widget.userId,
                                             'DrawingMode.highlighter',
                                             stopwatch.elapsed.inMilliseconds,
                                           );
                                         } else if (index == 3) {
-                                          updateDataHistory(DrawingMode.eraser);
+                                          _mode = DrawingMode.eraser;
                                           sendMessage(
                                             widget.userId,
                                             'DrawingMode.eraser',
                                             stopwatch.elapsed.inMilliseconds,
                                           );
                                         } else if (index == 4) {
-                                          updateDataHistory(DrawingMode.laser);
+                                          _mode = DrawingMode.laser;
                                           sendMessage(
                                             widget.userId,
                                             'DrawingMode.laser',
@@ -2931,7 +2869,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                       children: [
                                         InkWell(
                                           onTap: () {
-                                            print("Choose Color");
                                             setState(() {
                                               if (openLines ||
                                                   openMore == true) {
@@ -2949,8 +2886,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                         ),
                                         InkWell(
                                           onTap: () {
-                                            print("Pick Line");
-
                                             setState(() {
                                               if (openColors ||
                                                   openMore == true) {
@@ -3049,20 +2984,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
         ),
       ],
     );
-  }
-
-  void updateDataHistory(dynamic updateMode) {
-    if (_currentActionTimestamp.isEmpty) {
-      _mode = updateMode;
-    } else if (_mode != DrawingMode.drag) {
-      _currentActionTimestamp.clear();
-      _currentActionData.clear();
-      _mode = updateMode;
-    } else {
-      _currentActionTimestamp.clear();
-      _currentActionData.clear();
-      _mode = updateMode;
-    }
   }
 
   ///Button for list student

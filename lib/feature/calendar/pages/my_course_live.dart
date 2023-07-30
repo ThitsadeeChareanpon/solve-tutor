@@ -334,7 +334,7 @@ class _MyCourseLivePageState extends State<MyCourseLivePage> {
                 ] else ...[
                   Image.asset(
                     'assets/images/img_not_available.jpeg',
-                    height: 200,
+                    height: 160,
                     width: double.infinity,
                     fit: BoxFit.cover,
                   ),

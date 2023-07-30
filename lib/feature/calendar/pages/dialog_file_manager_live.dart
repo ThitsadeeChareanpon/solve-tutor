@@ -325,11 +325,11 @@ class _DialogFileManagerLiveState extends State<DialogFileManagerLive> {
         color: CustomColors.grayE5E6E9,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [_backtoDocument(), _chooseDocButton()],
+          children: [_backToDocument(), _chooseDocButton()],
         ));
   }
 
-  Widget _backtoDocument() {
+  Widget _backToDocument() {
     return ElevatedButton.icon(
       icon: const Icon(Icons.arrow_back,
           size: 20, color: CustomColors.gray878787),
@@ -357,6 +357,9 @@ class _DialogFileManagerLiveState extends State<DialogFileManagerLive> {
       ),
       onPressed: () {
         if (courseController.selectedDocumentIndex != null) {
+          var firstPageUrl =
+              courseController.courseData?.document?.data?.docFiles?.first;
+          // getImageDimensions(firstPageUrl!);
           Navigator.of(context).pop(courseController.courseData?.document?.id);
         }
       },
@@ -379,4 +382,13 @@ class _DialogFileManagerLiveState extends State<DialogFileManagerLive> {
       ),
     );
   }
+
+  // void getImageDimensions(String url) {
+  //   Image image = Image.network(url);
+  //   image.image
+  //       .resolve(const ImageConfiguration())
+  //       .addListener(ImageStreamListener((ImageInfo info, bool _) {
+  //     print('Width: ${info.image.width}, Height: ${info.image.height}');
+  //   }));
+  // }
 }
