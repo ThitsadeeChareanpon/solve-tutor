@@ -304,7 +304,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     await courseController.getCourseById(widget.courseId);
     setState(() {
       if (courseController.courseData?.document?.data?.docFiles == null) {
-        updateRatio(0.708);
         _pages = [
           'https://firebasestorage.googleapis.com/v0/b/solve-f1778.appspot.com/o/default_image%2Fa4.png?alt=media&token=01e0d9ac-15ed-4a62-886d-288c60ec1ee6',
           'https://firebasestorage.googleapis.com/v0/b/solve-f1778.appspot.com/o/default_image%2Fa4.png?alt=media&token=01e0d9ac-15ed-4a62-886d-288c60ec1ee6',
@@ -317,8 +316,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
         }
       } else {
         _pages = courseController.courseData!.document!.data!.docFiles!;
-        getRatio(_pages[0]);
-        print(_pages[0]);
+        updateRatio(_pages[0]);
         for (int i = 1; i < _pages.length; i++) {
           _addPage();
         }
@@ -842,25 +840,14 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
         .update({'currentMeetingCode': meeting.id});
   }
 
-  void getRatio(String url) {
+  void updateRatio(String url) {
     Image image = Image.network(url);
     image.image
         .resolve(const ImageConfiguration())
         .addListener(ImageStreamListener((ImageInfo info, bool _) {
-      // print('Width: ${info.image.width}, Height: ${info.image.height}');
       double ratio = info.image.width / info.image.height;
-      print(ratio);
-      updateRatio(ratio);
+      sheetImageRatio = ratio;
     }));
-  }
-
-  void updateRatio(double ratio) async {
-    sheetImageRatio = ratio;
-    await FirebaseFirestore.instance
-        .collection('course_live')
-        .doc(widget.courseId)
-        .update({'imageRatio': ratio});
-    isRatioReady = true;
   }
 
   // ---------- FUNCTION: solve pad feature
@@ -1475,9 +1462,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             Expanded(
               flex: 3,
               child: Text(
-                widget.isMock
-                    ? "คอร์สปรับพื้นฐานคณิตศาสตร์"
-                    : "$courseName ${meeting.id}",
+                widget.isMock ? "คอร์สปรับพื้นฐานคณิตศาสตร์" : courseName,
                 style: CustomStyles.bold16Black363636Overflow,
                 maxLines: 1,
               ),
@@ -1486,9 +1471,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             Expanded(
               flex: 4,
               child: Text(
-                widget.isMock
-                    ? "คอร์สปรับพื้นฐานคณิตศาสตร์"
-                    : "$courseName ${meeting.id}",
+                widget.isMock ? "คอร์สปรับพื้นฐานคณิตศาสตร์" : courseName,
                 style: CustomStyles.bold16Black363636Overflow,
                 maxLines: 1,
               ),
