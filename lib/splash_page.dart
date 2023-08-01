@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:solve_tutor/auth.dart';
 import 'package:solve_tutor/authentication/service/auth_provider.dart';
@@ -21,11 +22,11 @@ class SplashPageState extends State<SplashPage> {
         auth.getSelfInfo();
         await Future.delayed(const Duration(milliseconds: 500));
       }
-      goToMidleware();
+      goToMiddleware();
     });
   }
 
-  void goToMidleware() async {
+  void goToMiddleware() async {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const Authenticate()),
@@ -37,18 +38,7 @@ class SplashPageState extends State<SplashPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const FlutterLogo(size: 100),
-            const SizedBox(height: 20),
-            Container(
-              width: 20,
-              height: 20,
-              child: const CircularProgressIndicator(color: primaryColor),
-            ),
-          ],
-        ),
+        child: Lottie.asset("assets/images/logo.json", width: 100),
       ),
     );
   }
