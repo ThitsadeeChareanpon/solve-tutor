@@ -58,6 +58,7 @@ dependencies:
   lottie: ^2.4.0
   flutter_webrtc: ^0.9.34
   camera: ^0.10.5+2
+  webview_flutter: ^4.2.2
 
 dev_dependencies:
   flutter_test:

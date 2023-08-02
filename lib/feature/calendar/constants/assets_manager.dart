@@ -125,4 +125,5 @@ class ImageAssets {
   static const String arrowNextCircle = "$imagePath/arrow_next_circle.png";
   static const String arrowNextCircleGreen =
       "$imagePath/arrow_next_circle_green.png";
+  static const String penDisTab = "$imagePath/pen-dis-tab.png";
 }

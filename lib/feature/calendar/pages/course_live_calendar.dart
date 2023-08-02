@@ -17,6 +17,7 @@ import 'package:table_calendar/table_calendar.dart';
 
 import '../../class/pages/class_list_page.dart';
 import '../constants/custom_fontfamily.dart';
+import 'course_history.dart';
 import 'create_course_live.dart';
 
 class CourseLiveCalendar extends StatefulWidget {
@@ -376,7 +377,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
           ),
         ),
         child: Text(
-          'ค้นหาติวเตอร์',
+          'ค้นหางานสอน',
           style: CustomStyles.bold16Green,
         ),
       );
@@ -441,7 +442,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                         fit: BoxFit.fitHeight,
                       ),
                     ),
-                    if (courseReady)
+                    if (!courseReady)
                       const Text(
                         '- ยังไม่ถึงเวลาเข้าเรียน -',
                         style: TextStyle(color: Colors.white),
@@ -469,7 +470,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                                   Colors.black.withOpacity(0.5),
                                   BlendMode.srcOver)),
                         )),
-                    if (joinReady(showCourseTutor.start ?? DateTime.now())) ...[
+                    if (!courseReady) ...[
                       const Text(
                         '- ยังไม่ถึงเวลาเข้าห้องสอน -',
                         style: TextStyle(color: Colors.white),
@@ -533,6 +534,9 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
     var filterSubjectId = courseController.subjects
         .where((e) => e.id == showCourseTutor.subjectId)
         .toList();
+    bool courseReady = joinReady(showCourseTutor.start ?? DateTime.now());
+    print('card mob');
+    print(filterLevelId.first.name);
     return InkWell(
       onTap: () => onTap(),
       child: SizedBox(
@@ -564,8 +568,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                             image: imageProvider,
                             fit: BoxFit.cover,
                             colorFilter: ColorFilter.mode(
-                                joinReady(
-                                        showCourseTutor.start ?? DateTime.now())
+                                !courseReady
                                     ? Colors.black.withOpacity(0.6)
                                     : Colors.transparent,
                                 BlendMode.screen),
@@ -583,7 +586,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                         fit: BoxFit.fitHeight,
                       ),
                     ),
-                    if (joinReady(showCourseTutor.start ?? DateTime.now())) ...[
+                    if (!courseReady) ...[
                       Text(
                         '- ยังไม่ถึงเวลาเข้าเรียน -',
                         style: CustomStyles.med14White,
@@ -686,8 +689,8 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
               )
             ]
           : <Widget>[
-              const Icon(Icons.list),
               const Icon(Icons.calendar_month),
+              const Icon(Icons.list),
             ],
     );
   }
@@ -789,16 +792,16 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
           child: Center(
             child: Text(
               'ไม่พบข้อมูล',
-              style: CustomStyles.bold12Black363636,
+              style: CustomStyles.bold12Black363636.copyWith(fontSize: 12),
             ),
           ),
         ),
       ],
       Column(
         children: List.generate(listCalendarTab.length, (index) {
-          // var filterLevelId = courseController.levels
-          //     .where((e) => e.id == listCalendarTab[index].levelId)
-          //     .toList();
+          var filterLevelId = courseController.levels
+              .where((e) => e.id == listCalendarTab[index].levelId)
+              .toList();
           var filterSubjectId = courseController.subjects
               .where((e) => e.id == listCalendarTab[index].subjectId)
               .toList();
@@ -887,7 +890,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      listCalendarTab[index].tutorId ?? '',
+                      auth?.user?.name ?? '',
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: CustomStyles.reg16Green,
@@ -897,7 +900,8 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                         _tagType(
                             '${filterSubjectId.isNotEmpty ? filterSubjectId.first.name : ''}'),
                         S.w(4.0),
-                        // _learned()
+                        _tagType(
+                            '${filterLevelId.isNotEmpty ? filterLevelId.first.name : ''}'),
                       ],
                     )
                   ],
@@ -1638,7 +1642,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
   }
 
   bool joinReady(DateTime start) {
-    return DateTime.now().isAfter(start.subtract(Duration(minutes: 30)));
+    return DateTime.now().isAfter(start.subtract(const Duration(minutes: 30)));
   }
 
   Widget _tagTime(String tag) {
@@ -1666,7 +1670,8 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
       ),
       child: Text(
         tag,
-        style: CustomStyles.med12gray878787.copyWith(color: Colors.black),
+        style: CustomStyles.med12gray878787.copyWith(
+            color: Colors.black, fontSize: _util.isTablet() ? 14 : 13),
       ),
     );
   }
@@ -1701,20 +1706,30 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
   }
 
   Widget _historyText() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        const Icon(
-          Icons.history,
-          color: CustomColors.greenPrimary,
-        ),
-        Text(
-          'ประวัติการสอน',
-          style:
-              CustomStyles.bold16Green.copyWith(fontWeight: FontWeight.normal),
-        ),
-      ],
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const CourseHistory(),
+          ),
+        );
+      },
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.history,
+            color: CustomColors.greenPrimary,
+          ),
+          Text(
+            'ประวัติการสอน',
+            style: CustomStyles.bold16Green
+                .copyWith(fontWeight: FontWeight.normal),
+          ),
+        ],
+      ),
     );
   }
 

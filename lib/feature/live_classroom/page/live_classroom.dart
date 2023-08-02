@@ -139,10 +139,10 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       "image_active": ImageAssets.rubberActive,
       "image_dis": ImageAssets.rubberDis,
     },
-    {
-      "image_active": ImageAssets.laserPenActive,
-      "image_dis": ImageAssets.laserPenDis,
-    }
+    // {
+    //   "image_active": ImageAssets.laserPenActive,
+    //   "image_dis": ImageAssets.laserPenDis,
+    // }
   ];
 
   List<SelectQuizModel> quizList = [

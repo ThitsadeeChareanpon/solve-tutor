@@ -15,6 +15,8 @@ import 'package:solve_tutor/feature/class/services/class_provider.dart';
 import 'package:solve_tutor/widgets/date_time_format_util.dart';
 import 'package:solve_tutor/widgets/sizer.dart';
 
+import '../../calendar/helper/utility_helper.dart';
+
 class ClassListPage extends StatefulWidget {
   const ClassListPage({super.key});
 
@@ -26,6 +28,7 @@ class _ClassListPageState extends State<ClassListPage>
     with TickerProviderStateMixin {
   AuthProvider? authProvider;
   ClassProvider? classProvider;
+  final _util = UtilityHelper();
 
   // String selectClass = "วิชาคณิตศาสตร์";
   int count = 0;
@@ -204,7 +207,7 @@ class _ClassListPageState extends State<ClassListPage>
                 tabs: <Widget>[
                   Tab(
                     text: authProvider?.user!.getRoleType() == RoleType.tutor
-                        ? 'ค้นหานักเรียน'
+                        ? 'ค้นหางานสอน'
                         : 'ประกาศของนักเรียน',
 
                     // icon: Icon(Icons.account_circle),
@@ -238,8 +241,6 @@ class _ClassListPageState extends State<ClassListPage>
         'ค้นหางานสอน',
         style: TextStyle(color: appTextPrimaryColor),
       ),
-      // elevation: 0,
-      // centerTitle: true,
       backgroundColor: Colors.white,
       leading: IconButton(
         onPressed: () => Navigator.pop(context),
@@ -265,22 +266,21 @@ class _ClassListPageState extends State<ClassListPage>
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const CreateClassPage()),
+                      builder: (context) => const CreateClassPage(),
+                    ),
                   );
                 },
                 child: Row(
-                  // ignore: prefer_const_literals_to_create_immutables
                   children: [
                     const Icon(
                       Icons.add,
                       size: 16,
                     ),
-                    Text(
-                      authProvider?.user!.getRoleType() == RoleType.tutor
-                          ? 'สร้างประกาศหานักเรียน'
-                          : 'สร้างประกาศหางานสอน',
-                      style: const TextStyle(fontSize: 16),
-                    )
+                    if (_util.isTablet())
+                      const Text(
+                        'สร้างประกาศหางานสอน',
+                        style: TextStyle(fontSize: 16),
+                      )
                   ],
                 ),
               ),

@@ -192,6 +192,7 @@ class _OrderDetailPageState extends State<ClassDetailPage> {
                     //   maxLines: 2,
                     //   overflow: TextOverflow.ellipsis,
                     // ),
+                    S.h(10),
                     Row(
                       children: [
                         Container(

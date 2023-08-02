@@ -190,7 +190,7 @@ class _UpdateCourseLiveTabState extends State<UpdateCourseLiveTab>
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          'แก้ไขล่าสุด: ${FormatDate.dt(dt)} ',
+          'แก้ไขล่าสุด: \n${FormatDate.dt(dt)} ',
           style: CustomStyles.med12gray878787,
         ),
       ],
