@@ -294,17 +294,31 @@ class _TimeTableLiveState extends State<TimeTableLive> {
               }
             },
             outsideBuilder: (context, day, event) {
-              return TextButton(
-                onPressed: () {
-                  _clearTime();
-                  courseController.haveErrorText = '';
-                  showDialog(
-                    context: context,
-                    builder: (context) => _addClassTime(day),
-                  );
-                },
-                child: Container(
-                  color: const Color(0xffB9E7C9),
+              if (day.isAfter(today)) {
+                return TextButton(
+                  onPressed: () {
+                    _clearTime();
+                    courseController.haveErrorText = '';
+                    showDialog(
+                      context: context,
+                      builder: (context) => _addClassTime(day),
+                    );
+                  },
+                  child: Container(
+                    color: const Color(0xffB9E7C9),
+                    padding: const EdgeInsets.only(left: 20, top: 20),
+                    alignment: Alignment.topLeft,
+                    child: Text(
+                      day.day.toString(),
+                      style: CustomStyles.med16Black363636
+                          .copyWith(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                );
+              } else {
+                return Container(
+                  color: Colors.grey.withOpacity(0.5),
+                  margin: const EdgeInsets.all(10),
                   padding: const EdgeInsets.only(left: 20, top: 20),
                   alignment: Alignment.topLeft,
                   child: Text(
@@ -312,8 +326,8 @@ class _TimeTableLiveState extends State<TimeTableLive> {
                     style: CustomStyles.med16Black363636
                         .copyWith(fontWeight: FontWeight.bold),
                   ),
-                ),
-              );
+                );
+              }
             },
             disabledBuilder: (context, day, focusedDay) {
               return TextButton(
@@ -338,21 +352,15 @@ class _TimeTableLiveState extends State<TimeTableLive> {
               DateTime selectedDay =
                   DateTime(day.year, day.month, day.day, day.hour);
               if (today.isAfter(selectedDay)) {
-                return TextButton(
-                  onPressed: () {},
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.rectangle,
-                      color: CustomColors.grayF3F3F3,
-                    ),
-                    padding: const EdgeInsets.only(left: 20, top: 20),
-                    alignment: Alignment.topLeft,
-                    child: Text(
-                      day.day.toString(),
-                      style: CustomStyles.med16Black363636.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: CustomColors.gray878787),
-                    ),
+                return Container(
+                  color: Colors.grey.withOpacity(0.5),
+                  margin: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.only(left: 20, top: 20),
+                  alignment: Alignment.topLeft,
+                  child: Text(
+                    day.day.toString(),
+                    style: CustomStyles.med16Black363636
+                        .copyWith(fontWeight: FontWeight.bold),
                   ),
                 );
               } // the past
@@ -435,7 +443,8 @@ class _TimeTableLiveState extends State<TimeTableLive> {
                     ),
                   ],
                 );
-              } else if (event.isNotEmpty && today.isAfter(markerDay)) {
+              } // past marker
+              else if (event.isNotEmpty && today.isAfter(markerDay)) {
                 return Column(
                   children: [
                     S.h(70),
@@ -459,7 +468,8 @@ class _TimeTableLiveState extends State<TimeTableLive> {
                             onTap: () async {
                               await showDialog(
                                   context: context,
-                                  builder: (context) => _eventList(day, event));
+                                  builder: (context) =>
+                                      _eventList(day, event, isPast: true));
                               setState(() {});
                             },
                             child: Text(
@@ -1196,7 +1206,7 @@ class _TimeTableLiveState extends State<TimeTableLive> {
     });
   }
 
-  Widget _eventList(DateTime day, List<Event>? event) {
+  Widget _eventList(DateTime day, List<Event>? event, {bool isPast = false}) {
     event?.sort((a, b) => a.start.compareTo(b.start));
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -1256,113 +1266,57 @@ class _TimeTableLiveState extends State<TimeTableLive> {
                       child: SizedBox(
                         // padding: const EdgeInsets.all(8.0),
                         child: ListTile(
-                            dense: true,
-                            leading: Icon(
-                              Icons.check_circle_outlined,
-                              color: CustomColors.greenPrimary,
-                              size: _util.isTablet() ? 40 : 30,
-                            ),
-                            title: Text(
-                              i.courseName,
-                              style: CustomStyles.blod16gray878787,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            subtitle: Text(
-                              i.title,
-                              overflow: TextOverflow.ellipsis,
-                              style: CustomStyles.blod16gray878787,
-                            ),
-                            trailing: i.courseId ==
-                                    courseController.courseData?.id
-                                ? TextButton(
-                                    onPressed: () async {
-                                      // var result = courseController.courseData?.calendars
-                                      //     ?.where((element) =>
-                                      //         element.courseId == i.courseId &&
-                                      //         element.start?.compareTo(i.start) == 0 &&
-                                      //         element.end?.compareTo(i.end) == 0)
-                                      //     .toList();
-                                      // if (result?.isNotEmpty == true) {
-                                      //   for (var i in result as List<CalendarDate>) {
-                                      //     courseController.courseData?.calendars
-                                      //         ?.remove(i);
-                                      //   }
-                                      //   event?.remove(i);
-                                      //   setState(() {});
-                                      // }
-                                      // print(courseController.courseData?.id);
-                                      // var result = courseController
-                                      //     .calendarListAll
-                                      //     .where((element) =>
-                                      //         element.courseId ==
-                                      //             courseController
-                                      //                 .courseData?.id &&
-                                      //         element.start?.compareTo(i.start) ==
-                                      //             0 &&
-                                      //         element.end?.compareTo(i.end) == 0)
-                                      //     .toList();
-                                      // var result2 = courseController
-                                      //     .calendarListAll
-                                      //     .where((element) =>
-                                      //         element.courseId ==
-                                      //             courseController
-                                      //                 .courseData?.id &&
-                                      //         element.start?.compareTo(i.start) ==
-                                      //             0 &&
-                                      //         element.end?.compareTo(i.end) == 0)
-                                      //     .toList();
-                                      // if (result.isNotEmpty == true ||
-                                      //     result2.isNotEmpty == true) {
-                                      //   for (var i in result) {
-                                      //     courseController.courseData?.calendars
-                                      //         ?.remove(i);
-                                      //     courseController.calendarListAll
-                                      //         .remove(i);
-                                      //   }
-                                      //   event?.remove(i);
-                                      //   setState(() {});
-                                      // }      // print(courseController.courseData?.id);
-                                      // var result = courseController
-                                      //     .calendarListAll
-                                      //     .where((element) =>
-                                      //         element.courseId ==
-                                      //             courseController
-                                      //                 .courseData?.id &&
-                                      //         element.start?.compareTo(i.start) ==
-                                      //             0 &&
-                                      //         element.end?.compareTo(i.end) == 0)
-                                      //     .toList();
-                                      var result2 = courseController
-                                          .courseData?.calendars
-                                          ?.where((element) =>
-                                              element.courseId ==
-                                                  courseController
-                                                      .courseData?.id &&
-                                              element.start
-                                                      ?.compareTo(i.start) ==
-                                                  0 &&
-                                              element.end?.compareTo(i.end) ==
-                                                  0)
-                                          .toList();
-                                      if (result2?.isNotEmpty == true) {
-                                        for (var i in result2 ?? []) {
-                                          courseController.courseData?.calendars
-                                              ?.remove(i);
-                                          courseController.calendarListAll
-                                              .remove(i);
-                                        }
-                                        event?.remove(i);
-                                        setState(() {});
+                          dense: true,
+                          leading: Icon(
+                            Icons.check_circle_outlined,
+                            color: CustomColors.greenPrimary,
+                            size: _util.isTablet() ? 40 : 30,
+                          ),
+                          title: Text(
+                            i.courseName,
+                            style: CustomStyles.blod16gray878787,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          subtitle: Text(
+                            i.title,
+                            overflow: TextOverflow.ellipsis,
+                            style: CustomStyles.blod16gray878787,
+                          ),
+                          trailing: i.courseId ==
+                                      courseController.courseData?.id &&
+                                  !isPast
+                              ? TextButton(
+                                  onPressed: () async {
+                                    var result2 = courseController
+                                        .courseData?.calendars
+                                        ?.where((element) =>
+                                            element.courseId ==
+                                                courseController
+                                                    .courseData?.id &&
+                                            element.start?.compareTo(i.start) ==
+                                                0 &&
+                                            element.end?.compareTo(i.end) == 0)
+                                        .toList();
+                                    if (result2?.isNotEmpty == true) {
+                                      for (var i in result2 ?? []) {
+                                        courseController.courseData?.calendars
+                                            ?.remove(i);
+                                        courseController.calendarListAll
+                                            .remove(i);
                                       }
-                                    },
-                                    child: Text(
-                                      'ลบ',
-                                      textAlign: TextAlign.center,
-                                      style: CustomStyles.blod16gray878787
-                                          .copyWith(color: Colors.red),
-                                    ),
-                                  )
-                                : const SizedBox()),
+                                      event?.remove(i);
+                                      setState(() {});
+                                    }
+                                  },
+                                  child: Text(
+                                    'ลบ',
+                                    textAlign: TextAlign.center,
+                                    style: CustomStyles.blod16gray878787
+                                        .copyWith(color: Colors.red),
+                                  ),
+                                )
+                              : const SizedBox(),
+                        ),
                       ),
                     )
                   ],

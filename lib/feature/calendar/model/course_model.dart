@@ -165,14 +165,17 @@ class CalendarDate {
   DateTime? end;
   String? courseName;
   String? courseId;
+  String? reviewFile;
 
-  CalendarDate({this.start, this.end, this.courseName, this.courseId});
+  CalendarDate(
+      {this.start, this.end, this.courseName, this.courseId, this.reviewFile});
 
   CalendarDate.fromJson(Map<String, dynamic> json) {
     start = DateTime.fromMillisecondsSinceEpoch(json['start']);
     end = DateTime.fromMillisecondsSinceEpoch(json['end']);
     courseName = json['course_name'] ?? '';
     courseId = json['course_id'] ?? '';
+    reviewFile = json['review_file'] ?? '';
   }
 
   Map<String, dynamic> toJson() {
@@ -181,6 +184,7 @@ class CalendarDate {
     data['end'] = end?.toUtc().millisecondsSinceEpoch;
     data['course_name'] = courseName;
     data['course_id'] = courseId;
+    data['review_file'] = reviewFile;
     return data;
   }
 }

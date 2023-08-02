@@ -330,7 +330,8 @@ class _UpdateCourseLiveTabState extends State<UpdateCourseLiveTab>
           context: context,
           loadingWidget: Alert.getOverlayScreen(),
         );
-        showSnackBar(context, 'อัwเดทสำเร็จ');
+        if (!mounted) return;
+        showSnackBar(context, 'อัพเดทสำเร็จ');
         courseController.refresh();
       },
       child: Text(

@@ -195,6 +195,8 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
                 isActive ? _buttonJoinRoom() : _buttonNotYet(),
               ] else ...[
                 SizedBox(height: 70, child: _microphone()),
+                S.h(10),
+                if (!isActive) Countdown(courseStart: widget.course.start!),
               ],
               S.h(20),
             ],
@@ -414,7 +416,7 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           _timeJoin(),
           _tutorTitle(),

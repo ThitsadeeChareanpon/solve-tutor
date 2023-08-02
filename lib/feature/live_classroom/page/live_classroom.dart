@@ -144,16 +144,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       "image_dis": ImageAssets.laserPenDis,
     }
   ];
-  final List _listToolsMobile = [
-    {
-      "image_active": ImageAssets.highlightActive,
-      "image_dis": ImageAssets.highlightDis,
-    },
-    {
-      "image_active": ImageAssets.rubberActive,
-      "image_dis": ImageAssets.rubberDis,
-    }
-  ];
 
   List<SelectQuizModel> quizList = [
     SelectQuizModel("ชุดที่#1 สมการเชิงเส้นตัวแปรเดียว", "1 ข้อ", false),
@@ -254,7 +244,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   DrawingMode _studentMode = DrawingMode.drag;
   final SolveStopwatch stopwatch = SolveStopwatch();
   Size studentSolvepadSize = const Size(1059.0, 547.0);
-  Size? mySolvepadSize;
+  Size mySolvepadSize = const Size(1059.0, 547.0);
   double sheetImageRatio = 0.708;
   double studentImageWidth = 0;
   double studentExtraSpaceX = 0;
@@ -360,11 +350,11 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     studentImageWidth = studentSolvepadSize.height * sheetImageRatio;
     studentExtraSpaceX = (studentSolvepadSize.width - studentImageWidth) / 2;
     mySolvepadSize = Size(solvepadWidth, solvepadHeight);
-    myImageWidth = mySolvepadSize!.height * sheetImageRatio;
-    myExtraSpaceX = (mySolvepadSize!.width - myImageWidth) / 2;
+    myImageWidth = mySolvepadSize.height * sheetImageRatio;
+    myExtraSpaceX = (mySolvepadSize.width - myImageWidth) / 2;
     scaleImageX = myImageWidth / studentImageWidth;
-    scaleX = mySolvepadSize!.width / studentSolvepadSize.width;
-    scaleY = mySolvepadSize!.height / studentSolvepadSize.height;
+    scaleX = mySolvepadSize.width / studentSolvepadSize.width;
+    scaleY = mySolvepadSize.height / studentSolvepadSize.height;
   }
 
   void initConference() {
@@ -418,8 +408,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
         if (data.startsWith('StudentShareScreen')) {
           var parts = data.split(':');
           var status = parts[1];
-          double? solvepadWidth = mySolvepadSize?.width;
-          double? solvepadHeight = mySolvepadSize?.height;
+          double solvepadWidth = mySolvepadSize.width;
+          double solvepadHeight = mySolvepadSize.height;
           if (status == 'enable') {
             solvepadWidth = double.parse(parts[2]);
             solvepadHeight = double.parse(parts[3]);
@@ -429,7 +419,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             focusedStudentName = '';
             cleanStudentSolvepad();
           }
-          updateStudentData(uid, status, solvepadWidth!, solvepadHeight!);
+          updateStudentData(uid, status, solvepadWidth, solvepadHeight);
         } // listen to student drawing
         else {
           for (var entry in handlers.entries) {
@@ -615,8 +605,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     double studentImageWidth = studentHeight * sheetImageRatio;
     double studentExtraSpaceX = (studentWidth - studentImageWidth) / 2;
 
-    double myWidth = mySolvepadSize!.width;
-    double myHeight = mySolvepadSize!.height;
+    double myWidth = mySolvepadSize.width;
+    double myHeight = mySolvepadSize.height;
     double myImageWidth = myHeight * sheetImageRatio;
     double myExtraSpaceX = (myWidth - myImageWidth) / 2;
     // double diffExtraSpaceX = myExtraSpaceX - hostExtraSpaceX;
@@ -677,19 +667,13 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
 
   @override
   dispose() {
-    // SystemChrome.setPreferredOrientations([
-    //   DeviceOrientation.portraitUp,
-    //   DeviceOrientation.portraitDown,
-    //   DeviceOrientation.landscapeRight,
-    //   DeviceOrientation.landscapeLeft,
-    // ]);
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeRight,
+      DeviceOrientation.landscapeLeft,
+    ]);
     _pageController.dispose();
-    // SystemChrome.setPreferredOrientations([
-    //   DeviceOrientation.portraitUp,
-    //   DeviceOrientation.portraitDown,
-    //   DeviceOrientation.landscapeLeft,
-    //   DeviceOrientation.landscapeRight,
-    // ]);
     _meetingTimer?.cancel();
     super.dispose();
   }
@@ -728,6 +712,11 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       print('Student Join');
       print(participant.displayName);
       print(participant.id);
+      sendMessage(
+        widget.userId,
+        'SetSolvepad:${participant.id}:${mySolvepadSize.width}:${mySolvepadSize.height}',
+        stopwatch.elapsed.inMilliseconds,
+      );
     });
 
     _meeting.on(Events.participantLeft, (Participant participant) {
@@ -952,14 +941,16 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: _onWillPopScope,
-      child: _joined && isCourseLoaded
-          ? Scaffold(
-              backgroundColor: CustomColors.grayCFCFCF,
-              body: !Responsive.isMobile(context)
-                  ? _buildTablet()
-                  : _buildMobile(),
-            )
-          : const LoadingScreen(),
+      child: SafeArea(
+        child: _joined && isCourseLoaded
+            ? Scaffold(
+                backgroundColor: CustomColors.grayCFCFCF,
+                body: !Responsive.isMobile(context)
+                    ? _buildTablet()
+                    : _buildMobile(),
+              )
+            : const LoadingScreen(),
+      ),
     );
   }
 
@@ -1137,7 +1128,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
           ),
 
           ///tools widget
-          if (!selectedTools) toolsUndoMobile(),
           if (!selectedTools) toolsMobile(),
           if (selectedTools) toolsActiveMobile(),
 
@@ -1160,8 +1150,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
           builder: (BuildContext context, BoxConstraints constraints) {
         double solvepadWidth = constraints.maxWidth;
         double solvepadHeight = constraints.maxHeight;
-        if (mySolvepadSize?.width != solvepadWidth) {
-          // mySolvepadSize = Size(solvepadWidth, solvepadHeight);
+        if (mySolvepadSize.width != solvepadWidth) {
           initSolvepadScaling(solvepadWidth, solvepadHeight);
         }
         return Stack(children: [
@@ -1953,82 +1942,84 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       useSafeArea: false,
       context: context,
       builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return Column(
-              children: [
-                Material(
-                  color: Colors.transparent,
-                  child: Container(
-                    width: double.infinity,
-                    height: 60,
-                    color: CustomColors.whitePrimary,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        S.w(defaultPadding),
-                        if (Responsive.isMobile(context))
+        return SafeArea(
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              return Column(
+                children: [
+                  Material(
+                    color: Colors.transparent,
+                    child: Container(
+                      width: double.infinity,
+                      height: 60,
+                      color: CustomColors.whitePrimary,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          S.w(defaultPadding),
+                          if (Responsive.isMobile(context))
+                            Expanded(
+                                flex: 4,
+                                child: Row(
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () => Navigator.of(context).pop(),
+                                      child: const Icon(
+                                        Icons.close,
+                                        color: CustomColors.gray878787,
+                                        size: 18,
+                                      ),
+                                    ),
+                                    S.w(8),
+                                    Flexible(
+                                      child: Text(
+                                        courseName,
+                                        style: CustomStyles
+                                            .bold16Black363636Overflow,
+                                        maxLines: 1,
+                                      ),
+                                    ),
+                                  ],
+                                )),
                           Expanded(
-                              flex: 4,
+                              flex: 2,
                               child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  GestureDetector(
-                                    onTap: () => Navigator.of(context).pop(),
-                                    child: const Icon(
-                                      Icons.close,
-                                      color: CustomColors.gray878787,
-                                      size: 18,
+                                  S.w(16.0),
+                                  Container(
+                                    height: 11,
+                                    width: 11,
+                                    decoration: BoxDecoration(
+                                        color: CustomColors.redF44336,
+                                        borderRadius: BorderRadius.circular(100)
+                                        //more than 50% of width makes circle
+                                        ),
+                                  ),
+                                  S.w(4.0),
+                                  RichText(
+                                    text: TextSpan(
+                                      text: 'Live Time: ',
+                                      style: CustomStyles.med14redFF4201,
+                                      children: <TextSpan>[
+                                        TextSpan(
+                                          text: _formattedElapsedTime,
+                                          style: CustomStyles.med14Gray878787,
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  S.w(8),
-                                  Flexible(
-                                    child: Text(
-                                      courseName,
-                                      style: CustomStyles
-                                          .bold16Black363636Overflow,
-                                      maxLines: 1,
-                                    ),
-                                  ),
+                                  S.w(defaultPadding),
                                 ],
-                              )),
-                        Expanded(
-                            flex: 2,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                S.w(16.0),
-                                Container(
-                                  height: 11,
-                                  width: 11,
-                                  decoration: BoxDecoration(
-                                      color: CustomColors.redF44336,
-                                      borderRadius: BorderRadius.circular(100)
-                                      //more than 50% of width makes circle
-                                      ),
-                                ),
-                                S.w(4.0),
-                                RichText(
-                                  text: TextSpan(
-                                    text: 'Live Time: ',
-                                    style: CustomStyles.med14redFF4201,
-                                    children: <TextSpan>[
-                                      TextSpan(
-                                        text: '01 : 59 : 59',
-                                        style: CustomStyles.med14Gray878787,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                S.w(defaultPadding),
-                              ],
-                            ))
-                      ],
+                              ))
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            );
-          },
+                ],
+              );
+            },
+          ),
         );
       },
     );
@@ -2045,161 +2036,210 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             spreadRadius: 1)
       ]),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          S.w(28),
-          Expanded(
-            flex: 3,
-            child: Container(
-              height: 38,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: CustomColors.grayCFCFCF,
-                  style: BorderStyle.solid,
-                  width: 1.0,
-                ),
-                borderRadius: BorderRadius.circular(8),
-                color: CustomColors.whitePrimary,
+          Container(
+            height: 38,
+            margin: const EdgeInsets.only(left: 10),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: CustomColors.grayCFCFCF,
+                style: BorderStyle.solid,
+                width: 1.0,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  InkWell(
-                    onTap: () => headerLayer1Mobile(),
+              borderRadius: BorderRadius.circular(8),
+              color: CustomColors.whitePrimary,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                InkWell(
+                  onTap: () => headerLayer1Mobile(),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
                     child: Image.asset(
                       ImageAssets.iconInfoPage,
                       height: 24,
                       width: 24,
                     ),
                   ),
-                  S.w(8),
-                  Container(
-                    width: 1,
-                    height: 32,
-                    color: CustomColors.grayCFCFCF,
-                  ),
-                  S.w(8),
-                  Image.asset(
-                    ImageAssets.allPages,
-                    height: 24,
-                    width: 24,
-                  ),
-                  S.w(8),
-                  Container(
-                    width: 1,
-                    height: 32,
-                    color: CustomColors.grayCFCFCF,
-                  ),
-                  S.w(8),
-                  Image.asset(
-                    ImageAssets.backDis,
-                    height: 14,
-                    width: 8,
-                  ),
-                  S.w(defaultPadding),
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: CustomColors.grayCFCFCF,
-                        style: BorderStyle.solid,
-                        width: 1.0,
+                ),
+                Container(
+                  width: 1,
+                  height: 32,
+                  color: CustomColors.grayCFCFCF,
+                ),
+                S.w(8),
+                Image.asset(
+                  ImageAssets.allPages,
+                  height: 24,
+                  width: 24,
+                ),
+                S.w(8),
+                Container(
+                  width: 1,
+                  height: 32,
+                  color: CustomColors.grayCFCFCF,
+                ),
+                Material(
+                  child: InkWell(
+                    onTap: () {
+                      if (_pageController.hasClients &&
+                          _pageController.page!.toInt() != 0) {
+                        sendMessage(
+                          widget.userId,
+                          'ChangePage:${_currentPage - 1}',
+                          stopwatch.elapsed.inMilliseconds,
+                        );
+                        _pageController.animateToPage(
+                          _pageController.page!.toInt() - 1,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Image.asset(
+                        ImageAssets.backDis,
+                        height: 16,
+                        width: 17,
+                        color: _isPrevBtnActive
+                            ? CustomColors.activePagingBtn
+                            : CustomColors.inactivePagingBtn,
                       ),
-                      borderRadius: BorderRadius.circular(4),
-                      color: CustomColors.whitePrimary,
-                    ),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Text("Page 20", style: CustomStyles.bold12greenPrimary),
-                      ],
                     ),
                   ),
-                  S.w(8.0),
-                  Text("/ 149", style: CustomStyles.med12gray878787),
-                  S.w(defaultPadding),
-                  Image.asset(
-                    ImageAssets.forward,
-                    height: 14,
-                    width: 8,
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: CustomColors.grayCFCFCF,
+                      style: BorderStyle.solid,
+                      width: 1.0,
+                    ),
+                    borderRadius: BorderRadius.circular(4),
+                    color: CustomColors.whitePrimary,
                   ),
-                  S.w(8.0),
-                ],
-              ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Text("Page ${_currentPage + 1}",
+                          style: CustomStyles.bold12greenPrimary),
+                    ],
+                  ),
+                ),
+                S.w(8.0),
+                Text("/ ${_pages.length}", style: CustomStyles.med12gray878787),
+                Material(
+                  child: InkWell(
+                    // splashColor: Colors.lightGreen,
+                    onTap: () {
+                      if (_pages.length > 1) {
+                        if (_pageController.hasClients &&
+                            _pageController.page!.toInt() !=
+                                _pages.length - 1) {
+                          sendMessage(
+                            widget.userId,
+                            'ChangePage:${_currentPage + 1}',
+                            stopwatch.elapsed.inMilliseconds,
+                          );
+                          _pageController.animateToPage(
+                            _pageController.page!.toInt() + 1,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
+                        }
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Image.asset(
+                        ImageAssets.forward,
+                        height: 16,
+                        width: 17,
+                        color: _isNextBtnActive
+                            ? CustomColors.activePagingBtn
+                            : CustomColors.inactivePagingBtn,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          Expanded(
-              flex: 4,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Transform.scale(
-                    scale: 0.6,
-                    child: CupertinoSwitch(
-                      value: _requestScreenShare,
-                      onChanged: (bool value) {
-                        setState(() {
-                          _requestScreenShare = value;
-                        });
-                      },
-                    ),
-                  ),
-                  Text("ให้นักเรียนแชร์จอ",
-                      textAlign: TextAlign.center,
-                      style: CustomStyles.bold11Gray878787),
-                  S.w(defaultPadding),
-                  Container(
-                    height: 32,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: CustomColors.grayCFCFCF,
-                        style: BorderStyle.solid,
-                        width: 1.0,
-                      ),
-                      borderRadius: BorderRadius.circular(8),
-                      color: CustomColors.whitePrimary,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        S.w(8),
-                        InkWell(
-                          onTap: () {
-                            showLeader(context);
-                          },
-                          child: Image.asset(
-                            ImageAssets.leaderboard,
-                            height: 24,
-                            width: 24,
-                          ),
-                        ),
-                        S.w(8),
-                        Container(
-                          width: 1,
-                          height: double.infinity,
-                          color: CustomColors.grayCFCFCF,
-                        ),
-                        S.w(8),
-                        InkWell(
-                          onTap: () {
-                            setState(() {
-                              showStudent = !showStudent;
-                            });
-                          },
-                          child: Image.asset(
-                            ImageAssets.shareGray,
-                            height: 24,
-                            width: 24,
-                          ),
-                        ),
-                        S.w(8),
-                      ],
-                    ),
-                  )
-                ],
-              )),
-
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Transform.scale(
+                scale: 0.6,
+                child: CupertinoSwitch(
+                  trackColor: Colors.blue.withOpacity(0.1),
+                  activeColor: Colors.blue,
+                  value: _requestScreenShare,
+                  onChanged: (bool value) {
+                    setState(() {
+                      _requestScreenShare = value;
+                    });
+                  },
+                ),
+              ),
+              Text("ให้นักเรียนแชร์จอ",
+                  textAlign: TextAlign.center,
+                  style: CustomStyles.bold14bluePrimary),
+              S.w(defaultPadding),
+              // Container(
+              //   height: 32,
+              //   decoration: BoxDecoration(
+              //     border: Border.all(
+              //       color: CustomColors.grayCFCFCF,
+              //       style: BorderStyle.solid,
+              //       width: 1.0,
+              //     ),
+              //     borderRadius: BorderRadius.circular(8),
+              //     color: CustomColors.whitePrimary,
+              //   ),
+              //   child: Row(
+              //     mainAxisAlignment: MainAxisAlignment.center,
+              //     children: <Widget>[
+              //       S.w(8),
+              //       InkWell(
+              //         onTap: () {
+              //           showLeader(context);
+              //         },
+              //         child: Image.asset(
+              //           ImageAssets.leaderboard,
+              //           height: 24,
+              //           width: 24,
+              //         ),
+              //       ),
+              //       S.w(8),
+              //       Container(
+              //         width: 1,
+              //         height: double.infinity,
+              //         color: CustomColors.grayCFCFCF,
+              //       ),
+              //       S.w(8),
+              //       InkWell(
+              //         onTap: () {
+              //           setState(() {
+              //             showStudent = !showStudent;
+              //           });
+              //         },
+              //         child: Image.asset(
+              //           ImageAssets.shareGray,
+              //           height: 24,
+              //           width: 24,
+              //         ),
+              //       ),
+              //       S.w(8),
+              //     ],
+              //   ),
+              // )
+            ],
+          ),
           // / Statistics
           // Expanded(
           //     flex: 2,
@@ -2274,46 +2314,12 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
           //         ),
           //       ),
           //     )),
-          S.w(28),
         ],
       ),
     );
   }
 
   /// Tools
-  Widget toolsUndoMobile() {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Padding(
-        padding: const EdgeInsets.only(left: 15),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          // mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            InkWell(
-              onTap: () {
-                print("Undo");
-              },
-              child: Image.asset(
-                ImageAssets.undo,
-                width: 38,
-              ),
-            ),
-            S.h(8),
-            InkWell(
-              onTap: () {
-                print("Redo");
-              },
-              child: Image.asset(
-                ImageAssets.redo,
-                width: 38,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget toolsActiveMobile() {
     return Positioned(
@@ -2339,7 +2345,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                       });
                     },
                     child: Image.asset(
-                      _listToolsMobile[_selectedIndexTools]['image_active'],
+                      _listTools[_selectedIndexTools]['image_active'],
                       height: 70,
                       width: 70,
                     ),
@@ -2351,150 +2357,148 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
 
   Widget toolsMobile() {
     return Positioned(
-        left: 15,
-        bottom: 5,
-        child: Align(
-          alignment: Alignment.bottomLeft,
-          child: Column(
-            children: [
-              if (openColors)
-                Container(
-                    height: 55,
-                    width: 260,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: CustomColors.grayCFCFCF,
-                        style: BorderStyle.solid,
-                        width: 1.0,
-                      ),
-                      borderRadius: BorderRadius.circular(64),
-                      color: CustomColors.whitePrimary,
+      left: 15,
+      bottom: 5,
+      child: Align(
+        alignment: Alignment.bottomLeft,
+        child: Column(
+          children: [
+            if (openColors)
+              Container(
+                  height: 55,
+                  width: 260,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: CustomColors.grayCFCFCF,
+                      style: BorderStyle.solid,
+                      width: 1.0,
                     ),
-                    child: Container(
-                      alignment: Alignment.center,
-                      child: ListView.builder(
-                          padding: const EdgeInsets.only(left: 1, right: 1),
-                          scrollDirection: Axis.horizontal,
-                          physics: const NeverScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          itemCount: _listColors.length,
-                          itemBuilder: (context, index) {
-                            return Row(
-                              // // crossAxisAlignment: CrossAxisAlignment.start,
-                              // mainAxisAlignment:
-                              //     MainAxisAlignment.center,
-                              children: [
-                                InkWell(
+                    borderRadius: BorderRadius.circular(64),
+                    color: CustomColors.whitePrimary,
+                  ),
+                  child: Container(
+                    alignment: Alignment.center,
+                    child: ListView.builder(
+                        padding: const EdgeInsets.only(left: 1, right: 1),
+                        scrollDirection: Axis.horizontal,
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        itemCount: _listColors.length,
+                        itemBuilder: (context, index) {
+                          return Row(
+                            // // crossAxisAlignment: CrossAxisAlignment.start,
+                            // mainAxisAlignment:
+                            //     MainAxisAlignment.center,
+                            children: [
+                              InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    _selectedIndexColors = index;
+
+                                    // Close popup
+                                    openColors = !openColors;
+                                  });
+                                  print('Tap : index $index');
+                                  print(
+                                      'Tap : _selectIndex $_selectedIndexColors');
+                                },
+                                child: Image.asset(_listColors[index]['color'],
+                                    width: 48),
+                              ),
+                              S.w(4)
+                            ],
+                          );
+                        }),
+                  )),
+            if (openLines)
+              Container(
+                  height: 55,
+                  width: 200,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: CustomColors.grayCFCFCF,
+                      style: BorderStyle.solid,
+                      width: 1.0,
+                    ),
+                    borderRadius: BorderRadius.circular(64),
+                    color: CustomColors.whitePrimary,
+                  ),
+                  child: Container(
+                    alignment: Alignment.center,
+                    child: ListView.builder(
+                        padding: const EdgeInsets.only(left: 1, right: 1),
+                        scrollDirection: Axis.horizontal,
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        itemCount: _listLines.length,
+                        itemBuilder: (context, index) {
+                          return Row(
+                            children: [
+                              InkWell(
                                   onTap: () {
                                     setState(() {
-                                      _selectedIndexColors = index;
-
-                                      // Close popup
-                                      openColors = !openColors;
-                                    });
-                                    print('Tap : index $index');
-                                    print(
-                                        'Tap : _selectIndex $_selectedIndexColors');
-                                  },
-                                  child: Image.asset(
-                                      _listColors[index]['color'],
-                                      width: 48),
-                                ),
-                                S.w(4)
-                              ],
-                            );
-                          }),
-                    )),
-              if (openLines)
-                Container(
-                    height: 55,
-                    width: 200,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: CustomColors.grayCFCFCF,
-                        style: BorderStyle.solid,
-                        width: 1.0,
-                      ),
-                      borderRadius: BorderRadius.circular(64),
-                      color: CustomColors.whitePrimary,
-                    ),
-                    child: Container(
-                      alignment: Alignment.center,
-                      child: ListView.builder(
-                          padding: const EdgeInsets.only(left: 1, right: 1),
-                          scrollDirection: Axis.horizontal,
-                          physics: const NeverScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          itemCount: _listLines.length,
-                          itemBuilder: (context, index) {
-                            return Row(
-                              children: [
-                                InkWell(
-                                    onTap: () {
                                       setState(() {
-                                        setState(() {
-                                          _selectedIndexLines = index;
+                                        _selectedIndexLines = index;
 
-                                          // Close popup
-                                          openLines = !openLines;
-                                        });
+                                        // Close popup
+                                        openLines = !openLines;
                                       });
-                                    },
-                                    child: Row(
-                                      children: [
-                                        Image.asset(
-                                          _selectedIndexLines == index
-                                              ? _listLines[index]
-                                                  ['image_active']
-                                              : _listLines[index]['image_dis'],
-                                          width: 46,
-                                        ),
-                                        S.h(8)
-                                      ],
-                                    )),
-                                S.w(4)
-                              ],
-                            );
-                          }),
-                    )),
-              AnimatedContainer(
-                duration: const Duration(seconds: 1),
-                curve: Curves.fastOutSlowIn,
-                height: 65,
-                width: selectedTools ? 0 : 310,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: CustomColors.grayCFCFCF,
-                    style: BorderStyle.solid,
-                    width: 1.0,
-                  ),
-                  borderRadius: BorderRadius.circular(64),
-                  color: CustomColors.whitePrimary,
+                                    });
+                                  },
+                                  child: Row(
+                                    children: [
+                                      Image.asset(
+                                        _selectedIndexLines == index
+                                            ? _listLines[index]['image_active']
+                                            : _listLines[index]['image_dis'],
+                                        width: 46,
+                                      ),
+                                      S.h(8)
+                                    ],
+                                  )),
+                              S.w(4)
+                            ],
+                          );
+                        }),
+                  )),
+            AnimatedContainer(
+              duration: const Duration(seconds: 1),
+              curve: Curves.fastOutSlowIn,
+              height: 65,
+              width: selectedTools ? 0 : 430,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: CustomColors.grayCFCFCF,
+                  style: BorderStyle.solid,
+                  width: 1.0,
                 ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    S.h(8),
-                    selectedTools
-                        ? Expanded(
-                            flex: 2,
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset(
-                                    _listToolsMobile[_selectedIndexTools]
-                                        ['image_active'],
-                                    width: 10.w,
-                                  )
-                                ],
-                              ),
+                borderRadius: BorderRadius.circular(64),
+                color: CustomColors.whitePrimary,
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  S.h(8),
+                  selectedTools
+                      ? Expanded(
+                          flex: 2,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  _listTools[_selectedIndexTools]
+                                      ['image_active'],
+                                  width: 10.w,
+                                )
+                              ],
                             ),
-                          )
-                        : Expanded(
-                            // flex: 2,
-                            child: Row(
+                          ),
+                        )
+                      : Expanded(
+                          // flex: 2,
+                          child: Row(
                             // mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               ListView.builder(
@@ -2503,7 +2507,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                   physics: const NeverScrollableScrollPhysics(),
                                   scrollDirection: Axis.horizontal,
                                   shrinkWrap: true,
-                                  itemCount: _listToolsMobile.length,
+                                  itemCount: _listTools.length,
                                   itemBuilder: (context, index) {
                                     return Row(
                                       children: [
@@ -2512,15 +2516,53 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                             setState(() {
                                               _selectedIndexTools = index;
                                             });
-                                            print('Tap : index $index');
-                                            print(
-                                                'Tap : _selectIndex $_selectedIndexTools');
+                                            if (index == 0) {
+                                              _mode = DrawingMode.drag;
+                                              sendMessage(
+                                                widget.userId,
+                                                'DrawingMode.drag',
+                                                stopwatch
+                                                    .elapsed.inMilliseconds,
+                                              );
+                                            } else if (index == 1) {
+                                              _mode = DrawingMode.pen;
+                                              sendMessage(
+                                                widget.userId,
+                                                'DrawingMode.pen',
+                                                stopwatch
+                                                    .elapsed.inMilliseconds,
+                                              );
+                                            } else if (index == 2) {
+                                              _mode = DrawingMode.highlighter;
+                                              sendMessage(
+                                                widget.userId,
+                                                'DrawingMode.highlighter',
+                                                stopwatch
+                                                    .elapsed.inMilliseconds,
+                                              );
+                                            } else if (index == 3) {
+                                              _mode = DrawingMode.eraser;
+                                              sendMessage(
+                                                widget.userId,
+                                                'DrawingMode.eraser',
+                                                stopwatch
+                                                    .elapsed.inMilliseconds,
+                                              );
+                                            } else if (index == 4) {
+                                              _mode = DrawingMode.laser;
+                                              sendMessage(
+                                                widget.userId,
+                                                'DrawingMode.laser',
+                                                stopwatch
+                                                    .elapsed.inMilliseconds,
+                                              );
+                                            }
                                           },
                                           child: Image.asset(
                                             _selectedIndexTools == index
-                                                ? _listToolsMobile[index]
+                                                ? _listTools[index]
                                                     ['image_active']
-                                                : _listToolsMobile[index]
+                                                : _listTools[index]
                                                     ['image_dis'],
                                             width: 48,
                                           ),
@@ -2562,36 +2604,40 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                   width: 38,
                                 ),
                               ),
-                              S.w(defaultPadding),
-                              InkWell(
-                                onTap: () {
-                                  print("Clear");
-                                },
-                                child: Image.asset(
-                                  ImageAssets.bin,
-                                  width: 38,
-                                ),
-                              ),
-                              S.w(defaultPadding),
+                              S.w(4),
+                              // InkWell(
+                              //   onTap: () {
+                              //     print("Clear");
+                              //   },
+                              //   child: Image.asset(
+                              //     ImageAssets.bin,
+                              //     width: 38,
+                              //   ),
+                              // ),
                               InkWell(
                                 onTap: () {
                                   setState(() {
                                     selectedTools = !selectedTools;
                                   });
                                 },
-                                child: Image.asset(
-                                  ImageAssets.arrowLeftDouble,
-                                  width: 14,
+                                child: Container(
+                                  padding: const EdgeInsets.all(10),
+                                  child: Image.asset(
+                                    ImageAssets.arrowLeftDouble,
+                                    width: 14,
+                                  ),
                                 ),
                               ),
                             ],
-                          )),
-                  ],
-                ),
+                          ),
+                        ),
+                ],
               ),
-            ],
-          ),
-        ));
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget toolsControlMobile() {
@@ -2656,19 +2702,19 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
               ],
             ),
             S.h(8),
-            InkWell(
-              onTap: () {
-                setState(() {
-                  displayEnable = !displayEnable;
-                });
-              },
-              child: Image.asset(
-                displayEnable
-                    ? ImageAssets.displayEnable
-                    : ImageAssets.displayDis,
-                width: 44,
-              ),
-            ),
+            // InkWell(
+            //   onTap: () {
+            //     setState(() {
+            //       displayEnable = !displayEnable;
+            //     });
+            //   },
+            //   child: Image.asset(
+            //     displayEnable
+            //         ? ImageAssets.displayEnable
+            //         : ImageAssets.displayDis,
+            //     width: 44,
+            //   ),
+            // ),
             S.h(8),
             InkWell(
               onTap: () {
