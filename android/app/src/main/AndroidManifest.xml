@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.solve.solve_tutor">
    <application
-        android:label="solve_tutor"
+        android:label="SOLVE Instructor"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

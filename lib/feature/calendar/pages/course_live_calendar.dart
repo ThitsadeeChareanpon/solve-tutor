@@ -1256,7 +1256,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                             style: TextStyle(
                               color: Colors.white,
                               fontFamily: CustomFontFamily.NotoSansMed,
-                              fontSize: _util.addMinusFontSize(10),
+                              fontSize: _util.addMinusFontSize(8),
                             ),
                           ),
                         ),
@@ -1397,7 +1397,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
   Color _getWeekColor(int weekday) {
     switch (weekday) {
       case 1:
-        return const Color(0xffffdd00);
+        return Colors.black;
       case 2:
         return Colors.pinkAccent;
       case 3:

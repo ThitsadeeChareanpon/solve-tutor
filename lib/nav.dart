@@ -102,7 +102,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
             BottomNavigationBarItem(
                 activeIcon: Icon(Icons.copy),
                 icon: Icon(Icons.copy_outlined),
-                label: "รายการ"),
+                label: "คอร์ส"),
             BottomNavigationBarItem(
                 activeIcon: Icon(CupertinoIcons.chat_bubble_2),
                 icon: Icon(CupertinoIcons.chat_bubble_2),
