@@ -190,13 +190,28 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
                 /// TODO: make Countdown widget change active status
                 isActive
                     ? S.h(30)
-                    : Countdown(courseStart: widget.course.start!),
+                    : Countdown(
+                        courseStart: widget.course.start!,
+                        onActiveChanged: (bool value) {
+                          setState(() {
+                            isActive = value;
+                          });
+                        },
+                      ),
                 S.h(10),
                 isActive ? _buttonJoinRoom() : _buttonNotYet(),
               ] else ...[
                 SizedBox(height: 70, child: _microphone()),
                 S.h(10),
-                if (!isActive) Countdown(courseStart: widget.course.start!),
+                if (!isActive)
+                  Countdown(
+                    courseStart: widget.course.start!,
+                    onActiveChanged: (bool value) {
+                      setState(() {
+                        isActive = value;
+                      });
+                    },
+                  ),
               ],
               S.h(20),
             ],
@@ -429,8 +444,11 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
 
 class Countdown extends StatefulWidget {
   final DateTime courseStart;
+  final ValueChanged<bool> onActiveChanged;
 
-  const Countdown({super.key, required this.courseStart});
+  const Countdown(
+      {Key? key, required this.courseStart, required this.onActiveChanged})
+      : super(key: key);
 
   @override
   State<Countdown> createState() => _CountdownState();
@@ -450,8 +468,16 @@ class _CountdownState extends State<Countdown> {
   }
 
   void _getTime() {
+    final timeUntilStart = widget.courseStart.difference(DateTime.now());
+
+    // Check if the time until start is less than or equal to 5 minutes
+    if (timeUntilStart <= const Duration(minutes: 5)) {
+      widget.onActiveChanged(true); // Notify the parent widget
+      _timer.cancel(); // Optionally, stop the timer
+    }
+
     setState(() {
-      _timeUntilStart = widget.courseStart.difference(DateTime.now());
+      _timeUntilStart = timeUntilStart;
     });
   }
 

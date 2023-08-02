@@ -391,6 +391,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
     var filterSubjectId = courseController.subjects
         .where((e) => e.id == showCourseTutor.subjectId)
         .toList();
+    bool courseReady = joinReady(showCourseTutor.start ?? DateTime.now());
     return InkWell(
       onTap: () => onTap(),
       child: SizedBox(
@@ -421,9 +422,11 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                           image: DecorationImage(
                             image: imageProvider,
                             fit: BoxFit.cover,
-                            colorFilter: ColorFilter.mode(
-                                Colors.black.withOpacity(0.5),
-                                BlendMode.srcOver),
+                            colorFilter: !courseReady
+                                ? ColorFilter.mode(
+                                    Colors.black.withOpacity(0.5),
+                                    BlendMode.srcOver)
+                                : null,
                           ),
                         ),
                       ),
@@ -438,12 +441,11 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                         fit: BoxFit.fitHeight,
                       ),
                     ),
-                    if (joinReady(showCourseTutor.start ?? DateTime.now())) ...[
+                    if (courseReady)
                       const Text(
                         '- ยังไม่ถึงเวลาเข้าเรียน -',
                         style: TextStyle(color: Colors.white),
                       ),
-                    ]
                   ],
                 ),
               ] else ...[
@@ -1636,7 +1638,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
   }
 
   bool joinReady(DateTime start) {
-    return DateTime.now().isBefore(start);
+    return DateTime.now().isAfter(start.subtract(Duration(minutes: 30)));
   }
 
   Widget _tagTime(String tag) {
