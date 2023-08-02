@@ -1393,7 +1393,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
   Color _getWeekColor(int weekday) {
     switch (weekday) {
       case 1:
-        return Colors.black;
+        return const Color(0xffffdd00);
       case 2:
         return Colors.pinkAccent;
       case 3:
