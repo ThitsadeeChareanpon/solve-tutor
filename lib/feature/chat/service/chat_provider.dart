@@ -10,6 +10,7 @@ import 'package:solve_tutor/authentication/models/user_model.dart';
 import 'package:solve_tutor/authentication/service/auth_provider.dart';
 import 'package:solve_tutor/feature/chat/models/chat_model.dart';
 import 'package:solve_tutor/feature/chat/models/message.dart' as messageModel;
+import 'package:solve_tutor/feature/order/model/order_class_model.dart';
 import 'package:uuid/uuid.dart';
 
 class ChatProvider extends ChangeNotifier {
@@ -145,7 +146,7 @@ class ChatProvider extends ChangeNotifier {
   }
 
   Stream<QuerySnapshot<Map<String, dynamic>>> getAllChat(List<String> chatIds) {
-    log('\nchatIds: $chatIds');
+    // log('\nchatIds: $chatIds');
     return firebaseFirestore
         .collection('chats')
         .where(
@@ -159,7 +160,7 @@ class ChatProvider extends ChangeNotifier {
 
   Future<List<ChatModel>> getAllChatV2(List<String> chatIds) async {
     log('\nchatIds: $chatIds');
-    log('here 1111111 ${chatIds.length}');
+    // log('here 1111111 ${chatIds.length}');
     List<ChatModel> chatList = [];
     try {
       for (var i = 0; i < chatIds.length; i++) {
@@ -168,15 +169,15 @@ class ChatProvider extends ChangeNotifier {
             .doc(chatIds[i])
             .get()
             .then((value) {
-          log('here 2222 id : ${value.id}, data : ${value.data()}');
+          // log('here 2222 id : ${value.id}, data : ${value.data()}');
           if (value.data() != null) {
             ChatModel only = ChatModel.fromJson(value.data()!);
             chatList.add(only);
-            log('here 3333 ${only.toJson()}');
+            // log('here 3333 ${only.toJson()}');
           }
         });
       }
-      log('chatList: ${chatList.length}');
+      // log('chatList: ${chatList.length}');
       return chatList;
     } catch (e) {
       log('error: $e');
@@ -197,15 +198,31 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<DocumentSnapshot<Map<String, dynamic>>> getOrderInfo(String id) async {
-    return await firebaseFirestore.collection('orders').doc(id).get();
+  Future<Map<OrderClassModel, UserModel>?> getOrderInfo(String id) async {
+    log("getOrderInfo");
+    OrderClassModel? order;
+    await firebaseFirestore.collection('orders').doc(id).get().then((value) {
+      order = OrderClassModel.fromJson(value.data()!);
+    });
+    UserModel? userChatInfo;
+    await firebaseFirestore
+        .collection('users')
+        .doc(order?.studentId ?? "")
+        .get()
+        .then((value) {
+      userChatInfo = UserModel.fromJson(value.data()!);
+    });
+    Map<OrderClassModel, UserModel>? data = {
+      order!: userChatInfo!,
+    };
+    return data;
   }
 
-  Future<DocumentSnapshot<Map<String, dynamic>>> getStudentInfo(
-      String id) async {
-    log("getStudentInfo : $id");
-    return await firebaseFirestore.collection('users').doc(id).get();
-  }
+  // Future<DocumentSnapshot<Map<String, dynamic>>> getStudentInfo(
+  //     String id) async {
+  //   // log("getStudentInfo : $id");
+  //   return await firebaseFirestore.collection('users').doc(id).get();
+  // }
 
   Stream<QuerySnapshot<Map<String, dynamic>>> getUserInfo(String id) {
     log("getUserInfo : $id");
@@ -255,7 +272,7 @@ class ChatProvider extends ChangeNotifier {
     var data1 = await chatPath.get();
     final List<DocumentSnapshot> doc1 = data1.docs;
     for (var i = 0; i < doc1.length; i++) {
-      log("auth ------ ${auth?.user?.id ?? ""}");
+      // log("auth ------ ${auth?.user?.id ?? ""}");
       var element1 = doc1[i];
       var messagePath = chatPath.doc(element1.id).collection('messages');
       var data3Read = await messagePath.where('read', isEqualTo: '').get();
@@ -263,7 +280,7 @@ class ChatProvider extends ChangeNotifier {
           .where('fromId', isNotEqualTo: auth?.user?.id ?? "")
           .get();
       data3Read.docs.addAll(data3NoteME.docs);
-      log("message id : ${element1.id}, read size : ${data3Read.size}");
+      // log("message id : ${element1.id}, read size : ${data3Read.size}");
       stackChat += data3Read.size;
     }
     log("stackChat : $stackChat");

@@ -73,7 +73,6 @@ class _ChatListPageState extends State<ChatListPage> {
           ),
           body: SafeArea(
             child: Consumer<ChatProvider>(builder: (context, con, _) {
-              try {} catch (e) {}
               return StreamBuilder(
                 stream: con.getMyOrderChat(auth.uid ?? ""),
                 builder: (context, snapshot) {
