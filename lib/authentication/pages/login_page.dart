@@ -4,11 +4,9 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:solve_tutor/auth.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:solve_tutor/authentication/service/auth_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:solve_tutor/constants/theme.dart';
-import 'package:solve_tutor/widgets/sizer.dart';
 
 import '../../feature/calendar/constants/assets_manager.dart';
 import '../../feature/calendar/constants/custom_colors.dart';
@@ -31,7 +29,12 @@ class LoginPageState extends State<LoginPage> {
         log('\nUserAdditionalInfo: ${user.additionalUserInfo}');
         if (await authProvider!.userExists(user.user!)) {
         } else {
-          await authProvider!.createUser(user.user!);
+          await authProvider!.createUser(
+            id: user.user?.uid ?? "",
+            name: user.user?.displayName ?? "",
+            email: user.user?.email ?? "",
+            image: user.user?.photoURL ?? "",
+          );
         }
         authProvider!.getSelfInfo();
         // var route =
@@ -57,6 +60,42 @@ class LoginPageState extends State<LoginPage> {
       // Dialogs.showSnackbar(context, 'Something Went Wrong (Check Internet!)');
       return null;
     }
+  }
+
+  _handleAppleBtnClick() async {
+    try {
+      var auth = await _signInWithApple();
+      if (auth?.user != null) {
+        log('\nUser: ${auth!.user}');
+        if (await authProvider!.userExists(auth.user!)) {
+        } else {
+          await authProvider!.createUser(
+            id: auth.user!.uid,
+            name: auth.user!.displayName ?? "",
+            email: auth.user!.email ?? "",
+          );
+        }
+        authProvider!.getSelfInfo();
+      }
+    } catch (e) {
+      log("_handleAppleBtnClick : $e");
+    }
+  }
+
+  Future<UserCredential?> _signInWithApple() async {
+    final appleCredential = await SignInWithApple.getAppleIDCredential(
+      scopes: [
+        AppleIDAuthorizationScopes.email,
+        AppleIDAuthorizationScopes.fullName
+      ],
+    );
+    // Create an `OAuthCredential` from the credential returned by Apple.
+    final oauthCredential = OAuthProvider("apple.com").credential(
+      idToken: appleCredential.identityToken,
+    );
+    final UserCredential userCredential =
+        await FirebaseAuth.instance.signInWithCredential(oauthCredential);
+    return userCredential;
   }
 
   AuthProvider? authProvider;
@@ -90,7 +129,7 @@ class LoginPageState extends State<LoginPage> {
                   Text('เข้าสู่ระบบด้วยบัญชี',
                       style: CustomStyles.med18Black363636),
                   S.h(36.0),
-                  Row(
+                  Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       // Login with Google
@@ -120,14 +159,16 @@ class LoginPageState extends State<LoginPage> {
                           ),
                         ),
                       ),
-                      S.w(16.0),
+                      S.h(16.0),
                       // Login with Apple ID
                       Platform.isIOS
                           ? InkWell(
-                              onTap: () {},
+                              onTap: () {
+                                _handleAppleBtnClick();
+                              },
                               child: Container(
-                                width: 176.0,
-                                height: 40.0,
+                                width: 200.0,
+                                height: 50.0,
                                 decoration: BoxDecoration(
                                   color: CustomColors.grayF3F3F3,
                                   borderRadius: BorderRadius.circular(8.0),
@@ -136,12 +177,12 @@ class LoginPageState extends State<LoginPage> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Image.asset(
-                                      ImageAssets.icApple,
+                                      'assets/images/ic_apple.png',
                                       width: 19.56,
                                       height: 24,
                                     ),
                                     S.w(16.0),
-                                    Text("Apple ID",
+                                    Text("Apple",
                                         style: CustomStyles.med14Black363636)
                                   ],
                                 ),

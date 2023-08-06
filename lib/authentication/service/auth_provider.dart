@@ -60,14 +60,19 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  createUser(User userIn) async {
+  createUser({
+    required String id,
+    required String name,
+    required String email,
+    String? image,
+  }) async {
     final time = DateTime.now().millisecondsSinceEpoch.toString();
     final chatUser = UserModel(
-      id: userIn.uid,
-      name: userIn.displayName ?? "",
-      email: userIn.email ?? "",
+      id: id,
+      name: name,
+      email: email,
       about: "Hey, I'm here",
-      image: userIn.photoURL ?? "",
+      image: image ?? "",
       createdAt: time,
       isOnline: false,
       lastActive: time,
@@ -75,10 +80,7 @@ class AuthProvider extends ChangeNotifier {
       role: '',
     );
     user = chatUser;
-    await firebaseFirestore
-        .collection('users')
-        .doc(userIn.uid)
-        .set(chatUser.toJson());
+    await firebaseFirestore.collection('users').doc(id).set(chatUser.toJson());
     notifyListeners();
   }
 
