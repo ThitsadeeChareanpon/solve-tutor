@@ -7,6 +7,7 @@ import 'package:solve_tutor/feature/calendar/pages/course_live_calendar.dart';
 import 'package:solve_tutor/feature/chat/pages/chat_list_page.dart';
 import 'package:solve_tutor/feature/class/pages/class_list_page.dart';
 import 'package:solve_tutor/feature/manage_course/pages/manage_course_page.dart';
+import 'package:solve_tutor/feature/notification/notification_page.dart';
 import 'package:solve_tutor/feature/profile/pages/profile_page.dart';
 
 class Nav extends StatefulWidget {
@@ -26,7 +27,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
     const ManageCoursePage(),
     // const ClassListPage(),
     const ChatListPage(),
-    const Center(child: Text("Notification")),
+    const NotificationPage(),
     const ProfilePage(),
   ];
 

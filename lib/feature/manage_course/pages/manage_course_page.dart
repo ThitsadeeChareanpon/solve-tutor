@@ -133,14 +133,14 @@ class _ManageCoursePageState extends State<ManageCoursePage> {
                       // content:
                       //     "สร้างคลังเอกสารประกอบการเรียน เพื่อให้คุณสามารถแชร์เอกสารกับคอร์สอื่นๆได้",
                     ),
-                    gridCard(
-                      context,
-                      onTap: () {},
-                      image: 'assets/images/menu_qa.png',
-                      title: "ตอบคำถามนักเรียน",
-                      // content:
-                      //     "คำถามระหว่างเรียนของนักเรียนของคุณ ที่ต้องการให้คุณช่วยตอบ",
-                    ),
+                    // gridCard(
+                    //   context,
+                    //   onTap: () {},
+                    //   image: 'assets/images/menu_qa.png',
+                    //   title: "ตอบคำถามนักเรียน",
+                    //   // content:
+                    //   //     "คำถามระหว่างเรียนของนักเรียนของคุณ ที่ต้องการให้คุณช่วยตอบ",
+                    // ),
                     gridCard(
                       context,
                       onTap: () {
