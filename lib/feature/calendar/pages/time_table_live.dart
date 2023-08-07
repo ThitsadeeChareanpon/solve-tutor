@@ -255,7 +255,9 @@ class _TimeTableLiveState extends State<TimeTableLive> {
               right: BorderSide(width: 1, color: CustomColors.grayCFCFCF),
               top: BorderSide(width: 1, color: CustomColors.grayCFCFCF),
               bottom: BorderSide(width: 1, color: CustomColors.grayCFCFCF),
-              borderRadius: BorderRadius.all(Radius.circular(8.0)),
+              borderRadius: BorderRadius.all(
+                Radius.circular(8.0),
+              ),
             ),
           ),
           onDaySelected: _onDaySelected,
@@ -280,6 +282,20 @@ class _TimeTableLiveState extends State<TimeTableLive> {
                       builder: (context) => _addClassTime(day),
                     );
                   },
+                  child: Container(
+                    color: const Color(0xffB9E7C9),
+                    padding: const EdgeInsets.only(left: 20, top: 20),
+                    alignment: Alignment.topLeft,
+                    child: Text(
+                      day.day.toString(),
+                      style: CustomStyles.med16Black363636
+                          .copyWith(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                );
+              } else {
+                return TextButton(
+                  onPressed: () {},
                   child: Container(
                     color: const Color(0xffB9E7C9),
                     padding: const EdgeInsets.only(left: 20, top: 20),
@@ -394,11 +410,11 @@ class _TimeTableLiveState extends State<TimeTableLive> {
                 width: 200,
                 color: CustomColors.green125924,
                 alignment: Alignment.topLeft,
-                // child: Text(
-                //   day.day.toString(),
-                //   style: CustomStyles.med16Black363636
-                //       .copyWith(fontWeight: FontWeight.bold),
-                // ),
+                child: Text(
+                  day.day.toString(),
+                  style: CustomStyles.med16Black363636
+                      .copyWith(fontWeight: FontWeight.bold),
+                ),
               );
             },
             markerBuilder: (context, day, event) {
