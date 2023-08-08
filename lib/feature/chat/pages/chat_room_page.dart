@@ -16,11 +16,11 @@ import 'package:solve_tutor/feature/chat/models/message.dart';
 import 'package:solve_tutor/feature/chat/service/chat_provider.dart';
 import 'package:solve_tutor/feature/chat/widgets/message_card.dart';
 import 'package:solve_tutor/feature/order/model/order_class_model.dart';
-import 'package:solve_tutor/feature/order/pages/payment_page.dart';
 import 'package:solve_tutor/feature/order/service/order_mock_provider.dart';
 import 'package:solve_tutor/widgets/date_until.dart';
 import 'package:solve_tutor/widgets/sizer.dart';
 
+// ignore: must_be_immutable
 class ChatRoomPage extends StatefulWidget {
   ChatRoomPage({super.key, required this.chat, required this.order});
   ChatModel chat;
@@ -244,55 +244,73 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                     if (widget.order.fromMarketPlace) {
                       return const SizedBox();
                     }
-                    if (orderDetail?.status == "payment") {
-                      return GestureDetector(
-                        onTap: () {
-                          var route = MaterialPageRoute(
-                            builder: (context) => CreateCourseLivePage(
-                              tutorId: auth.uid ?? "",
-                              studentId: widget.order.studentId,
-                              studentName: list[0].name ?? "",
-                            ),
-                          );
-                          Navigator.push(context, route);
-                        },
-                        child: Container(
-                          width: 100,
-                          height: 30,
-                          margin: const EdgeInsets.fromLTRB(0, 10, 10, 10),
-                          padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: primaryColor,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Text(
-                            "สร้างออเดอร์",
-                            style: TextStyle(
-                              fontSize: 15,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-                    return Container(
-                      width: 80,
-                      margin: const EdgeInsets.fromLTRB(0, 10, 10, 10),
-                      padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: greyColor2,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Text(
-                        "ยังไม่ชำระ",
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: Colors.white,
-                        ),
-                      ),
-                    );
+                    return StreamBuilder(
+                        stream: chat.getOrderStatus(widget.order.id ?? ""),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasError) {
+                            return Text("Something went wrong");
+                          } else if (snapshot.hasData &&
+                              snapshot.data!.exists) {
+                            Map<String, dynamic> data =
+                                snapshot.data!.data() as Map<String, dynamic>;
+                            return Builder(builder: (context) {
+                              if (data['status'] == 'payment') {
+                                return GestureDetector(
+                                  onTap: () {
+                                    var route = MaterialPageRoute(
+                                      builder: (context) =>
+                                          CreateCourseLivePage(
+                                        tutorId: auth.uid ?? "",
+                                        studentId: widget.order.studentId,
+                                        studentName: list[0].name ?? "",
+                                      ),
+                                    );
+                                    Navigator.push(context, route);
+                                  },
+                                  child: Container(
+                                    width: 100,
+                                    height: 30,
+                                    margin: const EdgeInsets.fromLTRB(
+                                        0, 10, 10, 10),
+                                    padding:
+                                        const EdgeInsets.fromLTRB(5, 0, 5, 0),
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: primaryColor,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: const Text(
+                                      "สร้างออเดอร์",
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }
+                              return Container(
+                                width: 80,
+                                margin:
+                                    const EdgeInsets.fromLTRB(0, 10, 10, 10),
+                                padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: greyColor2,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Text(
+                                  "ยังไม่ชำระ",
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              );
+                            });
+                          }
+                          return SizedBox();
+                        });
                   }),
                 ],
               ),
