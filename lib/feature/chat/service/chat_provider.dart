@@ -11,7 +11,6 @@ import 'package:solve_tutor/authentication/service/auth_provider.dart';
 import 'package:solve_tutor/feature/chat/models/chat_model.dart';
 import 'package:solve_tutor/feature/chat/models/message.dart' as messageModel;
 import 'package:solve_tutor/feature/order/model/order_class_model.dart';
-import 'package:uuid/uuid.dart';
 
 class ChatProvider extends ChangeNotifier {
   final GoogleSignIn googleSignIn = GoogleSignIn();
@@ -292,5 +291,11 @@ class ChatProvider extends ChangeNotifier {
         .collection('chats/$chatId/messages/')
         .where('read', isEqualTo: '')
         .snapshots();
+  }
+
+  Stream<DocumentSnapshot<Map<String, dynamic>>> getOrderStatus(
+      String orderId) {
+    log('streamOrderStatus: $orderId');
+    return firebaseFirestore.collection('orders').doc(orderId).snapshots();
   }
 }
