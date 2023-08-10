@@ -1,13 +1,10 @@
-import 'dart:convert';
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:solve_tutor/authentication/models/user_model.dart';
-import 'package:http/http.dart';
 
 class AuthProvider extends ChangeNotifier {
   final GoogleSignIn googleSignIn = GoogleSignIn();
@@ -150,6 +147,17 @@ class AuthProvider extends ChangeNotifier {
     } catch (e) {
       print(e);
       return null;
+    }
+  }
+
+  deleteAccount() async {
+    try {
+      await firebaseFirestore.collection('users').doc(uid).update({
+        'is_deleted': true,
+      });
+      signOut();
+    } catch (e) {
+      log("e : $e");
     }
   }
 }

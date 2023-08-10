@@ -1,23 +1,16 @@
-import 'dart:developer';
-import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:solve_tutor/auth.dart';
 import 'package:solve_tutor/authentication/service/auth_provider.dart';
-import 'package:solve_tutor/constants/school_subject_constants.dart';
 import 'package:solve_tutor/constants/theme.dart';
 import 'package:solve_tutor/widgets/confirm_action_widget.dart';
 import 'package:solve_tutor/widgets/dialogs.dart';
 import 'package:solve_tutor/widgets/sizer.dart';
 
-import '../../../db_test.dart';
-import '../../live_classroom/components/room_loading_screen.dart';
 import '../components/webview.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -288,6 +281,87 @@ class _ProfilePageState extends State<ProfilePage> {
                   settingCard(
                       title: 'นโยบายความเป็นส่วนตัว',
                       url: 'https://solve.in.th/privacy-policy/'),
+                  const Divider(thickness: 2),
+                  GestureDetector(
+                    onTap: () {
+                      showDialog<void>(
+                        context: context,
+                        barrierDismissible: true,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            content: Container(
+                              width: 300,
+                              child: const SingleChildScrollView(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: <Widget>[
+                                    Text(
+                                      "เราเสียใจที่คุณจะไม่ได้ใช้งานบริการของเราอีก หากคุณได้ทำการลบบัญชีผู้ใช้แล้ว จะไม่สามารถทำการกู้กลับข้อมูลเดินมาได้ และไม่สามารถสมัครสมาชิกใหม่ด้วยบัญชีเดิมได้อีก",
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            actionsAlignment: MainAxisAlignment.center,
+                            actions: <Widget>[
+                              Container(
+                                width: double.infinity,
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: TextButton(
+                                        child: const Text(
+                                          'ยกเลิก',
+                                          style: TextStyle(color: Colors.grey),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: TextButton(
+                                        child: const Text(
+                                          'ตกลง',
+                                          style: TextStyle(color: Colors.red),
+                                        ),
+                                        onPressed: () async {
+                                          Navigator.of(context).pop();
+                                          await authProvider.deleteAccount();
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                    onDoubleTap: () {},
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(20, 15, 20, 5),
+                      child: const Row(
+                        children: [
+                          SizedBox(width: 20),
+                          Expanded(
+                            child: Text(
+                              'คำขอลบบัญชี',
+                              style: TextStyle(
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                          Icon(
+                            Icons.chevron_right,
+                            color: primaryColor,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                   const Divider(thickness: 2),
                   const SizedBox(height: 20),
                   Center(
