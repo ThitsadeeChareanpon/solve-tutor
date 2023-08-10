@@ -166,7 +166,6 @@ class CourseLiveController extends ChangeNotifier {
       equals: isSameDay,
       hashCode: getHashCode,
     )..addAll(kEventSource);
-    // setState(() {});
     notifyListeners();
   }
 
@@ -174,11 +173,6 @@ class CourseLiveController extends ChangeNotifier {
     selectedDocumentIndex = index;
     notifyListeners();
   }
-
-  // setDocument(DocumentModel doc) {
-  //   document = doc;
-  //   notifyListeners();
-  // }
 
   void initialize() {
     keywordTextEditingController.addListener(() {

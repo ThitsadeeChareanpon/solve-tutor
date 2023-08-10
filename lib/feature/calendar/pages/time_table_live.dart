@@ -219,10 +219,11 @@ class _TimeTableLiveState extends State<TimeTableLive> {
 
   Widget _tableCalendarTablet() {
     return Consumer<CourseLiveController>(builder: (_, course, child) {
-      DateTime today = DateTime(
-          DateTime.now().year, DateTime.now().month, DateTime.now().day);
-      var firstDay = course.courseData?.firstDay ?? DateTime.now();
-      var lastDay = course.courseData?.lastDay ?? DateTime.now();
+      DateTime today = resetToMidnight(DateTime.now());
+      DateTime firstDay = course.courseData?.firstDay ?? today;
+      DateTime lastDay = course.courseData?.lastDay ?? today;
+      firstDay = resetToMidnight(firstDay);
+      lastDay = resetToMidnight(lastDay);
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: TableCalendar<Event>(
@@ -459,7 +460,7 @@ class _TimeTableLiveState extends State<TimeTableLive> {
                     ),
                   ],
                 );
-              } // past marker
+              } // future marker
               else if (event.isNotEmpty && today.isAfter(markerDay)) {
                 return Column(
                   children: [
@@ -500,7 +501,8 @@ class _TimeTableLiveState extends State<TimeTableLive> {
                     ),
                   ],
                 );
-              } else {
+              } // past marker
+              else {
                 return const SizedBox();
               }
             },
@@ -1050,54 +1052,6 @@ class _TimeTableLiveState extends State<TimeTableLive> {
                         .copyWith(color: CustomColors.gray878787)
                         .copyWith(fontSize: _util.addMinusFontSize(16)),
                   ),
-                  // Row(
-                  //   children: [
-                  //     Align(
-                  //       alignment: Alignment.centerLeft,
-                  //       child: Text(
-                  //         'เกิดซ้ำทุก',
-                  //         style: CustomStyles.med16Black36363606,
-                  //       ),
-                  //     ),
-                  //     S.w(20.0),
-                  //     Expanded(
-                  //       flex: 2,
-                  //       child: Padding(
-                  //         padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  //         child: TextFormField(
-                  //           controller: courseController.skipWeekTextEditing,
-                  //           keyboardType: TextInputType.number,
-                  //           textAlign: TextAlign.end,
-                  //           decoration: const InputDecoration(
-                  //             labelText: '',
-                  //             border: OutlineInputBorder(
-                  //               borderRadius: BorderRadius.all(
-                  //                 Radius.circular(8.0),
-                  //               ),
-                  //             ),
-                  //           ),
-                  //           inputFormatters: [
-                  //             LengthLimitingTextInputFormatter(1),
-                  //             FilteringTextInputFormatter.allow(
-                  //                 RegExp(r'[0-9]+[,.]{0,1}[0-9]*')),
-                  //             TextInputFormatter.withFunction(
-                  //               (oldValue, newValue) => newValue.copyWith(
-                  //                 text: newValue.text.replaceAll('.', ','),
-                  //               ),
-                  //             ),
-                  //           ],
-                  //           onChanged: (value) {},
-                  //         ),
-                  //       ),
-                  //     ),
-                  //     S.w(20.0),
-                  //     Text(
-                  //       'สัปดาห์',
-                  //       style: CustomStyles.med16Black36363606,
-                  //     ),
-                  //     Expanded(flex: 2, child: Container()),
-                  //   ],
-                  // ),
                   S.h(20.0),
                   Card(
                     shape: RoundedRectangleBorder(
@@ -1144,9 +1098,12 @@ class _TimeTableLiveState extends State<TimeTableLive> {
                     ),
                     S.h(20),
                   ],
-
                   Row(
-                    children: [_backTo(), S.w(10), _buttonFilterCreateClass()],
+                    children: [
+                      _backTo(),
+                      S.w(10),
+                      _buttonFilterCreateClass(),
+                    ],
                   ),
                 ],
               ),
@@ -1465,8 +1422,9 @@ class _TimeTableLiveState extends State<TimeTableLive> {
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: CustomColors.green20B153,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
         ),
         onPressed: () async {
           var selectedDay =
@@ -1481,13 +1439,11 @@ class _TimeTableLiveState extends State<TimeTableLive> {
               return courseController.calendarListAll.any((calendars) {
                 var start = calendars.start?.millisecondsSinceEpoch ?? 0;
                 var end = calendars.end?.millisecondsSinceEpoch ?? 0;
-                // print(
-                //     '${calendars.start}  :: ${df.start}  && ${calendars.start} :: ${df.end}');
                 var statusStart =
                     (start >= startSelected && start < endSelected);
-                var stutasEnd = (end > startSelected && end < endSelected);
-                print('${statusStart}|| ${stutasEnd}');
-                if (statusStart || stutasEnd) {
+                var statusEnd = (end > startSelected && end < endSelected);
+                print('${statusStart}|| ${statusEnd}');
+                if (statusStart || statusEnd) {
                   return true;
                 } else {
                   return false;
@@ -1502,16 +1458,10 @@ class _TimeTableLiveState extends State<TimeTableLive> {
               courseController.courseData?.calendars ??= [];
               courseController.setHaveError('');
               print('all ${courseController.calendarListAll.length}');
-              // var calendarData = CalendarDate(
-              //     start: startTime,
-              //     end: endTime,
-              //     courseId: courseController.courseData?.id,
-              //     courseName: courseController.courseData?.courseName);
               for (var calendar in dayFilterList) {
                 courseController.calendarListAll.add(calendar);
                 courseController.courseData?.calendars?.add(calendar);
               }
-
               if (light) {
                 await courseController
                     .getDataCalendarList(courseController.calendarListAll);
@@ -1558,6 +1508,7 @@ class _TimeTableLiveState extends State<TimeTableLive> {
   Future<List<CalendarDate>> getWeekdaysBetweenDates() async {
     DateTime? startDate =
         courseController.courseData?.firstDay?.add(const Duration(days: -1));
+    startDate = resetToMidnight(startDate!);
     DateTime? endDate = courseController.courseData?.lastDay;
     List<CalendarDate> filterList = [];
     var selectedDay =
@@ -1566,15 +1517,11 @@ class _TimeTableLiveState extends State<TimeTableLive> {
       startDate = startDate.add(const Duration(days: 1));
       for (int day = 0; day < selectedDay.toList().length; day++) {
         if (startDate.weekday == selectedDay[day].id) {
-          // print('${startDate}');
+          print('${startDate}');
           var start = startDate.add(Duration(
-              // days: 1,
-              hours: startTime?.hour ?? 0,
-              minutes: startTime?.minute ?? 0));
+              hours: startTime?.hour ?? 0, minutes: startTime?.minute ?? 0));
           var end = startDate.add(Duration(
-              // days: 1,
-              hours: endTime?.hour ?? 0,
-              minutes: endTime?.minute ?? 0));
+              hours: endTime?.hour ?? 0, minutes: endTime?.minute ?? 0));
           filterList.add(CalendarDate(
               start: start,
               end: end,
@@ -1583,15 +1530,10 @@ class _TimeTableLiveState extends State<TimeTableLive> {
         }
       }
     }
-
     return filterList;
   }
 
-  // bool _skipWeek(int week, int number) {
-  //   if (week > 1 && week <= number) {
-  //     return false;
-  //   }
-  //
-  //   return true;
-  // }
+  DateTime resetToMidnight(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
+  }
 }
