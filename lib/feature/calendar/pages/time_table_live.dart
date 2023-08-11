@@ -294,7 +294,8 @@ class _TimeTableLiveState extends State<TimeTableLive> {
                     ),
                   ),
                 );
-              } else {
+              } // today is in range
+              else {
                 return TextButton(
                   onPressed: () {},
                   child: Container(
@@ -308,7 +309,7 @@ class _TimeTableLiveState extends State<TimeTableLive> {
                     ),
                   ),
                 );
-              }
+              } // today is outside range
             },
             outsideBuilder: (context, day, event) {
               if (day.isAfter(today)) {
