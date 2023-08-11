@@ -38,17 +38,13 @@ class _CreateCourseLivePageState extends State<CreateCourseLivePage> {
           name: widget.studentName ?? '',
           createTime: DateTime.now());
       if (widget.studentId != null) {
-        log("initStudent");
         List<String>? studentList = [widget.studentId ?? ''];
         courseData.studentIds = studentList;
         courseData.studentDetails = [student];
         courseData.documentId = 'test';
-        log("initStudent2");
         setState(() {});
-        log("data : ${courseData.toJson()}");
         // courseController.courseData?.studentDetails?.add(filterStudent.first);
         await courseController.updateCourseDetailsOnlyStudent(courseData);
-        log("initStudent3");
       } else {
         log("error : ไม่มีนักเรียนเริ่มต้น");
       }
