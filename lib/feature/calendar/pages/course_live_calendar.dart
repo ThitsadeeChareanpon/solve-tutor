@@ -454,22 +454,25 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                   alignment: Alignment.center,
                   children: [
                     Container(
-                        height: 180,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(8),
-                            topRight: Radius.circular(8),
+                      height: 180,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(8),
+                          topRight: Radius.circular(8),
+                        ),
+                        image: DecorationImage(
+                          image: const AssetImage(
+                            'assets/images/img_not_available.jpeg',
                           ),
-                          image: DecorationImage(
-                              image: const AssetImage(
-                                'assets/images/img_not_available.jpeg',
-                              ),
-                              fit: BoxFit.cover,
-                              colorFilter: ColorFilter.mode(
-                                  Colors.black.withOpacity(0.5),
-                                  BlendMode.srcOver)),
-                        )),
+                          fit: BoxFit.cover,
+                          colorFilter: !courseReady
+                              ? ColorFilter.mode(Colors.black.withOpacity(0.5),
+                                  BlendMode.srcOver)
+                              : null,
+                        ),
+                      ),
+                    ),
                     if (!courseReady) ...[
                       const Text(
                         '- ยังไม่ถึงเวลาเข้าห้องสอน -',
@@ -1023,9 +1026,10 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                                 child: Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Image.asset(
-                                    ImageAssets.emptyCourse,
+                                    'assets/images/img_not_available.jpeg',
+                                    height: 160,
                                     width: double.infinity,
-                                    fit: BoxFit.fitHeight,
+                                    fit: BoxFit.cover,
                                   ),
                                 ),
                               ),
@@ -1167,6 +1171,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
             return TextButton(
               onPressed: () {},
               child: Container(
+                color: const Color(0xffB9E7C9),
                 padding: const EdgeInsets.only(left: 20, top: 20),
                 alignment: Alignment.topLeft,
                 child: Text(

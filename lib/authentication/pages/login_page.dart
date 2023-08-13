@@ -26,8 +26,8 @@ class LoginPageState extends State<LoginPage> {
       // Dialogs.showProgressBar(context);
       var user = await _signInWithGoogle();
       if (user != null) {
-        log('\nUser: ${user.user}');
-        log('\nUserAdditionalInfo: ${user.additionalUserInfo}');
+        // log('\nUser: ${user.user}');
+        // log('\nUserAdditionalInfo: ${user.additionalUserInfo}');
         if (await authProvider!.userExists(user.user!)) {
         } else {
           await authProvider!.createUser(
@@ -62,8 +62,8 @@ class LoginPageState extends State<LoginPage> {
   _handleAppleBtnClick() async {
     try {
       var auth = await _signInWithApple();
-      if (auth?.user != null) {
-        log('\nUser: ${auth!.user}');
+      if (auth!.user != null) {
+        // log('\nUser: ${auth!.user}');
         if (await authProvider!.userExists(auth.user!)) {
         } else {
           await authProvider!.createUser(
@@ -75,7 +75,7 @@ class LoginPageState extends State<LoginPage> {
         authProvider!.getSelfInfo();
       }
     } catch (e) {
-      log("_handleAppleBtnClick : $e");
+      log("catch _handleAppleBtnClick : $e");
       Dialogs.showSnackbar(context, 'Login failed');
     }
   }

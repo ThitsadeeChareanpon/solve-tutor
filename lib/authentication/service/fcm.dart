@@ -21,7 +21,7 @@ class FCM {
       provisional: false,
     );
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      forgroundNotification(context);
+      foregroundNotification(context);
       backgroundNotification(context);
       terminateNotification(context);
     }
@@ -31,9 +31,9 @@ class FCM {
   }
 
   //ระหว่างเปิดแอป
-  forgroundNotification(BuildContext context) {
+  foregroundNotification(BuildContext context) {
     FirebaseMessaging.onMessage.listen((event) {
-      print("forgroundNotification");
+      print("foregroundNotification");
       if (Platform.isIOS) {
         print("in ios");
         log("message notification");
@@ -48,7 +48,7 @@ class FCM {
   backgroundNotification(BuildContext context) {
     FirebaseMessaging.onMessageOpenedApp.listen((event) {
       print("backgroundNotification");
-      log("message notification");
+      // log("message notification");
     });
   }
 
@@ -58,10 +58,11 @@ class FCM {
     RemoteMessage? initialMessage =
         await FirebaseMessaging.instance.getInitialMessage();
     if (initialMessage != null) {
-      log("message notification");
+      // log("message notification");
     }
   }
 
+  /// TODO: check this dispose
   @override
   void dispose() {
     dataCtrl.close();

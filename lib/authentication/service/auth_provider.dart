@@ -14,7 +14,7 @@ class AuthProvider extends ChangeNotifier {
   String? uid;
 
   getSelfInfo() async {
-    log("getSelfInfo");
+    // log("getSelfInfo");
     uid = firebaseAuth.currentUser?.uid ?? "";
     await firebaseFirestore
         .collection('users')
@@ -29,7 +29,7 @@ class AuthProvider extends ChangeNotifier {
         if (user?.role == null || user?.role == "") {
           await updateRoleFirestore('tutor');
         }
-        log('My Data: ${userFirebase.data()}');
+        // log('My Data: ${userFirebase.data()}');
         notifyListeners();
       }
     });
@@ -82,13 +82,13 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> updateRoleFirestore(String role) async {
-    log("updateRoleFirestore ${user?.id}");
+    // log("updateRoleFirestore ${user?.id}");
     final CollectionReference users = firebaseFirestore.collection("users");
     final String uid = firebaseAuth.currentUser?.uid ?? '';
     await users.doc(uid).update({'role': role});
     final result = await users.doc(uid).get();
     await getSelfInfo();
-    log("result $result");
+    // log("result $result");
     notifyListeners();
     // return await firebaseFirestore
     //     .collection('users')

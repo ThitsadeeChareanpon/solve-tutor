@@ -67,11 +67,9 @@ class CourseLiveService {
 
   Future<String> createCourseLive(CourseModel courseData) async {
     try {
-      log("createCourseLive");
-
       Map<String, dynamic> json = await client.post(endpoint.createCourseLive(),
           body: courseData.toJson());
-      log("success");
+      // log("success");
       return json['data'];
     } catch (error) {
       log("err : $error");
@@ -91,7 +89,7 @@ class CourseLiveService {
     CourseModel courseData,
   ) async {
     try {
-      log("data service : ${courseData.toJson()}");
+      // log("data service : ${courseData.toJson()}");
       await client.put(endpoint.createCourseLive(), body: {
         "id": courseData.id,
         "tutor_id": courseData.tutorId,

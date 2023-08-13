@@ -150,9 +150,9 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
             children: [
               InkWell(
                 onTap: () {
-                  setState(() {
-                    isActive = !isActive;
-                  });
+                  // setState(() {
+                  //   isActive = !isActive;
+                  // });
                 },
                 child: Image.asset(
                   'assets/images/time.png',
