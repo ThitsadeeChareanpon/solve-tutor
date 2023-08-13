@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.solve.solve_tutor">
+    package="com.solve.tutor">
    <application
         android:label="SOLVE Instructor"
         android:name="${applicationName}"
