@@ -77,24 +77,18 @@ class OrderMockProvider extends ChangeNotifier {
 
   Future<ChatModel?> createChat(
       OrderClassModel order, UserModel cutomer) async {
-    var me = auth?.user?.getRoleType();
     String studentId = order.studentId ?? "";
-    String tutorId = auth?.user?.id ?? "";
-    log("message1 : s : $studentId, t : $tutorId");
-    if (me == RoleType.student) {
-      studentId = auth?.user?.id ?? "";
-      tutorId = order.tutorId ?? "";
-    }
-    String chatId = "${order.id}_${cutomer.id}_${order.tutorId}";
+    String me = auth?.user?.id ?? "";
+    String chatId = "${order.classId}_${order.studentId}_$me";
     await firebaseFirestore.collection('chats').doc(chatId).set({
       'chat_id': chatId,
       'order_id': '${order.id}',
-      'customer_id': '${cutomer.id}',
-      'tutor_id': '${order.tutorId}',
+      'customer_id': '${order.studentId}',
+      'tutor_id': '$me',
     });
     await sendFirstMessage(chatId);
     await sendToFirstMessage(
-      me == RoleType.student ? tutorId : studentId,
+      studentId,
       chatId,
     );
     return getChatInfo(chatId);

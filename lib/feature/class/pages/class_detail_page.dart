@@ -23,10 +23,10 @@ class ClassDetailPage extends StatefulWidget {
   ClassModel classDetail;
   UserModel user;
   @override
-  State<ClassDetailPage> createState() => _OrderDetailPageState();
+  State<ClassDetailPage> createState() => _ClassDetailPageState();
 }
 
-class _OrderDetailPageState extends State<ClassDetailPage> {
+class _ClassDetailPageState extends State<ClassDetailPage> {
   late AuthProvider auth;
   late OrderMockProvider order;
   late ChatProvider chat;
@@ -95,6 +95,8 @@ class _OrderDetailPageState extends State<ClassDetailPage> {
                   ),
                 ),
               ),
+              S.h(20),
+              Text("${widget.classDetail.id}"),
               S.h(20),
               Padding(
                 padding: const EdgeInsets.all(10),

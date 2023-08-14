@@ -47,8 +47,8 @@ class _ChatOrderCardState extends State<ChatOrderCard> {
           future: chat.getOrderInfo(widget.chat.chatId ?? ""),
           builder: (context, snapshot1) {
             try {
-              OrderClassModel? order = snapshot1.data?.keys.first;
-              UserModel? student = snapshot1.data?.values.first;
+              OrderClassModel order = snapshot1.data!.keys.first;
+              UserModel student = snapshot1.data!.values.first;
               return InkWell(
                 onTap: () {
                   Navigator.push(
@@ -56,7 +56,7 @@ class _ChatOrderCardState extends State<ChatOrderCard> {
                     MaterialPageRoute(
                       builder: (_) => ChatRoomPage(
                         chat: widget.chat,
-                        order: order!,
+                        order: order,
                       ),
                     ),
                   );
@@ -70,7 +70,7 @@ class _ChatOrderCardState extends State<ChatOrderCard> {
                         child: CachedNetworkImage(
                           width: 50,
                           height: 50,
-                          imageUrl: student?.image ?? "",
+                          imageUrl: student.image ?? "",
                           errorWidget: (context, url, error) =>
                               const CircleAvatar(
                                   child: Icon(CupertinoIcons.person)),
@@ -82,7 +82,7 @@ class _ChatOrderCardState extends State<ChatOrderCard> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("class : ${order?.title ?? ""}"),
+                          Text("class : ${order.title ?? ""}"),
                           StreamBuilder(
                             stream:
                                 chat.getLastMessage(widget.chat.chatId ?? ""),
