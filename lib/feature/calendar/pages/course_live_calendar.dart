@@ -202,7 +202,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                 if (_util.isTablet()) ...[
                   _historyText(),
                 ] else ...[
-                  _sellAll(),
+                  // _sellAll(),
                 ]
               ],
             ),
@@ -322,17 +322,28 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
               ),
             ),
           )
-        : Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-            decoration: const BoxDecoration(
-              color: CustomColors.greenPrimary,
-              borderRadius: BorderRadius.all(
-                Radius.circular(10),
+        : InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      CreateCourseLivePage(tutorId: auth!.user!.id!),
+                ),
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              decoration: const BoxDecoration(
+                color: CustomColors.greenPrimary,
+                borderRadius: BorderRadius.all(
+                  Radius.circular(10),
+                ),
               ),
-            ),
-            child: const Icon(
-              Icons.add,
-              color: Colors.white,
+              child: const Icon(
+                Icons.add,
+                color: Colors.white,
+              ),
             ),
           );
   }
@@ -368,17 +379,27 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
         ),
       );
     } else {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          border: Border.all(width: 1, color: Colors.grey),
-          borderRadius: const BorderRadius.all(
-            Radius.circular(10),
+      return InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ClassListPage(),
+            ),
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          decoration: BoxDecoration(
+            border: Border.all(width: 1, color: Colors.grey),
+            borderRadius: const BorderRadius.all(
+              Radius.circular(10),
+            ),
           ),
-        ),
-        child: Text(
-          'ค้นหางานสอน',
-          style: CustomStyles.bold16Green,
+          child: Text(
+            'ค้นหางานสอน',
+            style: CustomStyles.bold16Green,
+          ),
         ),
       );
     }
@@ -538,8 +559,6 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
         .where((e) => e.id == showCourseTutor.subjectId)
         .toList();
     bool courseReady = joinReady(showCourseTutor.start ?? DateTime.now());
-    print('card mob');
-    print(filterLevelId.first.name);
     return InkWell(
       onTap: () => onTap(),
       child: SizedBox(
@@ -631,11 +650,12 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                       ],
                     ),
                     S.h(8),
-                    Row(
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
                       children: [
                         _tagType(
                             '${filterLevelId.isNotEmpty ? filterLevelId.first.name : ''}'),
-                        S.w(10),
                         _tagType(
                             '${filterSubjectId.isNotEmpty ? filterSubjectId.first.name : ''}'),
                       ],
