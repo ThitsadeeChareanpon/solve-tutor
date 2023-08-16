@@ -2514,7 +2514,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
               duration: const Duration(seconds: 1),
               curve: Curves.fastOutSlowIn,
               height: 65,
-              width: selectedTools ? 0 : 430,
+              width: selectedTools ? 0 : 390,
+              // TODO: change to 430 when laser ready
               decoration: BoxDecoration(
                 border: Border.all(
                   color: CustomColors.grayCFCFCF,
@@ -2705,7 +2706,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                     'EndMeeting',
                     stopwatch.elapsed.inMilliseconds,
                   );
-                  meeting.end();
+                  if (!widget.isMock) meeting.end();
+                  if (widget.isMock) Navigator.of(context).pop();
                   closeChanel();
                 });
               },
@@ -3270,7 +3272,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     );
   }
 
-  /// TODO: check this widget onTap
   Widget showListStudentsMobile() {
     return Positioned(
       child: Align(
@@ -3278,6 +3279,37 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
+            /// TODO: revise this
+            // if (showStudent)
+            //   InkWell(
+            //     onTap: () {
+            //       setState(() {
+            //         showStudent = false;
+            //       });
+            //     },
+            //     child: Container(
+            //       height: 40,
+            //       width: 264,
+            //       decoration: BoxDecoration(
+            //         border: Border.all(
+            //             color: CustomColors.grayE5E6E9,
+            //             width: 1.0,
+            //             style: BorderStyle.solid),
+            //         color: CustomColors.whitePrimary,
+            //         borderRadius: const BorderRadius.only(
+            //           topRight: Radius.circular(8),
+            //           topLeft: Radius.circular(8),
+            //         ),
+            //       ),
+            //       child: Center(
+            //         child: Image.asset(
+            //           ImageAssets.arrowDown,
+            //           height: showStudent ? 16 : 22,
+            //           width: showStudent ? 16 : 25,
+            //         ),
+            //       ),
+            //     ),
+            //   ),
             AnimatedContainer(
               width: showStudent ? mySolvepadSize.width : 0,
               height: showStudent ? 105 : 0,
