@@ -198,7 +198,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _topicText('วันนี้'),
+                _topicText('คาบสอนวันนี้'),
                 if (_util.isTablet()) ...[
                   _historyText(),
                 ] else ...[

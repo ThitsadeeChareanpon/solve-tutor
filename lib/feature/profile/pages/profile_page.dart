@@ -18,6 +18,7 @@ import 'package:solve_tutor/widgets/sizer.dart';
 
 import '../../../db_test.dart';
 import '../../live_classroom/components/room_loading_screen.dart';
+import '../../live_classroom/page/live_classroom.dart';
 import '../components/webview.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -293,6 +294,26 @@ class _ProfilePageState extends State<ProfilePage> {
                   Center(
                     child: Column(
                       children: [
+                        // ElevatedButton(
+                        //   onPressed: () {
+                        //     Navigator.push(
+                        //       context,
+                        //       MaterialPageRoute(
+                        //         builder: (context) => const TutorLiveClassroom(
+                        //           meetingId: 'test',
+                        //           userId: 'test',
+                        //           token: 'test',
+                        //           displayName: 'TEST TEST',
+                        //           isHost: true,
+                        //           courseId: 'test',
+                        //           startTime: 0,
+                        //           isMock: true,
+                        //         ),
+                        //       ),
+                        //     );
+                        //   },
+                        //   child: const Text('TEST'),
+                        // ),
                         TextButton(
                           onPressed: () async {
                             showDialog(
