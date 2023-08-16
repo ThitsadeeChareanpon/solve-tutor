@@ -108,19 +108,17 @@ class _ChatListPageState extends State<ChatListPage> {
                                     });
                               } else if (snap.data?.isEmpty ?? false) {
                                 return const Center(
-                                  child: Text('No Chat Found!',
+                                  child: Text('No Chat!',
                                       style: TextStyle(fontSize: 20)),
                                 );
                               }
                               return const Center(
-                                child: Text('Loading...',
-                                    style: TextStyle(fontSize: 20)),
+                                child: Text('', style: TextStyle(fontSize: 20)),
                               );
                             });
                       }
                       return const Center(
-                        child:
-                            Text('Loading...', style: TextStyle(fontSize: 20)),
+                        child: Text('', style: TextStyle(fontSize: 20)),
                       );
                   }
                 },

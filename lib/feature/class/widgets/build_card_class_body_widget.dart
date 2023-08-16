@@ -4,8 +4,8 @@ import 'package:solve_tutor/widgets/date_time_format_util.dart';
 
 class BuildCardClassBodyWidget extends StatelessWidget {
   BuildCardClassBodyWidget(this.item, this.onTap, {super.key});
-  ClassModel item;
-  Function(ClassModel item) onTap;
+  final ClassModel item;
+  final Function(ClassModel item) onTap;
   @override
   Widget build(BuildContext context) {
     return Material(

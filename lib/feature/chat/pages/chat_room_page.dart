@@ -34,7 +34,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   final _textController = TextEditingController();
   bool _showEmoji = false, _isUploading = false;
   Sizer? mq;
-  RoleType me = RoleType.student;
+  // RoleType me = RoleType.student;
   late AuthProvider auth;
   late ChatProvider chat;
   OrderClassModel? orderDetail;
@@ -54,10 +54,11 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
 
   @override
   void initState() {
+    log("message111");
     super.initState();
     auth = Provider.of<AuthProvider>(context, listen: false);
     chat = Provider.of<ChatProvider>(context, listen: false);
-    me = auth.user!.getRoleType();
+    // me = auth.user!.getRoleType();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       chat.init(auth: auth);
       await init();
@@ -100,34 +101,39 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                   child: StreamBuilder(
                     stream: chat.getAllMessages(widget.chat.chatId ?? ""),
                     builder: (context, snapshot) {
-                      switch (snapshot.connectionState) {
-                        case ConnectionState.waiting:
-                        case ConnectionState.none:
-                          return const SizedBox();
-                        case ConnectionState.active:
-                        case ConnectionState.done:
-                          final data = snapshot.data?.docs;
-                          _list = data
-                                  ?.map((e) => Message.fromJson(e.data()))
-                                  .toList() ??
-                              [];
-                          if (_list.isNotEmpty) {
-                            return ListView.builder(
-                                reverse: true,
-                                itemCount: _list.length,
-                                padding: EdgeInsets.only(
-                                    top: Sizer(context).h * .01),
-                                physics: const BouncingScrollPhysics(),
-                                itemBuilder: (context, index) {
-                                  return MessageCard(
-                                      chat: widget.chat, message: _list[index]);
-                                });
-                          } else {
-                            return const Center(
-                              child: Text('Say Hii! 👋',
-                                  style: TextStyle(fontSize: 20)),
-                            );
-                          }
+                      try {
+                        switch (snapshot.connectionState) {
+                          case ConnectionState.waiting:
+                          case ConnectionState.none:
+                            return const SizedBox();
+                          case ConnectionState.active:
+                          case ConnectionState.done:
+                            final data = snapshot.data?.docs;
+                            _list = data
+                                    ?.map((e) => Message.fromJson(e.data()))
+                                    .toList() ??
+                                [];
+                            if (_list.isNotEmpty) {
+                              return ListView.builder(
+                                  reverse: true,
+                                  itemCount: _list.length,
+                                  padding: EdgeInsets.only(
+                                      top: Sizer(context).h * .01),
+                                  physics: const BouncingScrollPhysics(),
+                                  itemBuilder: (context, index) {
+                                    return MessageCard(
+                                        chat: widget.chat,
+                                        message: _list[index]);
+                                  });
+                            } else {
+                              return const Center(
+                                child: Text('Say Hii! 👋',
+                                    style: TextStyle(fontSize: 20)),
+                              );
+                            }
+                        }
+                      } catch (e) {
+                        return Text("error : $e");
                       }
                     },
                   ),
@@ -162,9 +168,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
 
   Widget _appBar() {
     String toUser = widget.order.studentId ?? "";
-    if (me == RoleType.student) {
-      toUser = widget.order.tutorId ?? "";
-    }
     return InkWell(
       onTap: () {
         // Navigator.push(

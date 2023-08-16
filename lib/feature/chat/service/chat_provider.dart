@@ -203,6 +203,7 @@ class ChatProvider extends ChangeNotifier {
     await firebaseFirestore.collection('orders').doc(id).get().then((value) {
       order = OrderClassModel.fromJson(value.data()!);
     });
+
     UserModel? userChatInfo;
     await firebaseFirestore
         .collection('users')
