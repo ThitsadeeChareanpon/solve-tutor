@@ -1261,8 +1261,8 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                         },
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 5.0, vertical: 0.0),
-                          margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                              horizontal: 5.0, vertical: 2.0),
+                          margin: const EdgeInsets.symmetric(horizontal: 12.0),
                           decoration: BoxDecoration(
                             border: Border.all(
                               color: CustomColors.gray878787,
@@ -1472,7 +1472,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
       ),
       daysOfWeekHeight: 50,
       rowHeight: 50,
-      selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+      selectedDayPredicate: (day) => false,
       rangeSelectionMode: _rangeSelectionMode,
       eventLoader: _getEventsForDay,
       startingDayOfWeek: StartingDayOfWeek.monday,
