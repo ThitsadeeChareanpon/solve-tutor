@@ -860,8 +860,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   }
 
   void updateMeetingCode() {
-    print('meeting code init');
-    print(meeting.id);
     FirebaseFirestore.instance
         .collection('course_live')
         .doc(widget.courseId)
@@ -4703,92 +4701,92 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                           ),
                         ),
                       Expanded(
-                          flex: Responsive.isDesktop(context) ? 3 : 4,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Container(
-                                height: 32,
-                                width: 145,
-                                // margin: EdgeInsets.only(top: defaultPadding),
-                                // padding: EdgeInsets.all(defaultPadding),
-                                decoration: const BoxDecoration(
-                                  color: CustomColors.pinkFFCDD2,
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(defaultPadding),
+                        flex: Responsive.isDesktop(context) ? 3 : 4,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Container(
+                              height: 32,
+                              width: 145,
+                              // margin: EdgeInsets.only(top: defaultPadding),
+                              // padding: EdgeInsets.all(defaultPadding),
+                              decoration: const BoxDecoration(
+                                color: CustomColors.pinkFFCDD2,
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(defaultPadding),
+                                ),
+                              ),
+                              // child: Row(
+                              //   mainAxisAlignment: MainAxisAlignment.center,
+                              //   children: [
+                              //     Image.asset(
+                              //       ImageAssets.lowSignal,
+                              //       height: 22,
+                              //       width: 18,
+                              //     ),
+                              //     S.w(10),
+                              //     Flexible(
+                              //       child: Text(
+                              //         "สัญญาณอ่อน",
+                              //         style: CustomStyles.bold14redB71C1C,
+                              //         maxLines: 1,
+                              //         overflow: TextOverflow.ellipsis,
+                              //       ),
+                              //     ),
+                              //   ],
+                              // ),
+                            ),
+                            S.w(16.0),
+                            Container(
+                              height: 11,
+                              width: 11,
+                              decoration: BoxDecoration(
+                                  color: CustomColors.redF44336,
+                                  borderRadius: BorderRadius.circular(100)
+                                  //more than 50% of width makes circle
                                   ),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Image.asset(
-                                      ImageAssets.lowSignal,
-                                      height: 22,
-                                      width: 18,
-                                    ),
-                                    S.w(10),
-                                    Flexible(
-                                      child: Text(
-                                        "สัญญาณอ่อน",
-                                        style: CustomStyles.bold14redB71C1C,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                            ),
+                            S.w(4.0),
+                            RichText(
+                              text: TextSpan(
+                                text: 'Live Time: ',
+                                style: CustomStyles.med14redFF4201,
+                                children: <TextSpan>[
+                                  TextSpan(
+                                    text: '01 : 59 : 59',
+                                    style: CustomStyles.med14Gray878787,
+                                  ),
+                                ],
                               ),
-                              S.w(16.0),
-                              Container(
-                                height: 11,
-                                width: 11,
-                                decoration: BoxDecoration(
+                            ),
+                            S.w(16.0),
+                            InkWell(
+                              onTap: () {
+                                showCloseDialog(context, () {});
+                              },
+                              child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: defaultPadding * 1,
+                                    vertical: defaultPadding / 1.5,
+                                  ),
+                                  decoration: BoxDecoration(
                                     color: CustomColors.redF44336,
-                                    borderRadius: BorderRadius.circular(100)
-                                    //more than 50% of width makes circle
-                                    ),
-                              ),
-                              S.w(4.0),
-                              RichText(
-                                text: TextSpan(
-                                  text: 'Live Time: ',
-                                  style: CustomStyles.med14redFF4201,
-                                  children: <TextSpan>[
-                                    TextSpan(
-                                      text: '01 : 59 : 59',
-                                      style: CustomStyles.med14Gray878787,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              S.w(16.0),
-                              InkWell(
-                                onTap: () {
-                                  showCloseDialog(context, () {});
-                                },
-                                child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: defaultPadding * 1,
-                                      vertical: defaultPadding / 1.5,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: CustomColors.redF44336,
-                                      borderRadius: BorderRadius.circular(8.0),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          "ปิดห้องเรียน",
-                                          style: CustomStyles.bold14White,
-                                        ),
-                                      ],
-                                    )),
-                              ),
-                              S.w(Responsive.isTablet(context) ? 5 : 24),
-                            ],
-                          ))
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        "ปิดห้องเรียน",
+                                        style: CustomStyles.bold14White,
+                                      ),
+                                    ],
+                                  )),
+                            ),
+                            S.w(Responsive.isTablet(context) ? 5 : 24),
+                          ],
+                        ),
+                      )
                     ],
                   ),
                 ),
@@ -4850,7 +4848,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                           childAspectRatio: 18 / 4,
                                           crossAxisSpacing: 20,
                                           mainAxisSpacing: 20),
-                                  itemCount: studentsDisplay.length,
+                                  itemCount: students.length,
                                   itemBuilder: (BuildContext context, index) {
                                     return Container(
                                       alignment: Alignment.center,
@@ -4861,8 +4859,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                       child: Row(
                                         children: [
                                           S.w(defaultPadding),
-                                          Image.asset(
-                                            studentsDisplay[index]['image'],
+                                          Image.network(
+                                            students[index]['image'],
                                             height: 62,
                                             width: 62,
                                           ),
@@ -4876,49 +4874,44 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                               SizedBox(
                                                 width: 118,
                                                 child: Text(
-                                                  studentsDisplay[index]
-                                                      ['name'],
+                                                  students[index]['name'],
                                                   style: CustomStyles
                                                       .bold16Black363636Overflow,
                                                   maxLines: 1,
                                                 ),
                                               ),
                                               S.h(4),
-                                              Row(
-                                                children: [
-                                                  if (studentsDisplay[index]
-                                                          ['status_share'] !=
-                                                      'disable')
+                                              if (students[index]
+                                                      ['status_share'] !=
+                                                  'disable') ...[
+                                                Row(
+                                                  children: [
                                                     Image.asset(
                                                       ImageAssets.shareGreen,
                                                       width: 22,
                                                     ),
-                                                  if (studentsDisplay[index]
-                                                          ['status_share'] !=
-                                                      'disable')
                                                     S.w(3),
-                                                  Text(
-                                                    studentsDisplay[index]
-                                                        ['status_txt'],
-                                                    style: studentsDisplay[
-                                                                    index][
-                                                                'status_share'] ==
-                                                            'disable'
-                                                        ? CustomStyles
-                                                            .med12gray878787
-                                                        : CustomStyles
-                                                            .bold12greenPrimary,
-                                                  )
-                                                ],
-                                              ),
+                                                    Text(
+                                                      'Sharing Screen',
+                                                      style: CustomStyles
+                                                          .bold12greenPrimary,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ] // if share
+                                              else ...[
+                                                Text(
+                                                  'Not allow sharing yet',
+                                                  style: CustomStyles
+                                                      .med12gray878787,
+                                                ),
+                                              ] // if not share
                                             ],
                                           ),
                                           Expanded(child: Container()),
-                                          if (studentsDisplay[index]
-                                                      ['status_share'] !=
+                                          if (students[index]['status_share'] !=
                                                   'disable' &&
-                                              studentsDisplay[index]
-                                                      ['share_now'] ==
+                                              students[index]['share_now'] ==
                                                   'N')
                                             SizedBox(
                                               width: 80,
@@ -4937,14 +4930,37 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                                     ), // NEW
                                                   ),
                                                   onPressed: () {
-                                                    // Navigator.of(context).pop();
+                                                    Navigator.of(context).pop();
+                                                    if (_requestScreenShare ==
+                                                        true) {
+                                                      setState(() {
+                                                        focusedStudentId =
+                                                            students[index]
+                                                                ['id'];
+                                                        focusedStudentName =
+                                                            students[index]
+                                                                ['name'];
+                                                      });
+                                                      var size = students[index]
+                                                              ['solvepad_size']
+                                                          .split(',');
+                                                      changeSolvepadScaling(
+                                                          double.parse(size[0]),
+                                                          double.parse(
+                                                              size[1]));
+                                                      sendMessage(
+                                                        widget.userId,
+                                                        'FocusStudentScreen:${students[index]['id']}',
+                                                        stopwatch.elapsed
+                                                            .inMilliseconds,
+                                                      );
+                                                    }
                                                   },
                                                   child: Text('เลือก',
                                                       style: CustomStyles
                                                           .bold14White)),
                                             ),
-                                          if (studentsDisplay[index]
-                                                  ['share_now'] ==
+                                          if (students[index]['share_now'] ==
                                               'Y')
                                             Container(
                                               width: 118,
@@ -4976,34 +4992,39 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                   }),
                             ),
                             S.h(24),
-                            Container(
-                              width: 120,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: CustomColors.grayCFCFCF,
-                                  style: BorderStyle.solid,
-                                  width: 1.0,
-                                ),
-                                borderRadius: BorderRadius.circular(8),
-                                color: CustomColors.whitePrimary,
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  const Icon(
-                                    Icons.arrow_back,
-                                    size: 24,
-                                    color: CustomColors.gray878787,
+                            InkWell(
+                              onTap: () {
+                                Navigator.pop(context);
+                              },
+                              child: Container(
+                                width: 120,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: CustomColors.grayCFCFCF,
+                                    style: BorderStyle.solid,
+                                    width: 1.0,
                                   ),
-                                  S.w(8),
-                                  Text("ย้อนกลับ",
-                                      textAlign: TextAlign.center,
-                                      style: CustomStyles.bold14Gray878787),
-                                ],
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: CustomColors.whitePrimary,
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 4),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    const Icon(
+                                      Icons.arrow_back,
+                                      size: 24,
+                                      color: CustomColors.gray878787,
+                                    ),
+                                    S.w(8),
+                                    Text("ย้อนกลับ",
+                                        textAlign: TextAlign.center,
+                                        style: CustomStyles.bold14Gray878787),
+                                  ],
+                                ),
                               ),
                             ),
                           ],
