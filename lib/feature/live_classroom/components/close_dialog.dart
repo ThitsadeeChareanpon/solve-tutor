@@ -46,19 +46,19 @@ Future<void> showCloseDialog(
                         width: 185,
                         height: 40,
                         child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: CustomColors.redF44336,
-                              shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.circular(8.0), // <-- Radius
-                              ), // NEW
-                            ),
-                            onPressed: () {
-                              Navigator.of(context).pop(); // Close the dialog
-                              onConfirm(); // Execute the confirmation function
-                            },
-                            child:
-                                Text(confirm, style: CustomStyles.bold14White)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: CustomColors.redF44336,
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(8.0), // <-- Radius
+                            ), // NEW
+                          ),
+                          onPressed: () {
+                            Navigator.of(context).pop(); // Close the dialog
+                            onConfirm(); // Execute the confirmation function
+                          },
+                          child: Text(confirm, style: CustomStyles.bold14White),
+                        ),
                       ),
                       SizedBox(
                         width: 185,

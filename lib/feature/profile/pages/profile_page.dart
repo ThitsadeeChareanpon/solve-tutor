@@ -289,9 +289,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         barrierDismissible: true,
                         builder: (BuildContext context) {
                           return AlertDialog(
-                            content: Container(
+                            content: const SizedBox(
                               width: 300,
-                              child: const SingleChildScrollView(
+                              child: SingleChildScrollView(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: <Widget>[
@@ -305,7 +305,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                             actionsAlignment: MainAxisAlignment.center,
                             actions: <Widget>[
-                              Container(
+                              SizedBox(
                                 width: double.infinity,
                                 child: Row(
                                   children: [
@@ -417,6 +417,13 @@ class _ProfilePageState extends State<ProfilePage> {
                         Text(
                           authProvider.user?.email ?? "",
                           style: const TextStyle(
+                            color: greyColor,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          'SOLVE Instructor v 0.1.52',
+                          style: TextStyle(
                             color: greyColor,
                           ),
                         ),

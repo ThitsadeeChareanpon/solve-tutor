@@ -280,6 +280,15 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     super.initState();
     SystemChrome.setPreferredOrientations(
         [DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [
+      SystemUiOverlay.bottom,
+    ]);
+    SystemChrome.setSystemUIChangeCallback((systemOverlaysAreVisible) async {
+      await Future.delayed(const Duration(seconds: 3));
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [
+        SystemUiOverlay.bottom,
+      ]);
+    });
     initTimer();
     initPagingBtn();
     if (!widget.isMock) {
@@ -394,18 +403,10 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   }
 
   void initWss() {
-    if (!widget.isMock) {
-      channel = WebSocketChannel.connect(
-        Uri.parse(
-            'ws://35.240.169.164:3000/${widget.courseId}/${widget.startTime}'),
-      );
-    } // use Mockup data
-    else {
-      channel = WebSocketChannel.connect(
-        Uri.parse(
-            'ws://35.240.169.164:3000/${widget.courseId}/${widget.startTime}'),
-      );
-    }
+    channel = WebSocketChannel.connect(
+      Uri.parse(
+          'ws://35.240.169.164:3000/${widget.courseId}/${widget.startTime}'),
+    );
 
     channel?.stream.listen((message) {
       // if (_requestScreenShare) {
@@ -441,7 +442,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
         } // listen to student drawing
         else if (data.startsWith('RequestSolvepadSize')) {
           sendMessage(
-            widget.userId,
             'SetSolvepad:${mySolvepadSize.width}:${mySolvepadSize.height}',
             stopwatch.elapsed.inMilliseconds,
           );
@@ -705,6 +705,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
 
   @override
   dispose() {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -721,10 +722,11 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     channel?.sink.close();
   }
 
-  void sendMessage(String name, dynamic data, int time) {
+  void sendMessage(dynamic data, int time) {
     if (widget.isMock) return;
     try {
-      final message = json.encode({'uid': name, 'data': data, 'time': time});
+      final message =
+          json.encode({'uid': widget.userId, 'data': data, 'time': time});
       channel?.sink.add(message);
     } catch (e) {
       print('Error sending message: $e');
@@ -850,7 +852,10 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   }
 
   Future<bool> _onWillPopScope() async {
-    print('somehow I pop');
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     if (widget.isMock) {
       Navigator.pop(context);
     }
@@ -887,7 +892,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       pointStack = _penPoints[_currentPage];
       removePointStack(pointStack, index);
       sendMessage(
-        widget.userId,
         'Erase.pen.$index',
         stopwatch.elapsed.inMilliseconds,
       );
@@ -895,7 +899,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       pointStack = _highlighterPoints[_currentPage];
       removePointStack(pointStack, index);
       sendMessage(
-        widget.userId,
         'Erase.high.$index',
         stopwatch.elapsed.inMilliseconds,
       );
@@ -982,16 +985,14 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: _onWillPopScope,
-      child: SafeArea(
-        child: _joined && isCourseLoaded
-            ? Scaffold(
-                backgroundColor: CustomColors.grayCFCFCF,
-                body: !Responsive.isMobile(context)
-                    ? _buildTablet()
-                    : _buildMobile(),
-              )
-            : const LoadingScreen(),
-      ),
+      child: _joined && isCourseLoaded
+          ? Scaffold(
+              backgroundColor: CustomColors.grayCFCFCF,
+              body: !Responsive.isMobile(context)
+                  ? _buildTablet()
+                  : _buildMobile(),
+            )
+          : const LoadingScreen(),
     );
   }
 
@@ -1072,7 +1073,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                     openColors = !openColors;
                                   });
                                   sendMessage(
-                                    widget.userId,
                                     'StrokeColor.$index',
                                     stopwatch.elapsed.inMilliseconds,
                                   );
@@ -1124,7 +1124,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                     openLines = !openLines;
                                   });
                                   sendMessage(
-                                    widget.userId,
                                     'StrokeWidth.$index',
                                     stopwatch.elapsed.inMilliseconds,
                                   );
@@ -1224,7 +1223,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
 
                   if (_mode == DrawingMode.drag) {
                     sendMessage(
-                      widget.userId,
                       'ScrollZoom:${originalTranslationX.toStringAsFixed(2)}:${originalTranslationY.toStringAsFixed(2)}:${scale.toStringAsFixed(2)}',
                       stopwatch.elapsed.inMilliseconds,
                     );
@@ -1248,7 +1246,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                               if (activePointerId != null) return;
                               activePointerId = details.pointer;
                               sendMessage(
-                                widget.userId,
                                 details.localPosition.toString(),
                                 stopwatch.elapsed.inMilliseconds,
                               );
@@ -1310,7 +1307,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                               if (activePointerId != details.pointer) return;
                               activePointerId = details.pointer;
                               sendMessage(
-                                widget.userId,
                                 details.localPosition.toString(),
                                 stopwatch.elapsed.inMilliseconds,
                               );
@@ -1378,7 +1374,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                               if (activePointerId != details.pointer) return;
                               activePointerId = null;
                               sendMessage(
-                                widget.userId,
                                 'null',
                                 stopwatch.elapsed.inMilliseconds,
                               );
@@ -1409,7 +1404,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                               if (activePointerId != details.pointer) return;
                               activePointerId = null;
                               sendMessage(
-                                widget.userId,
                                 'null',
                                 stopwatch.elapsed.inMilliseconds,
                               );
@@ -1579,16 +1573,18 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                   onTap: () async {
                     showCloseDialog(context, () {
                       sendMessage(
-                        widget.userId,
                         'EndMeeting',
                         stopwatch.elapsed.inMilliseconds,
                       );
-                      meeting.end();
-                      closeChanel();
-                      FirebaseFirestore.instance
-                          .collection('course_live')
-                          .doc(widget.courseId)
-                          .update({'currentMeetingCode': ''});
+                      if (!widget.isMock) {
+                        meeting.end();
+                        closeChanel();
+                        FirebaseFirestore.instance
+                            .collection('course_live')
+                            .doc(widget.courseId)
+                            .update({'currentMeetingCode': ''});
+                      }
+                      Navigator.of(context).pop();
                     });
                     // await meeting.stopRecording();
                     // await fetchRecording(widget.meetingId);
@@ -1672,7 +1668,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                           if (_pageController.hasClients &&
                               _pageController.page!.toInt() != 0) {
                             sendMessage(
-                              widget.userId,
                               'ChangePage:${_currentPage - 1}',
                               stopwatch.elapsed.inMilliseconds,
                             );
@@ -1730,7 +1725,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                 _pageController.page!.toInt() !=
                                     _pages.length - 1) {
                               sendMessage(
-                                widget.userId,
                                 'ChangePage:${_currentPage + 1}',
                                 stopwatch.elapsed.inMilliseconds,
                               );
@@ -1879,7 +1873,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                               showStudent = value;
                             });
                             sendMessage(
-                              widget.userId,
                               'RequestScreenShare:$value',
                               stopwatch.elapsed.inMilliseconds,
                             );
@@ -2128,7 +2121,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                       if (_pageController.hasClients &&
                           _pageController.page!.toInt() != 0) {
                         sendMessage(
-                          widget.userId,
                           'ChangePage:${_currentPage - 1}',
                           stopwatch.elapsed.inMilliseconds,
                         );
@@ -2183,7 +2175,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                             _pageController.page!.toInt() !=
                                 _pages.length - 1) {
                           sendMessage(
-                            widget.userId,
                             'ChangePage:${_currentPage + 1}',
                             stopwatch.elapsed.inMilliseconds,
                           );
@@ -2222,7 +2213,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                   value: _requestScreenShare,
                   onChanged: (bool value) {
                     sendMessage(
-                      widget.userId,
                       'RequestScreenShare:$value',
                       stopwatch.elapsed.inMilliseconds,
                     );
@@ -2567,7 +2557,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                             if (index == 0) {
                                               _mode = DrawingMode.drag;
                                               sendMessage(
-                                                widget.userId,
                                                 'DrawingMode.drag',
                                                 stopwatch
                                                     .elapsed.inMilliseconds,
@@ -2575,7 +2564,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                             } else if (index == 1) {
                                               _mode = DrawingMode.pen;
                                               sendMessage(
-                                                widget.userId,
                                                 'DrawingMode.pen',
                                                 stopwatch
                                                     .elapsed.inMilliseconds,
@@ -2583,7 +2571,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                             } else if (index == 2) {
                                               _mode = DrawingMode.highlighter;
                                               sendMessage(
-                                                widget.userId,
                                                 'DrawingMode.highlighter',
                                                 stopwatch
                                                     .elapsed.inMilliseconds,
@@ -2591,7 +2578,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                             } else if (index == 3) {
                                               _mode = DrawingMode.eraser;
                                               sendMessage(
-                                                widget.userId,
                                                 'DrawingMode.eraser',
                                                 stopwatch
                                                     .elapsed.inMilliseconds,
@@ -2599,7 +2585,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                             } else if (index == 4) {
                                               _mode = DrawingMode.laser;
                                               sendMessage(
-                                                widget.userId,
                                                 'DrawingMode.laser',
                                                 stopwatch
                                                     .elapsed.inMilliseconds,
@@ -2700,7 +2685,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
               onTap: () {
                 showCloseDialog(context, () {
                   sendMessage(
-                    widget.userId,
                     'EndMeeting',
                     stopwatch.elapsed.inMilliseconds,
                   );
@@ -2881,35 +2865,30 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                         if (index == 0) {
                                           _mode = DrawingMode.drag;
                                           sendMessage(
-                                            widget.userId,
                                             'DrawingMode.drag',
                                             stopwatch.elapsed.inMilliseconds,
                                           );
                                         } else if (index == 1) {
                                           _mode = DrawingMode.pen;
                                           sendMessage(
-                                            widget.userId,
                                             'DrawingMode.pen',
                                             stopwatch.elapsed.inMilliseconds,
                                           );
                                         } else if (index == 2) {
                                           _mode = DrawingMode.highlighter;
                                           sendMessage(
-                                            widget.userId,
                                             'DrawingMode.highlighter',
                                             stopwatch.elapsed.inMilliseconds,
                                           );
                                         } else if (index == 3) {
                                           _mode = DrawingMode.eraser;
                                           sendMessage(
-                                            widget.userId,
                                             'DrawingMode.eraser',
                                             stopwatch.elapsed.inMilliseconds,
                                           );
                                         } else if (index == 4) {
                                           _mode = DrawingMode.laser;
                                           sendMessage(
-                                            widget.userId,
                                             'DrawingMode.laser',
                                             stopwatch.elapsed.inMilliseconds,
                                           );
@@ -3159,7 +3138,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                   changeSolvepadScaling(double.parse(size[0]),
                                       double.parse(size[1]));
                                   sendMessage(
-                                    widget.userId,
                                     'FocusStudentScreen:${students[index]['id']}',
                                     stopwatch.elapsed.inMilliseconds,
                                   );
@@ -3373,7 +3351,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                       double.parse(size[1]),
                                     );
                                     sendMessage(
-                                      widget.userId,
                                       'FocusStudentScreen:${students[index]['id']}',
                                       stopwatch.elapsed.inMilliseconds,
                                     );
@@ -3476,7 +3453,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                 changeSolvepadScaling(double.parse(size[0]),
                                     double.parse(size[1]));
                                 sendMessage(
-                                  widget.userId,
                                   'FocusStudentScreen:${students[selectedIndex]['id']}',
                                   stopwatch.elapsed.inMilliseconds,
                                 );
@@ -3558,7 +3534,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
           InkWell(
               onTap: () {
                 sendMessage(
-                  widget.userId,
                   'HostLeaveScreen:$focusedStudentId',
                   stopwatch.elapsed.inMilliseconds,
                 );
@@ -4949,7 +4924,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                                           double.parse(
                                                               size[1]));
                                                       sendMessage(
-                                                        widget.userId,
                                                         'FocusStudentScreen:${students[index]['id']}',
                                                         stopwatch.elapsed
                                                             .inMilliseconds,
