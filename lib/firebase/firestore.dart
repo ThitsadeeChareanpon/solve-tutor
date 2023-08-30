@@ -84,7 +84,41 @@ class FirestoreService {
 
   Future<List> getDocumentsWhere(String field, dynamic operator, dynamic value) async {
     try {
-      final querySnapshot = await collection.where(field, isEqualTo: value).get();
+      Query query;
+
+      switch (operator) {
+        case '==':
+          query = collection.where(field, isEqualTo: value);
+          break;
+        case '!=':
+          query = collection.where(field, isNotEqualTo: value);
+          break;
+        case '<':
+          query = collection.where(field, isLessThan: value);
+          break;
+        case '>':
+          query = collection.where(field, isGreaterThan: value);
+          break;
+        case '<=':
+          query = collection.where(field, isLessThanOrEqualTo: value);
+          break;
+        case '>=':
+          query = collection.where(field, isGreaterThanOrEqualTo: value);
+          break;
+        case 'array-contains':
+          query = collection.where(field, arrayContains: value);
+          break;
+        case 'array-contains-any':
+          query = collection.where(field, arrayContainsAny: value);
+          break;
+        case '??':
+          query = collection.where(field, isNull: value);
+          break;
+        default:
+          throw Exception('Unsupported operator: $operator');
+      }
+
+      final querySnapshot = await query.get();
       final documents = [];
       if (querySnapshot.docs.isEmpty) {
         return documents;
