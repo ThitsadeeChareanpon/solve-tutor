@@ -1584,7 +1584,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                             .doc(widget.courseId)
                             .update({'currentMeetingCode': ''});
                       }
-                      Navigator.of(context).pop();
                     });
                     // await meeting.stopRecording();
                     // await fetchRecording(widget.meetingId);

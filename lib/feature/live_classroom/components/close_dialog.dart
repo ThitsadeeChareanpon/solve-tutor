@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
+import '../../../nav.dart';
 import '../../calendar/constants/custom_colors.dart';
 import '../../calendar/constants/custom_styles.dart';
 import '../../calendar/widgets/sizebox.dart';
@@ -54,8 +56,17 @@ Future<void> showCloseDialog(
                             ), // NEW
                           ),
                           onPressed: () {
-                            Navigator.of(context).pop(); // Close the dialog
+                            SystemChrome.setPreferredOrientations([
+                              DeviceOrientation.portraitUp,
+                              DeviceOrientation.portraitDown,
+                            ]);
                             onConfirm(); // Execute the confirmation function
+                            Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => Nav(),
+                                ),
+                                (route) => false);
                           },
                           child: Text(confirm, style: CustomStyles.bold14White),
                         ),
@@ -64,22 +75,23 @@ Future<void> showCloseDialog(
                         width: 185,
                         height: 40,
                         child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: CustomColors.whitePrimary,
-                              elevation: 0,
-                              side: const BorderSide(
-                                  width: 1, color: CustomColors.grayE5E6E9),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                  8.0,
-                                ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: CustomColors.whitePrimary,
+                            elevation: 0,
+                            side: const BorderSide(
+                                width: 1, color: CustomColors.grayE5E6E9),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                8.0,
                               ),
                             ),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: Text(cancel,
-                                style: CustomStyles.bold14Gray878787)),
+                          ),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: Text(cancel,
+                              style: CustomStyles.bold14Gray878787),
+                        ),
                       ),
                     ],
                   )

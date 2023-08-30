@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:solve_tutor/feature/calendar/pages/course_live_calendar.dart';
 import 'package:solve_tutor/feature/chat/pages/chat_list_page.dart';
@@ -56,6 +57,12 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeRight,
+      DeviceOrientation.landscapeLeft,
+    ]);
     tabController =
         TabController(length: pages.length, vsync: this); // initialise it here
     currentIndex = widget.index;
