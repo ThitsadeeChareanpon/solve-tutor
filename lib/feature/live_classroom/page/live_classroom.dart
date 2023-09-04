@@ -11,6 +11,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:sizer/sizer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../../nav.dart';
 import '../../calendar/constants/custom_styles.dart';
 import '../../calendar/controller/create_course_live_controller.dart';
 import '../../calendar/widgets/sizebox.dart';
@@ -1584,6 +1585,12 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                             .doc(widget.courseId)
                             .update({'currentMeetingCode': ''});
                       }
+                      Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Nav(),
+                          ),
+                          (route) => false);
                     });
                     // await meeting.stopRecording();
                     // await fetchRecording(widget.meetingId);
@@ -2687,9 +2694,20 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                     'EndMeeting',
                     stopwatch.elapsed.inMilliseconds,
                   );
-                  if (!widget.isMock) meeting.end();
-                  if (widget.isMock) Navigator.of(context).pop();
-                  closeChanel();
+                  if (!widget.isMock) {
+                    meeting.end();
+                    closeChanel();
+                    FirebaseFirestore.instance
+                        .collection('course_live')
+                        .doc(widget.courseId)
+                        .update({'currentMeetingCode': ''});
+                  }
+                  Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Nav(),
+                      ),
+                      (route) => false);
                 });
               },
               child: Image.asset(
