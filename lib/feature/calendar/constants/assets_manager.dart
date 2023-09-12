@@ -126,4 +126,7 @@ class ImageAssets {
   static const String arrowNextCircleGreen =
       "$imagePath/arrow_next_circle_green.png";
   static const String penDisTab = "$imagePath/pen-dis-tab.png";
+  static const String recordDis = "$imagePath/record_dis.png";
+  static const String recordEnable = "$imagePath/record_enable.png";
+  static const String loading = "$imagePath/loading.gif";
 }

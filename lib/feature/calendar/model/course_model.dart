@@ -166,6 +166,7 @@ class CalendarDate {
   String? courseName;
   String? courseId;
   String? reviewFile;
+  List<dynamic>? audioFile;
 
   CalendarDate(
       {this.start, this.end, this.courseName, this.courseId, this.reviewFile});
@@ -176,6 +177,12 @@ class CalendarDate {
     courseName = json['course_name'] ?? '';
     courseId = json['course_id'] ?? '';
     reviewFile = json['review_file'] ?? '';
+    if (json['audio_file'] != null) {
+      audioFile = <String>[];
+      json['audio_file'].forEach((v) {
+        audioFile?.add(v);
+      });
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -185,6 +192,9 @@ class CalendarDate {
     data['course_name'] = courseName;
     data['course_id'] = courseId;
     data['review_file'] = reviewFile;
+    if (audioFile != null) {
+      data['audio_file'] = audioFile!.map((v) => v).toList();
+    }
     return data;
   }
 }
