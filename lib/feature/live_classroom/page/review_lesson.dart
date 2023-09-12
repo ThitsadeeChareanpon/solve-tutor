@@ -563,12 +563,8 @@ class _ReviewLessonState extends State<ReviewLesson>
       } // Width
       else if (actionData.startsWith('ChangePage')) {
         var parts = actionData.split(':');
-        var pageAction = parts.last;
-        if (pageAction == 'prev') {
-          _tutorCurrentPage--;
-        } else if (pageAction == 'next') {
-          _tutorCurrentPage++;
-        }
+        var pageNumber = parts.last;
+        _tutorCurrentPage = int.parse(pageNumber);
       } // Paging
     }
   }
@@ -1955,9 +1951,7 @@ class _ReviewLessonState extends State<ReviewLesson>
             child: AnimatedContainer(
               duration: const Duration(seconds: 1),
               curve: Curves.fastOutSlowIn,
-              height: selectedTools
-                  ? 270
-                  : MediaQuery.of(context).size.height - 300,
+              height: selectedTools ? 200 : 450,
               width: 120,
               decoration: BoxDecoration(
                 border: Border.all(

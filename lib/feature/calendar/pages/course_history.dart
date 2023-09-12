@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -91,7 +93,6 @@ class _CourseHistoryState extends State<CourseHistory>
     setState(() {
       reviewList = courseList;
     });
-    print(reviewList[0].thumbnailUrl);
   }
 
   @override
@@ -175,20 +176,19 @@ class _CourseHistoryState extends State<CourseHistory>
 
                 return InkWell(
                   onTap: () {
-                    print('tab card');
-                    // Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //     builder: (_) => ReviewLesson(
-                    //       courseId: reviewList[index].courseId!,
-                    //       courseName: reviewList[index].courseName!,
-                    //       file: reviewList[index].file!,
-                    //       tutorId: reviewList[index].tutorId!,
-                    //       userId: authProvider!.user!.id!,
-                    //       docId: reviewList[index].documentId!,
-                    //     ),
-                    //   ),
-                    // );
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ReviewLesson(
+                          courseId: reviewList[index].courseId!,
+                          courseName: reviewList[index].courseName!,
+                          file: reviewList[index].file!,
+                          tutorId: authProvider!.user!.id!,
+                          userId: authProvider!.user!.id!,
+                          docId: reviewList[index].documentId!,
+                        ),
+                      ),
+                    );
                   },
                   child: Container(
                     margin: const EdgeInsets.symmetric(vertical: 10),

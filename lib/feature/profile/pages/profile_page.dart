@@ -422,7 +422,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                         const SizedBox(height: 10),
                         const Text(
-                          'SOLVE Instructor v 0.1.54',
+                          'SOLVE Instructor v 0.1.60',
                           style: TextStyle(
                             color: greyColor,
                           ),
