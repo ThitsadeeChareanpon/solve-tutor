@@ -57,6 +57,8 @@ class TutorLiveClassroom extends StatefulWidget {
 class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   // Conference
   bool isRecordingOn = false;
+  bool isRecordingLoading = false;
+  int recordIndex = 0;
   bool showChatSnackbar = false;
   String recordingState = "RECORDING_STOPPED";
   late Room meeting;
@@ -784,12 +786,42 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     });
 
     // Called when recording is started
-    _meeting.on(Events.recordingStateChanged, (String status) {
+    _meeting.on(Events.recordingStateChanged, (String status) async {
       print('Conference Recording Changed');
       print(status);
       setState(() {
         recordingState = status;
       });
+      switch (status) {
+        case 'RECORDING_STOPPED':
+          setState(() {
+            isRecordingLoading = false;
+            isRecordingOn = !isRecordingOn;
+          });
+          print('RECORDING_STOPPED:$recordIndex');
+          sendMessage('RECORDING_STOPPED:$recordIndex', stopwatch.elapsed.inMilliseconds);
+          await fetchRecording(widget.meetingId);
+          break;
+        case 'RECORDING_STOPPING':
+          setState(() {
+            isRecordingLoading = true;
+          });
+          break;
+        case 'RECORDING_STARTING':
+          setState(() {
+            isRecordingLoading = true;
+          });
+          break;
+        case 'RECORDING_STARTED':
+          setState(() {
+            isRecordingLoading = false;
+            isRecordingOn = !isRecordingOn;
+          });
+          print('RECORDING_STARTED:$recordIndex');
+          sendMessage('RECORDING_STARTED:$recordIndex', stopwatch.elapsed.inMilliseconds);
+          break;
+        default:
+      }
     });
 
     // Called when stream is enabled
@@ -841,15 +873,33 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
 
   Future<void> fetchRecording(meetingID) async {
     try {
+      List recordList = [];
       var record = await fetchRecordings(widget.token, meetingID);
-      print('record url');
-      print(record);
-      if (record[0]['file'] != null) {
-        print(record[0]['file']['fileUrl']);
-      }
+      // print('record url');
+      // print(record);
+      recordIndex += 1;
+      record.forEach((r) {
+        if (r['file'] != null) {
+          // print(r['file']['fileUrl']);
+          recordList.add(r['file']['fileUrl']);
+        }
+      });
+      print(recordList);
+      await updateAudioFile(recordList);
     } catch (error) {
       print('fetchRecording error: $error');
     }
+  }
+
+  Future<void> updateAudioFile(recordList) async {
+    var calendars = courseController.courseData?.calendars;
+    int indexToUpdate = calendars!.indexWhere((element) =>
+    element.start?.compareTo(DateTime.fromMillisecondsSinceEpoch(widget.startTime)) == 0);
+
+    if (indexToUpdate != -1) {
+      calendars[indexToUpdate].audioFile = recordList;
+    }
+    await courseController.updateCourseDetails(courseController.courseData);
   }
 
   Future<bool> _onWillPopScope() async {
@@ -1572,26 +1622,30 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                 S.w(16.0),
                 InkWell(
                   onTap: () async {
-                    showCloseDialog(context, () {
-                      sendMessage(
-                        'EndMeeting',
-                        stopwatch.elapsed.inMilliseconds,
-                      );
-                      if (!widget.isMock) {
-                        meeting.end();
-                        closeChanel();
-                        FirebaseFirestore.instance
-                            .collection('course_live')
-                            .doc(widget.courseId)
-                            .update({'currentMeetingCode': ''});
-                      }
-                      Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => Nav(),
-                          ),
-                          (route) => false);
-                    });
+                    if(isRecordingOn){
+                      showAlertRecordingDialog(context);
+                    } else {
+                      showCloseDialog(context, () {
+                        sendMessage(
+                          'EndMeeting',
+                          stopwatch.elapsed.inMilliseconds,
+                        );
+                        if (!widget.isMock) {
+                          meeting.end();
+                          closeChanel();
+                          FirebaseFirestore.instance
+                              .collection('course_live')
+                              .doc(widget.courseId)
+                              .update({'currentMeetingCode': ''});
+                        }
+                        Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Nav(),
+                            ),
+                                (route) => false);
+                      });
+                    }
                     // await meeting.stopRecording();
                     // await fetchRecording(widget.meetingId);
                   },
@@ -1766,6 +1820,30 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                Material(
+                  child: InkWell(
+                    onTap: () async {
+                      if(!isRecordingLoading) {
+                        if (!isRecordingOn) {
+                          await meeting.startRecording(config: {
+                            "mode": "audio"
+                          });
+                        } else {
+                          await meeting.stopRecording();
+                        }
+                      }
+                    },
+                    child: Image.asset(
+                      isRecordingLoading ? ImageAssets.loading :
+                      isRecordingOn
+                          ? ImageAssets.recordDis
+                          : ImageAssets.recordEnable,
+                      height: 44,
+                      width: 44,
+                    ),
+                  ),
+                ),
+                S.w(defaultPadding),
                 Material(
                   child: InkWell(
                     onTap: () {
