@@ -657,8 +657,6 @@ class _ReviewLessonState extends State<ReviewLesson>
                 ),
               ],
             ),
-
-            /// Play button
             Positioned(
               top: 80,
               right: 40,
@@ -904,6 +902,11 @@ class _ReviewLessonState extends State<ReviewLesson>
                 headerLayer2Mobile(),
                 const DividerLine(),
               ],
+            ),
+            Positioned(
+              top: 70,
+              right: 35,
+              child: play(),
             ),
 
             ///tools widget
