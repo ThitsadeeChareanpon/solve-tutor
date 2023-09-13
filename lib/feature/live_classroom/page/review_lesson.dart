@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/cupertino.dart';
@@ -164,6 +165,7 @@ class _ReviewLessonState extends State<ReviewLesson>
   int? activePointerId;
   bool _isPageReady = false;
   bool _isSolvepadDataReady = false;
+  int replayIndex = 0;
 
   // ---------- VARIABLE: page control
   String _formattedElapsedTime = ' 00 : 00 : 00 ';
@@ -193,12 +195,8 @@ class _ReviewLessonState extends State<ReviewLesson>
   }
 
   Future<void> initPagesData() async {
-    print('init data');
-    print(widget.file);
-    print(widget.docId);
     if (widget.docId == '') return;
     var sheet = await getDocFiles(widget.tutorId, widget.docId);
-    print(sheet.length);
     setState(() {
       _pages = sheet;
       _isPageReady = true;
@@ -232,19 +230,20 @@ class _ReviewLessonState extends State<ReviewLesson>
           downloadedSolvepad = jsonDecode(response.body);
           _isSolvepadDataReady = true;
         });
-        print('load solvepad complete');
+        log('load solvepad complete');
         startInstantReplay();
       } else {
         print('Failed to download file');
       }
     } catch (e) {
-      print('Get file URL error: $e');
+      log('Get file URL error: $e');
     }
   }
 
   void startInstantReplay() {
     if (_isPageReady && _isSolvepadDataReady) {
-      instantReplay();
+      log('function: startInstantReplay()');
+      // instantReplay();
     }
   }
 
@@ -319,8 +318,9 @@ class _ReviewLessonState extends State<ReviewLesson>
     }
   }
 
-  void replayLoopLive() async {
-    print('start replay loop');
+  void startReplayLoop({int startIndex = 0}) async {
+    log('start replay loop');
+    _isReplaying = true;
     _replayTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
         setState(() {
@@ -330,14 +330,19 @@ class _ReviewLessonState extends State<ReviewLesson>
         timer.cancel();
       }
     });
-    for (int i = 0; i < downloadedSolvepad.length; i++) {
+    for (int i = startIndex; i < downloadedSolvepad.length; i++) {
       if (downloadedSolvepad[i]['uid'] != widget.tutorId) {
         continue;
       }
       int actionTime = downloadedSolvepad[i]['time'];
       String actionData = downloadedSolvepad[i]['data'];
       while (stopwatch.elapsed.inMilliseconds < actionTime) {
-        await Future.delayed(Duration(milliseconds: 0), () {});
+        if (_isPause) {
+          replayIndex = i;
+          log('end replay loop due to pause');
+          return;
+        }
+        await Future.delayed(const Duration(milliseconds: 0), () {});
       }
       if (actionData.startsWith('Offset')) {
         var offset = convertToOffset(actionData);
@@ -446,27 +451,17 @@ class _ReviewLessonState extends State<ReviewLesson>
       } // ScrollZoom
       else if (actionData.startsWith('ChangePage')) {
         var parts = actionData.split(':');
-        var pageAction = parts.last;
-        if (pageAction == 'prev') {
-          _tutorCurrentPage--;
-          if (tabFreestyle) continue;
-          _pageController.animateToPage(
-            _pageController.page!.toInt() - 1,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-          );
-        } else if (pageAction == 'next') {
-          _tutorCurrentPage++;
-          if (tabFreestyle) continue;
-          _pageController.animateToPage(
-            _pageController.page!.toInt() + 1,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-          );
-        }
+        var pageNumber = parts.last;
+        _tutorCurrentPage = int.parse(pageNumber);
+        // if (tabFreestyle) continue;
+        _pageController.animateToPage(
+          _tutorCurrentPage,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
       } // Paging
     }
-    print('exit replay loop');
+    log('exit replay loop');
     setState(() {
       _isPause = !_isPause;
       _isReplaying = false;
@@ -602,6 +597,13 @@ class _ReviewLessonState extends State<ReviewLesson>
                   ),
                 ),
               ],
+            ),
+
+            /// Play button
+            Positioned(
+              top: 80,
+              right: 40,
+              child: play(),
             ),
             if (openColors)
               Positioned(
@@ -831,29 +833,31 @@ class _ReviewLessonState extends State<ReviewLesson>
 
   _buildMobile() {
     return Scaffold(
-        backgroundColor: CustomColors.grayCFCFCF,
-        body: SafeArea(
-            right: false,
-            left: false,
-            bottom: false,
-            child: Stack(
+      backgroundColor: CustomColors.grayCFCFCF,
+      body: SafeArea(
+        right: false,
+        left: false,
+        bottom: false,
+        child: Stack(
+          children: [
+            Column(
               children: [
-                Column(
-                  children: [
-                    headerLayer2Mobile(),
-                    const DividerLine(),
-                  ],
-                ),
-
-                ///tools widget
-                if (!selectedTools) toolsUndoMobile(),
-                if (!selectedTools) toolsMobile(),
-                if (selectedTools) toolsActiveMobile(),
-
-                /// Control menu
-                if (openShowDisplay == false) toolsControlMobile(),
+                headerLayer2Mobile(),
+                const DividerLine(),
               ],
-            )));
+            ),
+
+            ///tools widget
+            if (!selectedTools) toolsUndoMobile(),
+            if (!selectedTools) toolsMobile(),
+            if (selectedTools) toolsActiveMobile(),
+
+            /// Control menu
+            if (openShowDisplay == false) toolsControlMobile(),
+          ],
+        ),
+      ),
+    );
   }
 
   _buildMobileFullScreen() {
@@ -1258,20 +1262,30 @@ class _ReviewLessonState extends State<ReviewLesson>
         height: 45,
         child: GestureDetector(
           onTap: () {
-            setState(() {
-              _isPause = !_isPause;
-            });
-            if (!_isPause) {
+            if (_isPause) {
+              setState(() {
+                _isPause = !_isPause;
+              });
               if (!_isReplaying) {
                 stopwatch.reset();
                 stopwatch.start();
-                replayLoopLive();
-              } else {
+                startReplayLoop();
+              } // case: before start
+              else {
                 stopwatch.start();
-              }
-            } else {
+                log('time at resume');
+                log(stopwatch.elapsed.inMilliseconds.toString());
+                startReplayLoop(startIndex: replayIndex);
+              } // case: pausing
+            } // press while pausing or before start
+            else {
+              setState(() {
+                _isPause = !_isPause;
+              });
               stopwatch.stop();
-            }
+              log('time at pausing');
+              log(stopwatch.elapsed.inMilliseconds.toString());
+            } // press while playing
           },
           child: Container(
             decoration: BoxDecoration(
