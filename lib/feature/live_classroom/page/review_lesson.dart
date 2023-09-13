@@ -233,7 +233,7 @@ class _ReviewLessonState extends State<ReviewLesson>
         log('load solvepad complete');
         startInstantReplay();
       } else {
-        print('Failed to download file');
+        log('Failed to download file');
       }
     } catch (e) {
       log('Get file URL error: $e');
@@ -320,6 +320,7 @@ class _ReviewLessonState extends State<ReviewLesson>
 
   void startReplayLoop({int startIndex = 0}) async {
     log('start replay loop');
+    log('start index: ${startIndex.toString()}');
     _isReplaying = true;
     _replayTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
@@ -407,13 +408,7 @@ class _ReviewLessonState extends State<ReviewLesson>
         }
       } // Null
       else if (actionData.startsWith('DrawingMode')) {
-        String modeString = actionData.replaceAll('DrawingMode.', '');
-        DrawingMode drawingMode = DrawingMode.values.firstWhere(
-            (e) => e.toString() == 'DrawingMode.$modeString',
-            orElse: () => DrawingMode.drag);
-        setState(() {
-          _tutorMode = drawingMode;
-        });
+        setDrawingMode(actionData);
       } // Mode
       else if (actionData.startsWith('Erase')) {
         var parts = actionData.split('.');
@@ -425,18 +420,10 @@ class _ReviewLessonState extends State<ReviewLesson>
         }
       } // Erase
       else if (actionData.startsWith('StrokeColor')) {
-        var parts = actionData.split('.');
-        var index = int.parse(parts.last);
-        setState(() {
-          _tutorColorIndex = index;
-        });
+        setStrokeColor(actionData);
       } // Color
       else if (actionData.startsWith('StrokeWidth')) {
-        var parts = actionData.split('.');
-        var index = int.parse(parts.last);
-        setState(() {
-          _tutorStrokeWidthIndex = index;
-        });
+        setStrokeWidth(actionData);
       } // Width
       else if (actionData.startsWith('ScrollZoom')) {
         var parts = actionData.split(':');
@@ -444,7 +431,7 @@ class _ReviewLessonState extends State<ReviewLesson>
         var scrollY = double.parse(parts[2]);
         var zoom = double.parse(parts.last);
         _tutorCurrentScrollZoom = '${parts[1]}:${parts[2]}:${parts[3]}';
-        if (tabFreestyle) continue;
+        // if (tabFreestyle) continue;
         _transformationController[_tutorCurrentPage].value = Matrix4.identity()
           ..translate(scaleScrollX(scrollX), scaleScrollY(scrollY))
           ..scale(zoom);
@@ -466,6 +453,78 @@ class _ReviewLessonState extends State<ReviewLesson>
       _isPause = !_isPause;
       _isReplaying = false;
     });
+  }
+
+  void setDrawingMode(String actionData) {
+    String modeString = actionData.replaceAll('DrawingMode.', '');
+    DrawingMode drawingMode = DrawingMode.values.firstWhere(
+        (e) => e.toString() == 'DrawingMode.$modeString',
+        orElse: () => DrawingMode.drag);
+    setState(() {
+      _tutorMode = drawingMode;
+    });
+  }
+
+  void setStrokeColor(String actionData) {
+    var parts = actionData.split('.');
+    var index = int.parse(parts.last);
+    setState(() {
+      _tutorColorIndex = index;
+    });
+  }
+
+  void setStrokeWidth(String actionData) {
+    var parts = actionData.split('.');
+    var index = int.parse(parts.last);
+    setState(() {
+      _tutorStrokeWidthIndex = index;
+    });
+  }
+
+  int findReplayIndex() {
+    for (int i = 0; i < downloadedSolvepad.length; i++) {
+      if (downloadedSolvepad[i]['data'] == 'ChangePage:$_currentPage') {
+        setModeAfterSkip(i);
+        setColorAfterSkip(i);
+        setWidthAfterSkip(i);
+        Duration indexTime = convertToDuration(downloadedSolvepad[i]['time']);
+        stopwatch.skip(indexTime);
+        return i;
+      }
+    }
+    return 0; // Return -1 if not found
+  }
+
+  Duration convertToDuration(int timeInt) {
+    int milliseconds = timeInt;
+    return Duration(milliseconds: milliseconds);
+  }
+
+  void setModeAfterSkip(int index) {
+    for (int i = index - 1; i >= 0; i--) {
+      if (downloadedSolvepad[i]['data'].startsWith('DrawingMode.')) {
+        setDrawingMode(downloadedSolvepad[i]['data']);
+        return;
+      }
+    }
+  }
+
+  void setColorAfterSkip(int index) {
+    for (int i = index - 1; i >= 0; i--) {
+      if (downloadedSolvepad[i]['data'].startsWith('StrokeColor.')) {
+        setStrokeColor(downloadedSolvepad[i]['data']);
+        return;
+      }
+    }
+  }
+
+  void setWidthAfterSkip(int index) {
+    for (int i = index - 1; i >= 0; i--) {
+      if (downloadedSolvepad[i]['data'].startsWith('StrokeWidth.')) {
+        setStrokeWidth(downloadedSolvepad[i]['data']);
+        return;
+      }
+    }
   }
 
   void instantReplay() async {
@@ -1269,7 +1328,7 @@ class _ReviewLessonState extends State<ReviewLesson>
               if (!_isReplaying) {
                 stopwatch.reset();
                 stopwatch.start();
-                startReplayLoop();
+                startReplayLoop(startIndex: findReplayIndex());
               } // case: before start
               else {
                 stopwatch.start();
