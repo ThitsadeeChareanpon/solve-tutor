@@ -21,12 +21,13 @@ import '../solvepad/solvepad_stroke_model.dart';
 import '../utils/responsive.dart';
 
 class ReviewLesson extends StatefulWidget {
-  final String courseId, courseName, file, tutorId, userId, docId;
+  final String courseId, courseName, file, tutorId, userId, docId, audio;
   const ReviewLesson({
     Key? key,
     required this.courseId,
     required this.courseName,
     required this.file,
+    required this.audio,
     required this.tutorId,
     required this.userId,
     required this.docId,
@@ -192,6 +193,7 @@ class _ReviewLessonState extends State<ReviewLesson>
     initPagesData();
     initPagingBtn();
     initDownloadSolvepad();
+    print(widget.audio);
   }
 
   Future<void> initPagesData() async {

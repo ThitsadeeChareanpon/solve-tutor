@@ -76,6 +76,10 @@ class _CourseHistoryState extends State<CourseHistory>
             (item as Map<String, dynamic>)
                 .map((key, value) => MapEntry(key, value));
 
+        if (itemWithAdditionalFields['audio_file'] == null ||
+            itemWithAdditionalFields['audio_file'].isEmpty) {
+          itemWithAdditionalFields['audio_file'] = null;
+        }
         // Adding additional fields
         itemWithAdditionalFields['thumbnail_url'] = thumbnailUrl;
         itemWithAdditionalFields['document_id'] = docId;
@@ -183,6 +187,7 @@ class _CourseHistoryState extends State<CourseHistory>
                           courseId: reviewList[index].courseId!,
                           courseName: reviewList[index].courseName!,
                           file: reviewList[index].file!,
+                          audio: reviewList[index].audio!,
                           tutorId: authProvider!.user!.id!,
                           userId: authProvider!.user!.id!,
                           docId: reviewList[index].documentId!,
@@ -211,7 +216,8 @@ class _CourseHistoryState extends State<CourseHistory>
                             SizedBox(
                               height: 48,
                               width: 85,
-                              child: reviewList[index].thumbnailUrl != null
+                              child: reviewList[index].thumbnailUrl != null &&
+                                      reviewList[index].thumbnailUrl != ''
                                   ? CachedNetworkImage(
                                       width: double.infinity,
                                       fit: BoxFit.cover,
