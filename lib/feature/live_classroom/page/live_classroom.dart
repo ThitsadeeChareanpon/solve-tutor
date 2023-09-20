@@ -2850,6 +2850,28 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             // ),
             S.h(8),
             InkWell(
+              onTap: () async {
+                if(!isRecordingLoading) {
+                  if (!isRecordingOn) {
+                    await meeting.startRecording(config: {
+                      "mode": "audio"
+                    });
+                  } else {
+                    await meeting.stopRecording();
+                  }
+                }
+              },
+              child: Image.asset(
+                isRecordingLoading ? ImageAssets.loading :
+                isRecordingOn
+                    ? ImageAssets.recordDis
+                    : ImageAssets.recordEnable,
+                height: 44,
+                width: 44,
+              ),
+            ),
+            S.h(8),
+            InkWell(
               onTap: () {
                 setState(() {
                   micEnable = !micEnable;
