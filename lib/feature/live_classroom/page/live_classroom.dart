@@ -2854,6 +2854,11 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                 setState(() {
                   micEnable = !micEnable;
                 });
+                if (micEnable && !widget.isMock) {
+                  meeting.unmuteMic();
+                } else {
+                  meeting.muteMic();
+                }
               },
               child: Image.asset(
                 micEnable ? ImageAssets.micEnable : ImageAssets.micDis,
@@ -4315,6 +4320,11 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                     setState(() {
                                       micEnable = !micEnable;
                                     });
+                                    if (micEnable && !widget.isMock) {
+                                      meeting.unmuteMic();
+                                    } else {
+                                      meeting.muteMic();
+                                    }
                                   },
                                   child: Image.asset(
                                     micEnable
