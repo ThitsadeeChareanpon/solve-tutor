@@ -148,7 +148,7 @@ class _ReviewLessonState extends State<ReviewLesson>
   DrawingMode _mode = DrawingMode.drag;
   DrawingMode _tutorMode = DrawingMode.drag;
   String _tutorCurrentScrollZoom = '';
-  final SolveStopwatch stopwatch = SolveStopwatch();
+  final SolveStopwatch solvepadStopwatch = SolveStopwatch();
   Size studentSolvepadSize = const Size(1059.0, 547.0);
   Size? mySolvepadSize;
   double sheetImageRatio = 0.7373;
@@ -162,7 +162,6 @@ class _ReviewLessonState extends State<ReviewLesson>
 
   // ---------- VARIABLE: Solve Pad features
   bool _isReplaying = false;
-  // bool _isStarted = true;
   bool _isPrevBtnActive = false;
   bool _isNextBtnActive = true;
   int? activePointerId;
@@ -171,10 +170,10 @@ class _ReviewLessonState extends State<ReviewLesson>
   int replayIndex = 0;
 
   // ---------- VARIABLE: page control
-  String _formattedElapsedTime = ' 00 : 00 : 00 ';
+  // String _formattedElapsedTime = ' 00 : 00 : 00 ';
   Timer? _laserTimer;
   Timer? _tutorLaserTimer;
-  Timer? _replayTimer;
+  // Timer? _replayTimer;
   int _currentPage = 0;
   int _tutorCurrentPage = 0;
   final PageController _pageController = PageController();
@@ -240,10 +239,8 @@ class _ReviewLessonState extends State<ReviewLesson>
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
-        setState(() {
-          downloadedSolvepad = jsonDecode(response.body);
-          _isSolvepadDataReady = true;
-        });
+        downloadedSolvepad = jsonDecode(response.body);
+        _isSolvepadDataReady = true;
         log('load solvepad complete');
         if (widget.audio == null) {
           startInstantReplay();
@@ -266,10 +263,8 @@ class _ReviewLessonState extends State<ReviewLesson>
     audioBuffer = await downloadAudio(widget.audio!);
     _isAudioReady = true;
     _audioPlayer.openPlayer().then((e) {
-      setState(() {
-        _isPlayerReady = true;
-        log('load player complete');
-      });
+      _isPlayerReady = true;
+      log('load player complete');
     });
   }
 
@@ -344,7 +339,7 @@ class _ReviewLessonState extends State<ReviewLesson>
       DeviceOrientation.landscapeRight,
       DeviceOrientation.landscapeLeft,
     ]);
-    _replayTimer?.cancel();
+    // _replayTimer?.cancel();
     _audioPlayer.closePlayer();
     super.dispose();
   }
@@ -371,22 +366,24 @@ class _ReviewLessonState extends State<ReviewLesson>
     log('function: startReplayLoop()');
     log('start index: ${startIndex.toString()}');
     _isReplaying = true;
-    _replayTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (mounted) {
-        setState(() {
-          _formattedElapsedTime = _formatElapsedTime(stopwatch.elapsed);
-        });
-      } else {
-        timer.cancel();
-      }
-    });
+    // _replayTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    //   if (mounted) {
+    //     setState(() {
+    //       _formattedElapsedTime = _formatElapsedTime(solvepadStopwatch.elapsed);
+    //     });
+    //   } else {
+    //     timer.cancel();
+    //   }
+    // });
     for (int i = startIndex; i < downloadedSolvepad.length; i++) {
       if (downloadedSolvepad[i]['uid'] != widget.tutorId) {
         continue;
       }
       int actionTime = downloadedSolvepad[i]['time'];
       String actionData = downloadedSolvepad[i]['data'];
-      while (stopwatch.elapsed.inMilliseconds + initialAudioTime + audioDelay <
+      while (solvepadStopwatch.elapsed.inMilliseconds +
+              initialAudioTime +
+              audioDelay <
           actionTime) {
         if (_isPause) {
           replayIndex = i;
@@ -510,25 +507,19 @@ class _ReviewLessonState extends State<ReviewLesson>
     DrawingMode drawingMode = DrawingMode.values.firstWhere(
         (e) => e.toString() == 'DrawingMode.$modeString',
         orElse: () => DrawingMode.drag);
-    setState(() {
-      _tutorMode = drawingMode;
-    });
+    _tutorMode = drawingMode;
   }
 
   void setStrokeColor(String actionData) {
     var parts = actionData.split('.');
     var index = int.parse(parts.last);
-    setState(() {
-      _tutorColorIndex = index;
-    });
+    _tutorColorIndex = index;
   }
 
   void setStrokeWidth(String actionData) {
     var parts = actionData.split('.');
     var index = int.parse(parts.last);
-    setState(() {
-      _tutorStrokeWidthIndex = index;
-    });
+    _tutorStrokeWidthIndex = index;
   }
 
   int findReplayIndex(String keyword) {
@@ -538,7 +529,7 @@ class _ReviewLessonState extends State<ReviewLesson>
         setColorAfterSkip(i);
         setWidthAfterSkip(i);
         Duration indexTime = convertToDuration(downloadedSolvepad[i]['time']);
-        stopwatch.skip(indexTime);
+        solvepadStopwatch.skip(indexTime);
         return i;
       }
     }
@@ -638,9 +629,7 @@ class _ReviewLessonState extends State<ReviewLesson>
         DrawingMode drawingMode = DrawingMode.values.firstWhere(
             (e) => e.toString() == 'DrawingMode.$modeString',
             orElse: () => DrawingMode.drag);
-        setState(() {
-          _tutorMode = drawingMode;
-        });
+        _tutorMode = drawingMode;
       } // Mode
       else if (actionData.startsWith('Erase')) {
         var parts = actionData.split('.');
@@ -654,16 +643,12 @@ class _ReviewLessonState extends State<ReviewLesson>
       else if (actionData.startsWith('StrokeColor')) {
         var parts = actionData.split('.');
         var index = int.parse(parts.last);
-        setState(() {
-          _tutorColorIndex = index;
-        });
+        _tutorColorIndex = index;
       } // Color
       else if (actionData.startsWith('StrokeWidth')) {
         var parts = actionData.split('.');
         var index = int.parse(parts.last);
-        setState(() {
-          _tutorStrokeWidthIndex = index;
-        });
+        _tutorStrokeWidthIndex = index;
       } // Width
       else if (actionData.startsWith('ChangePage')) {
         var parts = actionData.split(':');
@@ -788,10 +773,8 @@ class _ReviewLessonState extends State<ReviewLesson>
                             return InkWell(
                               onTap: () {
                                 setState(() {
-                                  setState(() {
-                                    _selectedIndexLines = index;
-                                    openLines = !openLines;
-                                  });
+                                  _selectedIndexLines = index;
+                                  openLines = !openLines;
                                 });
                               },
                               child: Column(
@@ -824,7 +807,6 @@ class _ReviewLessonState extends State<ReviewLesson>
       //       if (showSpeechBalloon)
       //         InkWell(
       //           onTap: () {
-      //             print('bolloon tap');
       //             setState(() {
       //               showSpeechBalloon = false;
       //             });
@@ -849,7 +831,6 @@ class _ReviewLessonState extends State<ReviewLesson>
       //           InkWell(
       //             onTap: () {
       //               showSpeechBalloon = false;
-      //               print('List searh found');
       //               // Navigator.push(
       //               //   context,
       //               //   MaterialPageRoute(
@@ -922,7 +903,6 @@ class _ReviewLessonState extends State<ReviewLesson>
       //       InkWell(
       //         onTap: () {
       //           showSpeechBalloon = false;
-      //           print('ask tutor');
       //           Navigator.push(
       //             context,
       //             MaterialPageRoute(builder: (context) => const AskTutor()),
@@ -1228,7 +1208,7 @@ class _ReviewLessonState extends State<ReviewLesson>
                                 case DrawingMode.eraser:
                                   setState(() {
                                     _eraserPoints[_currentPage] =
-                                        Offset(-100, -100);
+                                        const Offset(-100, -100);
                                   });
                                   break;
                                 default:
@@ -1381,17 +1361,17 @@ class _ReviewLessonState extends State<ReviewLesson>
                 _isPause = !_isPause;
               });
               if (!_isReplaying) {
-                stopwatch.reset();
-                stopwatch.start();
+                solvepadStopwatch.reset();
+                solvepadStopwatch.start();
                 _audioPlayer.startPlayer(fromDataBuffer: audioBuffer);
                 startReplayLoop(
                     startIndex: findReplayIndex('ChangePage:$_currentPage'));
               } // case: before start
               else {
-                stopwatch.start();
+                solvepadStopwatch.start();
                 _audioPlayer.resumePlayer();
                 log('time at resume');
-                log(stopwatch.elapsed.inMilliseconds.toString());
+                log(solvepadStopwatch.elapsed.inMilliseconds.toString());
                 startReplayLoop(startIndex: replayIndex);
               } // case: pausing
             } // press while pausing or before start
@@ -1400,9 +1380,9 @@ class _ReviewLessonState extends State<ReviewLesson>
                 _isPause = !_isPause;
               });
               _audioPlayer.pausePlayer();
-              stopwatch.stop();
+              solvepadStopwatch.stop();
               log('time at pausing');
-              log(stopwatch.elapsed.inMilliseconds.toString());
+              log(solvepadStopwatch.elapsed.inMilliseconds.toString());
             } // press while playing
           },
           child: Container(
@@ -1990,7 +1970,7 @@ class _ReviewLessonState extends State<ReviewLesson>
                             setState(() {
                               _switchValue = value;
                             });
-                            print(value);
+                            log(value.toString());
                           },
                         ),
                       ),
@@ -2029,7 +2009,7 @@ class _ReviewLessonState extends State<ReviewLesson>
                       S.w(8),
                       InkWell(
                         onTap: () {
-                          print('leader');
+                          log('leader');
                           // showLeader(context);
                         },
                         child: Image.asset(
@@ -2109,7 +2089,6 @@ class _ReviewLessonState extends State<ReviewLesson>
                   //       children: [
                   //         InkWell(
                   //           onTap: () {
-                  //             print("Undo");
                   //           },
                   //           child: Image.asset(
                   //             ImageAssets.undo,
@@ -2118,7 +2097,6 @@ class _ReviewLessonState extends State<ReviewLesson>
                   //         ),
                   //         InkWell(
                   //           onTap: () {
-                  //             print("Redo");
                   //           },
                   //           child: Image.asset(
                   //             ImageAssets.redo,
@@ -2160,9 +2138,7 @@ class _ReviewLessonState extends State<ReviewLesson>
                                     S.h(8),
                                     InkWell(
                                       onTap: () {
-                                        setState(() {
-                                          _selectedIndexTools = index;
-                                        });
+                                        _selectedIndexTools = index;
                                         if (index == 0) {
                                           updateDataHistory(DrawingMode.drag);
                                         } else if (index == 1) {
@@ -2250,7 +2226,6 @@ class _ReviewLessonState extends State<ReviewLesson>
                                   //     children: [
                                   //       InkWell(
                                   //         onTap: () {
-                                  //           print("Clear");
                                   //         },
                                   //         child: Image.asset(
                                   //           ImageAssets.bin,
@@ -2259,7 +2234,6 @@ class _ReviewLessonState extends State<ReviewLesson>
                                   //       ),
                                   //       InkWell(
                                   //         onTap: () {
-                                  //           print("More");
                                   //
                                   //           setState(() {
                                   //             if (openColors ||
@@ -2494,7 +2468,7 @@ class _ReviewLessonState extends State<ReviewLesson>
               children: [
                 InkWell(
                   onTap: () {
-                    print('search found');
+                    log('search found');
                     // Navigator.push(
                     //   context,
                     //   MaterialPageRoute(
@@ -2536,14 +2510,14 @@ class _ReviewLessonState extends State<ReviewLesson>
             InkWell(
               onTap: () {
                 if (Responsive.isMobile(context)) {
-                  print('screenshot');
+                  log('screenshot');
                   // Navigator.push(
                   //   context,
                   //   MaterialPageRoute(
                   //       builder: (context) => const ScreenShotModalMobile()),
                   // );
                 } else {
-                  print('ask tutor');
+                  log('ask tutor');
                   // Navigator.push(
                   //   context,
                   //   MaterialPageRoute(builder: (context) => const AskTutor()),
@@ -2616,9 +2590,6 @@ class _ReviewLessonState extends State<ReviewLesson>
                                       // Close popup
                                       openColors = !openColors;
                                     });
-                                    print('Tap : index $index');
-                                    print(
-                                        'Tap : _selectIndex $_selectedIndexColors');
                                   },
                                   child: Image.asset(
                                       _listColors[index]['color'],
@@ -2656,12 +2627,10 @@ class _ReviewLessonState extends State<ReviewLesson>
                                 InkWell(
                                     onTap: () {
                                       setState(() {
-                                        setState(() {
-                                          _selectedIndexLines = index;
+                                        _selectedIndexLines = index;
 
-                                          // Close popup
-                                          openLines = !openLines;
-                                        });
+                                        // Close popup
+                                        openLines = !openLines;
                                       });
                                     },
                                     child: Row(
@@ -2736,9 +2705,6 @@ class _ReviewLessonState extends State<ReviewLesson>
                                             setState(() {
                                               _selectedIndexTools = index;
                                             });
-                                            print('Tap : index $index');
-                                            print(
-                                                'Tap : _selectIndex $_selectedIndexTools');
                                           },
                                           child: Image.asset(
                                             _selectedIndexTools == index
@@ -2771,7 +2737,7 @@ class _ReviewLessonState extends State<ReviewLesson>
                               S.w(defaultPadding),
                               InkWell(
                                 onTap: () {
-                                  print("Pick Line");
+                                  log("Pick Line");
 
                                   setState(() {
                                     if (openColors || openMore == true) {
@@ -2789,7 +2755,7 @@ class _ReviewLessonState extends State<ReviewLesson>
                               S.w(defaultPadding),
                               InkWell(
                                 onTap: () {
-                                  print("Clear");
+                                  log("Clear");
                                 },
                                 child: Image.asset(
                                   ImageAssets.bin,
@@ -2829,7 +2795,7 @@ class _ReviewLessonState extends State<ReviewLesson>
           children: [
             InkWell(
               onTap: () {
-                print("Undo");
+                log("Undo");
               },
               child: Image.asset(
                 ImageAssets.undo,
@@ -2839,7 +2805,7 @@ class _ReviewLessonState extends State<ReviewLesson>
             S.h(8),
             InkWell(
               onTap: () {
-                print("Redo");
+                log("Redo");
               },
               child: Image.asset(
                 ImageAssets.redo,
