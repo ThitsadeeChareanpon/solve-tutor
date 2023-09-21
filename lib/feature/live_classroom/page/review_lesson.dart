@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
+import 'package:flutter_sound/flutter_sound.dart';
 import 'package:speech_balloon/speech_balloon.dart';
 
 import '../../calendar/constants/assets_manager.dart';
@@ -21,7 +22,8 @@ import '../solvepad/solvepad_stroke_model.dart';
 import '../utils/responsive.dart';
 
 class ReviewLesson extends StatefulWidget {
-  final String courseId, courseName, file, tutorId, userId, docId, audio;
+  final String courseId, courseName, file, tutorId, userId, docId;
+  final String? audio;
   const ReviewLesson({
     Key? key,
     required this.courseId,
@@ -185,6 +187,14 @@ class _ReviewLessonState extends State<ReviewLesson>
   late AnimationController progressController;
   late Animation<double> animation;
 
+  // ---------- VARIABLE: sound
+  final FlutterSoundPlayer _audioPlayer = FlutterSoundPlayer();
+  bool playerReady = false;
+  Uint8List? audioBuffer;
+  int initialAudioTime = 0;
+  int audioIndex = 0;
+  int audioDelay = 0;
+
   @override
   void initState() {
     super.initState();
@@ -193,10 +203,21 @@ class _ReviewLessonState extends State<ReviewLesson>
     initPagesData();
     initPagingBtn();
     initDownloadSolvepad();
-    print(widget.audio);
+    initPlayer();
   }
 
-  Future<void> initPagesData() async {
+  void initPlayer() async {
+    if (widget.audio == null) return;
+    audioBuffer = await downloadAudio(widget.audio!);
+    _audioPlayer.openPlayer().then((e) {
+      setState(() {
+        playerReady = true;
+        log('player ready');
+      });
+    });
+  }
+
+  void initPagesData() async {
     if (widget.docId == '') return;
     var sheet = await getDocFiles(widget.tutorId, widget.docId);
     setState(() {
@@ -222,7 +243,7 @@ class _ReviewLessonState extends State<ReviewLesson>
     }
   }
 
-  Future<void> initDownloadSolvepad() async {
+  void initDownloadSolvepad() async {
     try {
       String url = widget.file;
       final response = await http.get(Uri.parse(url));
@@ -233,7 +254,14 @@ class _ReviewLessonState extends State<ReviewLesson>
           _isSolvepadDataReady = true;
         });
         log('load solvepad complete');
-        startInstantReplay();
+        if (widget.audio == null) {
+          startInstantReplay();
+        } else {
+          audioIndex = findReplayIndex('RECORDING_STARTED:0');
+          initialAudioTime = downloadedSolvepad[audioIndex]['time'];
+          audioDelay = 2000;
+          log('initialAudioTime $initialAudioTime');
+        }
       } else {
         log('Failed to download file');
       }
@@ -290,6 +318,21 @@ class _ReviewLessonState extends State<ReviewLesson>
   double scaleScrollX(double scrollX) => scrollX * scaleX;
   double scaleScrollY(double scrollY) => scrollY * scaleY;
 
+  Future<Uint8List?> downloadAudio(String url) async {
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        log('load audio complete');
+        return response.bodyBytes;
+      } else {
+        log('Failed to load audio from $url');
+      }
+    } catch (e) {
+      log('Error: $e');
+    }
+    return null;
+  }
+
   @override
   dispose() {
     SystemChrome.setPreferredOrientations([
@@ -299,6 +342,7 @@ class _ReviewLessonState extends State<ReviewLesson>
       DeviceOrientation.landscapeLeft,
     ]);
     _replayTimer?.cancel();
+    _audioPlayer.closePlayer();
     super.dispose();
   }
 
@@ -315,7 +359,7 @@ class _ReviewLessonState extends State<ReviewLesson>
       List<dynamic> docFiles = dataMap?['doc_files'] ?? [];
       return docFiles.cast<String>(); // Casting to List<String>
     } catch (e) {
-      print('An error occurred while fetching doc_files: $e');
+      log('An error occurred while fetching doc_files: $e');
       return [];
     }
   }
@@ -339,7 +383,8 @@ class _ReviewLessonState extends State<ReviewLesson>
       }
       int actionTime = downloadedSolvepad[i]['time'];
       String actionData = downloadedSolvepad[i]['data'];
-      while (stopwatch.elapsed.inMilliseconds < actionTime) {
+      while (stopwatch.elapsed.inMilliseconds + initialAudioTime + audioDelay <
+          actionTime) {
         if (_isPause) {
           replayIndex = i;
           log('end replay loop due to pause');
@@ -483,9 +528,9 @@ class _ReviewLessonState extends State<ReviewLesson>
     });
   }
 
-  int findReplayIndex() {
+  int findReplayIndex(String keyword) {
     for (int i = 0; i < downloadedSolvepad.length; i++) {
-      if (downloadedSolvepad[i]['data'] == 'ChangePage:$_currentPage') {
+      if (downloadedSolvepad[i]['data'] == keyword) {
         setModeAfterSkip(i);
         setColorAfterSkip(i);
         setWidthAfterSkip(i);
@@ -1333,10 +1378,13 @@ class _ReviewLessonState extends State<ReviewLesson>
               if (!_isReplaying) {
                 stopwatch.reset();
                 stopwatch.start();
-                startReplayLoop(startIndex: findReplayIndex());
+                _audioPlayer.startPlayer(fromDataBuffer: audioBuffer);
+                startReplayLoop(
+                    startIndex: findReplayIndex('ChangePage:$_currentPage'));
               } // case: before start
               else {
                 stopwatch.start();
+                _audioPlayer.resumePlayer();
                 log('time at resume');
                 log(stopwatch.elapsed.inMilliseconds.toString());
                 startReplayLoop(startIndex: replayIndex);
@@ -1346,6 +1394,7 @@ class _ReviewLessonState extends State<ReviewLesson>
               setState(() {
                 _isPause = !_isPause;
               });
+              _audioPlayer.pausePlayer();
               stopwatch.stop();
               log('time at pausing');
               log(stopwatch.elapsed.inMilliseconds.toString());

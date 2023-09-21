@@ -187,7 +187,7 @@ class _CourseHistoryState extends State<CourseHistory>
                           courseId: reviewList[index].courseId!,
                           courseName: reviewList[index].courseName!,
                           file: reviewList[index].file!,
-                          audio: reviewList[index].audio!,
+                          audio: reviewList[index].audio,
                           tutorId: authProvider!.user!.id!,
                           userId: authProvider!.user!.id!,
                           docId: reviewList[index].documentId!,
