@@ -955,7 +955,7 @@ class _ReviewLessonState extends State<ReviewLesson>
           children: [
             Column(
               children: [
-                headerLayer2Mobile(),
+                mobileReviewHeader(),
                 const DividerLine(),
                 solvePad(),
               ],
@@ -2071,6 +2071,61 @@ class _ReviewLessonState extends State<ReviewLesson>
           ),
           S.w(28),
         ],
+      ),
+    );
+  }
+
+  Widget mobileReviewHeader() {
+    return SafeArea(
+      child: StatefulBuilder(
+        builder: (context, setState) {
+          return Column(
+            children: [
+              Material(
+                color: Colors.transparent,
+                child: Container(
+                  width: double.infinity,
+                  height: 55,
+                  color: CustomColors.whitePrimary,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        flex: 4,
+                        child: Row(
+                          children: [
+                            InkWell(
+                              onTap: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: const Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Icon(
+                                  Icons.arrow_back,
+                                  color: CustomColors.gray878787,
+                                  size: 20.0,
+                                ),
+                              ),
+                            ),
+                            S.w(defaultPadding),
+                            Text(
+                              widget.courseName,
+                              style: CustomStyles.bold16Black363636Overflow,
+                              maxLines: 1,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Align(
+                          alignment: Alignment.centerRight,
+                          child: pagingTools()),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
