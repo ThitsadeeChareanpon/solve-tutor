@@ -189,7 +189,8 @@ class _ReviewLessonState extends State<ReviewLesson>
 
   // ---------- VARIABLE: sound
   final FlutterSoundPlayer _audioPlayer = FlutterSoundPlayer();
-  bool playerReady = false;
+  bool _isPlayerReady = false;
+  bool _isAudioReady = false;
   Uint8List? audioBuffer;
   int initialAudioTime = 0;
   int audioIndex = 0;
@@ -203,18 +204,7 @@ class _ReviewLessonState extends State<ReviewLesson>
     initPagesData();
     initPagingBtn();
     initDownloadSolvepad();
-    initPlayer();
-  }
-
-  void initPlayer() async {
-    if (widget.audio == null) return;
-    audioBuffer = await downloadAudio(widget.audio!);
-    _audioPlayer.openPlayer().then((e) {
-      setState(() {
-        playerReady = true;
-        log('player ready');
-      });
-    });
+    initAudioPlayer();
   }
 
   void initPagesData() async {
@@ -223,11 +213,12 @@ class _ReviewLessonState extends State<ReviewLesson>
     setState(() {
       _pages = sheet;
       _isPageReady = true;
-      startInstantReplay();
     });
     for (int i = 1; i < _pages.length; i++) {
       _addPage();
     }
+    log('load sheet complete');
+    if (widget.audio == null) startInstantReplay();
   }
 
   void initPagingBtn() {
@@ -270,10 +261,22 @@ class _ReviewLessonState extends State<ReviewLesson>
     }
   }
 
+  void initAudioPlayer() async {
+    if (widget.audio == null) return;
+    audioBuffer = await downloadAudio(widget.audio!);
+    _isAudioReady = true;
+    _audioPlayer.openPlayer().then((e) {
+      setState(() {
+        _isPlayerReady = true;
+        log('load player complete');
+      });
+    });
+  }
+
   void startInstantReplay() {
     if (_isPageReady && _isSolvepadDataReady) {
       log('function: startInstantReplay()');
-      // instantReplay();
+      instantReplay();
     }
   }
 
@@ -365,7 +368,7 @@ class _ReviewLessonState extends State<ReviewLesson>
   }
 
   void startReplayLoop({int startIndex = 0}) async {
-    log('start replay loop');
+    log('function: startReplayLoop()');
     log('start index: ${startIndex.toString()}');
     _isReplaying = true;
     _replayTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -704,11 +707,12 @@ class _ReviewLessonState extends State<ReviewLesson>
                 ),
               ],
             ),
-            Positioned(
-              top: 80,
-              right: 40,
-              child: play(),
-            ),
+            if (widget.audio != null)
+              Positioned(
+                top: 80,
+                right: 40,
+                child: play(),
+              ),
             if (openColors)
               Positioned(
                 left: 150,
@@ -1371,6 +1375,7 @@ class _ReviewLessonState extends State<ReviewLesson>
         height: 45,
         child: GestureDetector(
           onTap: () {
+            if (!_isPlayerReady && !_isAudioReady) return;
             if (_isPause) {
               setState(() {
                 _isPause = !_isPause;
