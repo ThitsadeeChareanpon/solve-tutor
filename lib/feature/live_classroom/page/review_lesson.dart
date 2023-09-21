@@ -544,6 +544,7 @@ class _ReviewLessonState extends State<ReviewLesson>
   }
 
   int findReplayIndex(String keyword) {
+    if (_currentPage == 0) return 0;
     for (int i = 0; i < downloadedSolvepad.length; i++) {
       if (downloadedSolvepad[i]['data'] == keyword) {
         setModeAfterSkip(i);
