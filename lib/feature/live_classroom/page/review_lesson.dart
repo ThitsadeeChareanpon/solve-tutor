@@ -528,8 +528,11 @@ class _ReviewLessonState extends State<ReviewLesson>
         setModeAfterSkip(i);
         setColorAfterSkip(i);
         setWidthAfterSkip(i);
-        Duration indexTime = convertToDuration(downloadedSolvepad[i]['time']);
+        Duration indexTime = convertToDuration(
+            downloadedSolvepad[i]['time'] - initialAudioTime - audioDelay);
         solvepadStopwatch.skip(indexTime);
+        _audioPlayer.seekToPlayer(convertToDuration(
+            downloadedSolvepad[i]['time'] - initialAudioTime - audioDelay));
         return i;
       }
     }
