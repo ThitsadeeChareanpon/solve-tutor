@@ -203,6 +203,7 @@ class _ReviewLessonState extends State<ReviewLesson>
     initPagesData();
     initPagingBtn();
     initDownloadSolvepad();
+    initAudioBuffer();
     initAudioPlayer();
   }
 
@@ -258,14 +259,7 @@ class _ReviewLessonState extends State<ReviewLesson>
         downloadedSolvepad = jsonDecode(response.body);
         _isSolvepadDataReady = true;
         log('load solvepad complete');
-        if (widget.audio == null) {
-          startInstantReplay();
-        } else {
-          audioIndex = findReplayIndex('RECORDING_STARTED:0');
-          initialAudioTime = downloadedSolvepad[audioIndex]['time'];
-          audioDelay = 2000;
-          log('initialAudioTime $initialAudioTime');
-        }
+        if (widget.audio == null) startInstantReplay();
       } else {
         log('Failed to download file');
       }
@@ -274,10 +268,18 @@ class _ReviewLessonState extends State<ReviewLesson>
     }
   }
 
-  void initAudioPlayer() async {
+  void initAudioBuffer() async {
     if (widget.audio == null) return;
     audioBuffer = await downloadAudio(widget.audio!);
     _isAudioReady = true;
+    audioIndex = findReplayIndex('RECORDING_STARTED:0');
+    initialAudioTime = downloadedSolvepad[audioIndex]['time'];
+    audioDelay = 2000;
+    log('initialAudioTime $initialAudioTime');
+  }
+
+  void initAudioPlayer() async {
+    if (widget.audio == null) return;
     _audioPlayer.openPlayer().then((e) {
       _isPlayerReady = true;
       log('load player complete');
