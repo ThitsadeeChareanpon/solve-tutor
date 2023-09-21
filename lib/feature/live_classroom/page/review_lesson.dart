@@ -957,13 +957,15 @@ class _ReviewLessonState extends State<ReviewLesson>
               children: [
                 headerLayer2Mobile(),
                 const DividerLine(),
+                solvePad(),
               ],
             ),
-            Positioned(
-              top: 70,
-              right: 35,
-              child: play(),
-            ),
+            if (widget.audio != null)
+              Positioned(
+                top: 60,
+                right: 40,
+                child: play(),
+              ),
 
             ///tools widget
             if (!selectedTools) toolsUndoMobile(),
@@ -971,7 +973,8 @@ class _ReviewLessonState extends State<ReviewLesson>
             if (selectedTools) toolsActiveMobile(),
 
             /// Control menu
-            if (openShowDisplay == false) toolsControlMobile(),
+            // TODO: Reconsider fullscreen option
+            // if (openShowDisplay == false) toolsControlMobile(),
           ],
         ),
       ),
@@ -1374,67 +1377,63 @@ class _ReviewLessonState extends State<ReviewLesson>
   }
 
   Widget play() {
-    return Center(
-      child: SizedBox(
-        width: 45,
-        height: 45,
-        child: GestureDetector(
-          onTap: () {
-            if (!_isPlayerReady && !_isAudioReady) return;
-            if (_isPause) {
-              setState(() {
-                _isPause = !_isPause;
-              });
-              if (!_isReplaying) {
-                solvepadStopwatch.reset();
-                solvepadStopwatch.start();
-                _audioPlayer.startPlayer(fromDataBuffer: audioBuffer);
-                startReplayLoop(
-                    startIndex: findReplayIndex('ChangePage:$_currentPage'));
-              } // case: before start
-              else {
-                solvepadStopwatch.start();
-                _audioPlayer.resumePlayer();
-                log('time at resume');
-                log(solvepadStopwatch.elapsed.inMilliseconds.toString());
-                startReplayLoop(startIndex: replayIndex);
-              } // case: pausing
-            } // press while pausing or before start
+    return SizedBox(
+      width: 45,
+      height: 45,
+      child: GestureDetector(
+        onTap: () {
+          if (!_isPlayerReady && !_isAudioReady) return;
+          if (_isPause) {
+            setState(() {
+              _isPause = !_isPause;
+            });
+            if (!_isReplaying) {
+              solvepadStopwatch.reset();
+              solvepadStopwatch.start();
+              _audioPlayer.startPlayer(fromDataBuffer: audioBuffer);
+              startReplayLoop(
+                  startIndex: findReplayIndex('ChangePage:$_currentPage'));
+            } // case: before start
             else {
-              setState(() {
-                _isPause = !_isPause;
-              });
-              _audioPlayer.pausePlayer();
-              solvepadStopwatch.stop();
-              log('time at pausing');
+              solvepadStopwatch.start();
+              _audioPlayer.resumePlayer();
+              log('time at resume');
               log(solvepadStopwatch.elapsed.inMilliseconds.toString());
-            } // press while playing
-          },
-          child: Container(
-            decoration: BoxDecoration(
+              startReplayLoop(startIndex: replayIndex);
+            } // case: pausing
+          } // press while pausing or before start
+          else {
+            setState(() {
+              _isPause = !_isPause;
+            });
+            _audioPlayer.pausePlayer();
+            solvepadStopwatch.stop();
+            log('time at pausing');
+            log(solvepadStopwatch.elapsed.inMilliseconds.toString());
+          } // press while playing
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            color: !_isPause ? CustomColors.gray363636 : CustomColors.redFF4201,
+            border: Border.all(
               color:
-                  !_isPause ? CustomColors.gray363636 : CustomColors.redFF4201,
-              border: Border.all(
-                color: !_isPause
-                    ? CustomColors.redFF4201
-                    : CustomColors.gray363636,
-                style: BorderStyle.solid,
-                width: 2.0,
-              ),
-              borderRadius: BorderRadius.circular(100),
+                  !_isPause ? CustomColors.redFF4201 : CustomColors.gray363636,
+              style: BorderStyle.solid,
+              width: 2.0,
             ),
-            child: !_isPause
-                ? const Icon(
-                    Icons.pause,
-                    size: 25,
-                    color: CustomColors.white,
-                  )
-                : const Icon(
-                    Icons.play_arrow,
-                    size: 25,
-                    color: CustomColors.white,
-                  ),
+            borderRadius: BorderRadius.circular(100),
           ),
+          child: !_isPause
+              ? const Icon(
+                  Icons.pause,
+                  size: 25,
+                  color: CustomColors.white,
+                )
+              : const Icon(
+                  Icons.play_arrow,
+                  size: 25,
+                  color: CustomColors.white,
+                ),
         ),
       ),
     );
@@ -1746,7 +1745,7 @@ class _ReviewLessonState extends State<ReviewLesson>
               ],
             ),
           ),
-          play(),
+          // play(),
           S.w(20),
         ],
       ),
@@ -1938,73 +1937,76 @@ class _ReviewLessonState extends State<ReviewLesson>
             spreadRadius: 1)
       ]),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          S.w(28),
           Expanded(
             flex: 3,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: defaultPadding),
               child: Container(
-                  height: 38,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: CustomColors.grayCFCFCF,
-                      style: BorderStyle.solid,
-                      width: 1.0,
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                    color: CustomColors.whitePrimary,
+                height: 38,
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: CustomColors.grayCFCFCF,
+                    style: BorderStyle.solid,
+                    width: 1.0,
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      S.w(8),
-                      InkWell(
-                        onTap: () => headerLayer1Mobile(),
-                        child: Image.asset(
-                          ImageAssets.iconInfoPage,
-                          height: 24,
-                          width: 24,
-                        ),
-                      ),
-                      S.w(8),
-                      Container(
-                        width: 1,
-                        height: 32,
-                        color: CustomColors.grayCFCFCF,
-                      ),
-                      S.w(8),
-                      Image.asset(
-                        ImageAssets.allPages,
+                  borderRadius: BorderRadius.circular(8),
+                  color: CustomColors.whitePrimary,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    S.w(8),
+                    InkWell(
+                      onTap: () => headerLayer1Mobile(),
+                      child: Image.asset(
+                        ImageAssets.iconInfoPage,
                         height: 24,
                         width: 24,
                       ),
-                      S.w(8),
-                      Container(
-                        width: 1,
-                        height: 32,
-                        color: CustomColors.grayCFCFCF,
+                    ),
+                    S.w(8),
+                    Container(
+                      width: 1,
+                      height: 32,
+                      color: CustomColors.grayCFCFCF,
+                    ),
+                    S.w(8),
+                    Image.asset(
+                      ImageAssets.allPages,
+                      height: 24,
+                      width: 24,
+                    ),
+                    S.w(8),
+                    Container(
+                      width: 1,
+                      height: 32,
+                      color: CustomColors.grayCFCFCF,
+                    ),
+                    S.w(8),
+                    Transform.scale(
+                      scale: 0.6,
+                      child: CupertinoSwitch(
+                        value: _switchValue,
+                        onChanged: (bool value) {
+                          setState(() {
+                            _switchValue = value;
+                          });
+                          log(value.toString());
+                        },
                       ),
-                      S.w(8),
-                      Transform.scale(
-                        scale: 0.6,
-                        child: CupertinoSwitch(
-                          value: _switchValue,
-                          onChanged: (bool value) {
-                            setState(() {
-                              _switchValue = value;
-                            });
-                            log(value.toString());
-                          },
-                        ),
-                      ),
-                      Text("เลื่อนหน้าตามติวเตอร์",
-                          style: CustomStyles.bold12gray878787),
-                      S.w(8.0),
-                    ],
-                  )),
+                    ),
+                    Text("เลื่อนหน้าตามติวเตอร์",
+                        style: CustomStyles.bold12gray878787),
+                    S.w(8.0),
+                  ],
+                ),
+              ),
             ),
+          ),
+          const Expanded(
+            child: SizedBox(),
           ),
           Expanded(
             flex: 3,
@@ -2473,88 +2475,89 @@ class _ReviewLessonState extends State<ReviewLesson>
     return Align(
       alignment: Alignment.centerRight,
       child: Padding(
-        padding: const EdgeInsets.only(right: 40),
+        padding: const EdgeInsets.only(right: 40, top: 60),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            InkWell(
-              onTap: () {
-                setState(() {
-                  openShowDisplay = !openShowDisplay;
-                });
-              },
-              child: Image.asset(
-                'assets/images/ic_open_show.png',
-                width: 44,
-              ),
-            ),
-            S.h(8),
-            Stack(
-              children: [
-                InkWell(
-                  onTap: () {
-                    log('search found');
-                    // Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //       builder: (context) => const QAListSearchFound()),
-                    // );
-
-                    /// TODO: for Search Not Found question
-                    // Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //       builder: (context) => const QuestionSearchNotFound()),
-                    // );
-                  },
-                  child: Image.asset(
-                    'assets/images/ic_qa_float_black.png',
-                    height: 44,
-                    width: 44,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 21),
-                  child: Container(
-                    decoration: const BoxDecoration(
-                        color: CustomColors.greenPrimary,
-                        shape: BoxShape.circle),
-                    width: 25,
-                    height: 25,
-                    child: Center(
-                      child: Text(
-                        "13",
-                        style: CustomStyles.bold11White,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            S.h(8),
-            InkWell(
-              onTap: () {
-                if (Responsive.isMobile(context)) {
-                  log('screenshot');
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //       builder: (context) => const ScreenShotModalMobile()),
-                  // );
-                } else {
-                  log('ask tutor');
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(builder: (context) => const AskTutor()),
-                  // );
-                }
-              },
-              child: Image.asset(
-                'assets/images/ic_mic_off_float.png',
-                width: 44,
-              ),
-            ),
-            S.h(8),
+            // InkWell(
+            //   onTap: () {
+            //     setState(() {
+            //       openShowDisplay = !openShowDisplay;
+            //     });
+            //   },
+            //   child: Image.asset(
+            //     'assets/images/ic_open_show.png',
+            //     width: 44,
+            //   ),
+            // ),
+            // S.h(8),
+            // Stack(
+            //   children: [
+            //     InkWell(
+            //       onTap: () {
+            //         log('search found');
+            //         // Navigator.push(
+            //         //   context,
+            //         //   MaterialPageRoute(
+            //         //       builder: (context) => const QAListSearchFound()),
+            //         // );
+            //
+            //         /// TODO: for Search Not Found question
+            //         // Navigator.push(
+            //         //   context,
+            //         //   MaterialPageRoute(
+            //         //       builder: (context) => const QuestionSearchNotFound()),
+            //         // );
+            //       },
+            //       child: Image.asset(
+            //         'assets/images/ic_qa_float_black.png',
+            //         height: 44,
+            //         width: 44,
+            //       ),
+            //     ),
+            //     Padding(
+            //       padding: const EdgeInsets.only(left: 21),
+            //       child: Container(
+            //         decoration: const BoxDecoration(
+            //           color: CustomColors.greenPrimary,
+            //           shape: BoxShape.circle,
+            //         ),
+            //         width: 25,
+            //         height: 25,
+            //         child: Center(
+            //           child: Text(
+            //             "13",
+            //             style: CustomStyles.bold11White,
+            //           ),
+            //         ),
+            //       ),
+            //     ),
+            //   ],
+            // ),
+            // S.h(8),
+            // InkWell(
+            //   onTap: () {
+            //     if (Responsive.isMobile(context)) {
+            //       log('screenshot');
+            //       // Navigator.push(
+            //       //   context,
+            //       //   MaterialPageRoute(
+            //       //       builder: (context) => const ScreenShotModalMobile()),
+            //       // );
+            //     } else {
+            //       log('ask tutor');
+            //       // Navigator.push(
+            //       //   context,
+            //       //   MaterialPageRoute(builder: (context) => const AskTutor()),
+            //       // );
+            //     }
+            //   },
+            //   child: Image.asset(
+            //     'assets/images/ic_mic_off_float.png',
+            //     width: 44,
+            //   ),
+            // ),
+            // S.h(8),
             InkWell(
               onTap: () {
                 setState(() {
@@ -2813,28 +2816,70 @@ class _ReviewLessonState extends State<ReviewLesson>
     return Align(
       alignment: Alignment.centerLeft,
       child: Padding(
-        padding: const EdgeInsets.only(left: 15),
+        padding: const EdgeInsets.only(left: 45),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           // mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             InkWell(
               onTap: () {
-                log("Undo");
+                if (_pageController.hasClients &&
+                    _pageController.page!.toInt() != 0) {
+                  _pageController.animateToPage(
+                    _pageController.page!.toInt() - 1,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                }
               },
-              child: Image.asset(
-                ImageAssets.undo,
-                width: 38,
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.all(Radius.circular(90)),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                      left: 8, right: 8, top: 10, bottom: 14),
+                  child: Image.asset(
+                    ImageAssets.arrowUp,
+                    width: 20,
+                    color: _isPrevBtnActive
+                        ? CustomColors.activePagingBtn
+                        : CustomColors.inactivePagingBtn,
+                  ),
+                ),
               ),
             ),
             S.h(8),
             InkWell(
               onTap: () {
-                log("Redo");
+                if (_pages.length > 1) {
+                  if (_pageController.hasClients &&
+                      _pageController.page!.toInt() != _pages.length - 1) {
+                    _pageController.animateToPage(
+                      _pageController.page!.toInt() + 1,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  }
+                }
               },
-              child: Image.asset(
-                ImageAssets.redo,
-                width: 38,
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.all(Radius.circular(90)),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                      left: 8, right: 8, top: 14, bottom: 10),
+                  child: Image.asset(
+                    ImageAssets.arrowDown,
+                    width: 20,
+                    color: _isNextBtnActive
+                        ? CustomColors.activePagingBtn
+                        : CustomColors.inactivePagingBtn,
+                  ),
+                ),
               ),
             ),
           ],
