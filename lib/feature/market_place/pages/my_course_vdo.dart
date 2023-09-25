@@ -265,7 +265,7 @@ class _MyCourseVDOPageState extends State<MyCourseVDOPage> {
                     hintText: '-- เลือกหมวดหมู่ --',
                     onChanged: (value) {
                       selectedSubject = value ?? '';
-                      debugPrint(value);
+                      debugPrint('หมวดหมู่ $value');
                       courseController.courseFilter = courseController
                           .courseList
                           .where((element) => element.subjectId == value)

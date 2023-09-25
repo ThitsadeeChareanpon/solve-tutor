@@ -88,10 +88,8 @@ class _ManageCoursePageState extends State<ManageCoursePage> {
                     //       ),
                     //     );
                     //   },
-                    //   image: 'assets/images/course1.png',
-                    //   title: "สร้างคอร์ส Marketplace",
-                    // content:
-                    //     "สร้างคอร์สสอนพิเศษของคุณ เพื่อลงขายใน Market Place ของเรา",
+                    //   image: 'assets/images/menu_my_course.png',
+                    //   title: "คอร์ส Marketplace",
                     // ),
                     gridCard(
                       context,
@@ -106,7 +104,7 @@ class _ManageCoursePageState extends State<ManageCoursePage> {
                         );
                       },
                       image: 'assets/images/menu_my_course.png',
-                      title: "คอร์สของฉัน",
+                      title: "คอร์ส Live",
                       // content:
                       //     "สร้างคอร์สสอนพิเศษของคุณ เพื่อลงขายใน Market Place ของเรา",
                     ),

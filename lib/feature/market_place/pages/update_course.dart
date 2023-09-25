@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
@@ -43,14 +45,19 @@ class _UpdateCourseTabState extends State<UpdateCourseTab>
       await Alert.showOverlay(
         loadingWidget: Alert.getOverlayScreen(),
         asyncFunction: () async {
-          // ues courseId get cours edetails
+          // ues courseId get course details
+          log('init course edit page');
           final course = await courseController.getCourseById(widget.courseId);
+          log('getCourseById');
           await courseController.setInitData(course);
+          log('setInitData');
           // await courseController.(course);
           await courseController
               .getCalendarListAll(courseController.courseData?.tutorId ?? '');
+          log('getCalendarListAll');
           await courseController.getDataCalendarList(
               courseController.courseData?.calendars ?? []);
+          log('getDataCalendarList');
         },
         context: context,
       );
@@ -292,7 +299,7 @@ class _UpdateCourseTabState extends State<UpdateCourseTab>
             );
           }
           // ignore: use_build_context_synchronously
-          showSnackBar(context, 'อัwเดทสำเร็จ');
+          showSnackBar(context, 'อัพเดทสำเร็จ');
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: courseController.courseData?.publishing == true
@@ -323,7 +330,7 @@ class _UpdateCourseTabState extends State<UpdateCourseTab>
           loadingWidget: Alert.getOverlayScreen(),
         );
         // ignore: use_build_context_synchronously
-        showSnackBar(context, 'อัwเดทสำเร็จ');
+        showSnackBar(context, 'อัพเดทสำเร็จ');
       },
       child: Text(
         "บันทึก",
