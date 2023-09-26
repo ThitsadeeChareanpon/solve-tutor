@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:solve_tutor/feature/calendar/model/course_model.dart';
 import 'package:solve_tutor/feature/calendar/model/days.dart';
 import 'package:solve_tutor/feature/calendar/model/document_model.dart';
@@ -15,7 +17,12 @@ import 'package:solve_tutor/feature/calendar/model/subject_model.dart';
 import 'package:solve_tutor/feature/calendar/pages/utils.dart';
 import 'package:solve_tutor/feature/calendar/service/course_live_service.dart';
 import 'package:solve_tutor/feature/calendar/widgets/format_date.dart';
+import 'package:solve_tutor/feature/chat/models/chat_model.dart';
+import 'package:solve_tutor/feature/chat/models/message.dart';
+import 'package:solve_tutor/feature/chat/service/chat_provider.dart';
+import 'package:solve_tutor/feature/order/model/order_class_model.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:uuid/uuid.dart';
 
 class CourseLiveController extends ChangeNotifier {
   var courseNameTextEditing = TextEditingController();
@@ -405,16 +412,109 @@ class CourseLiveController extends ChangeNotifier {
     }
   }
 
-  Future<void> updateCourseDetails(CourseModel? courseData) async {
+  Future<void> updateCourseDetails(
+      BuildContext context, CourseModel? courseData) async {
     try {
+      ChatProvider chat = Provider.of<ChatProvider>(context, listen: false);
       if (courseData == null) return;
       if (courseData.id?.isNotEmpty == true &&
           courseData.tutorId?.isNotEmpty == true) {
         await CourseLiveService().updateCourseLiveDetails(courseData);
+        for (var i = 0; i < (courseData.studentIds?.length ?? 0); i++) {
+          OrderClassModel orderNew = await createMarketOrder(
+            courseData.id ?? "",
+            courseData.courseName ?? "",
+            courseData.detailsText ?? "",
+            courseData.tutorId ?? "",
+            courseData.studentIds?[i] ?? "",
+          );
+          ChatModel? data = await createMarketChat(
+            courseData.id ?? "",
+            courseData.tutorId ?? "",
+            courseData.studentIds?[i] ?? "",
+          );
+          await chat.setMyChat(data);
+          await chat.sendFirstMessage(
+            data?.chatId ?? "",
+            data?.customerId ?? "",
+            "คุณถูกเพิ่มเข้าคอร์สนี้",
+            MessageType.text,
+          );
+        }
       }
     } catch (error) {
       debugPrint(error.toString());
     }
+  }
+
+  Future<OrderClassModel> createMarketOrder(
+    String courseId,
+    String courseTitle,
+    String courseContent,
+    String tutorId,
+    String studentId,
+  ) async {
+    final FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
+    var uuid = const Uuid();
+    String refId = "#${(uuid.hashCode + 1).toString().padLeft(5, '0')}";
+    String orderUid = uuid.v4();
+
+    orderUid = "${courseId}_${studentId}_${tutorId}";
+    OrderClassModel? order;
+    var ref = await firebaseFirestore.collection('orders').doc(orderUid).get();
+    if (ref.data()?.isNotEmpty ?? false) {
+      order = OrderClassModel.fromJson(ref.data()!);
+    } else {
+      order = OrderClassModel(
+        id: orderUid,
+        tutorId: tutorId,
+        studentId: studentId,
+        classId: courseId,
+        refId: refId,
+        title: courseTitle,
+        content: courseContent,
+        fromMarketPlace: true,
+      );
+      await firebaseFirestore
+          .collection('orders')
+          .doc(orderUid)
+          .set(order.toJson());
+    }
+    return order;
+  }
+
+  Future<ChatModel?> createMarketChat(
+    String orderId,
+    String tutorId,
+    String studentId,
+  ) async {
+    final FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
+    String chatId = "${orderId}_${studentId}_${tutorId}";
+    await firebaseFirestore.collection('chats').doc(chatId).set({
+      'chat_id': chatId,
+      'order_id': '$orderId',
+      'customer_id': '$studentId',
+      'tutor_id': '$tutorId',
+    });
+    // await makeMessage(chatId, studentId);
+    // await makeMessage(chatId, tutorId);
+    print('created =>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
+    return await getChatInfo(chatId);
+  }
+
+  Future<ChatModel?> getChatInfo(String chatId) async {
+    final FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
+    ChatModel? chat;
+    await firebaseFirestore
+        .collection('chats')
+        .doc(chatId)
+        .get()
+        .then((userFirebase) async {
+      if (userFirebase.exists) {
+        chat = ChatModel.fromJson(userFirebase.data()!);
+      }
+    });
+    return chat;
   }
 
   Future<void> updateCourseDetailsOnlyStudent(CourseModel courseData) async {

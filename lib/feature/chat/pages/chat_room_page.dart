@@ -16,11 +16,11 @@ import 'package:solve_tutor/feature/chat/models/message.dart';
 import 'package:solve_tutor/feature/chat/service/chat_provider.dart';
 import 'package:solve_tutor/feature/chat/widgets/message_card.dart';
 import 'package:solve_tutor/feature/order/model/order_class_model.dart';
+import 'package:solve_tutor/feature/order/pages/payment_page.dart';
 import 'package:solve_tutor/feature/order/service/order_mock_provider.dart';
 import 'package:solve_tutor/widgets/date_until.dart';
 import 'package:solve_tutor/widgets/sizer.dart';
 
-// ignore: must_be_immutable
 class ChatRoomPage extends StatefulWidget {
   ChatRoomPage({super.key, required this.chat, required this.order});
   ChatModel chat;
@@ -34,7 +34,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   final _textController = TextEditingController();
   bool _showEmoji = false, _isUploading = false;
   Sizer? mq;
-  // RoleType me = RoleType.student;
+  RoleType me = RoleType.student;
   late AuthProvider auth;
   late ChatProvider chat;
   OrderClassModel? orderDetail;
@@ -54,11 +54,10 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
 
   @override
   void initState() {
-    log("message111");
     super.initState();
     auth = Provider.of<AuthProvider>(context, listen: false);
     chat = Provider.of<ChatProvider>(context, listen: false);
-    // me = auth.user!.getRoleType();
+    me = auth.user!.getRoleType();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       chat.init(auth: auth);
       await init();
@@ -70,70 +69,61 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     mq = Sizer(context);
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
-      child: WillPopScope(
-        onWillPop: () {
-          if (_showEmoji) {
-            setState(() => _showEmoji = !_showEmoji);
-            return Future.value(false);
-          } else {
-            return Future.value(true);
-          }
-        },
-        child: Scaffold(
-          appBar: PreferredSize(
-            preferredSize: widget.order.fromMarketPlace
-                ? const Size.fromHeight(70)
-                : const Size.fromHeight(110),
-            child: SafeArea(
+      child: SafeArea(
+        child: WillPopScope(
+          onWillPop: () {
+            if (_showEmoji) {
+              setState(() => _showEmoji = !_showEmoji);
+              return Future.value(false);
+            } else {
+              return Future.value(true);
+            }
+          },
+          child: Scaffold(
+            appBar: PreferredSize(
+              preferredSize: const Size.fromHeight(80),
               child: AppBar(
                 backgroundColor: Colors.white,
                 leading: const SizedBox(),
                 flexibleSpace: _appBar(),
               ),
             ),
-          ),
-          backgroundColor: Colors.white,
-          // backgroundColor: const Color.fromARGB(255, 234, 248, 255),
-          body: SafeArea(
-            child: Column(
+            backgroundColor: Colors.white,
+            // backgroundColor: const Color.fromARGB(255, 234, 248, 255),
+            body: Column(
               children: [
                 Expanded(
                   child: StreamBuilder(
                     stream: chat.getAllMessages(widget.chat.chatId ?? ""),
                     builder: (context, snapshot) {
-                      try {
-                        switch (snapshot.connectionState) {
-                          case ConnectionState.waiting:
-                          case ConnectionState.none:
-                            return const SizedBox();
-                          case ConnectionState.active:
-                          case ConnectionState.done:
-                            final data = snapshot.data?.docs;
-                            _list = data
-                                    ?.map((e) => Message.fromJson(e.data()))
-                                    .toList() ??
-                                [];
-                            if (_list.isNotEmpty) {
-                              return ListView.builder(
-                                  reverse: true,
-                                  itemCount: _list.length,
-                                  padding: EdgeInsets.only(
-                                      top: Sizer(context).h * .01),
-                                  physics: const BouncingScrollPhysics(),
-                                  itemBuilder: (context, index) {
-                                    return MessageCard(
-                                        chat: widget.chat,
-                                        message: _list[index]);
-                                  });
-                            } else {
-                              return const Center(
-                                child: Text('Say Hii! 👋',
-                                    style: TextStyle(fontSize: 20)),
-                              );
-                            }
-                        }
-                      } catch (e) {
-                        return Text("error : $e");
+                      switch (snapshot.connectionState) {
+                        case ConnectionState.waiting:
+                        case ConnectionState.none:
+                          return const SizedBox();
+                        case ConnectionState.active:
+                        case ConnectionState.done:
+                          final data = snapshot.data?.docs;
+                          _list = data
+                                  ?.map((e) => Message.fromJson(e.data()))
+                                  .toList() ??
+                              [];
+                          if (_list.isNotEmpty) {
+                            return ListView.builder(
+                                reverse: true,
+                                itemCount: _list.length,
+                                padding: EdgeInsets.only(
+                                    top: Sizer(context).h * .01),
+                                physics: const BouncingScrollPhysics(),
+                                itemBuilder: (context, index) {
+                                  return MessageCard(
+                                      chat: widget.chat, message: _list[index]);
+                                });
+                          } else {
+                            return const Center(
+                              child: Text('Say Hii! 👋',
+                                  style: TextStyle(fontSize: 20)),
+                            );
+                          }
                       }
                     },
                   ),
@@ -168,6 +158,9 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
 
   Widget _appBar() {
     String toUser = widget.order.studentId ?? "";
+    if (me == RoleType.student) {
+      toUser = widget.order.tutorId ?? "";
+    }
     return InkWell(
       onTap: () {
         // Navigator.push(
@@ -181,169 +174,108 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
           final data = snapshot.data?.docs;
           final list =
               data?.map((e) => UserModel.fromJson(e.data())).toList() ?? [];
-          return Column(
-            children: [
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(
-                      Icons.chevron_left,
-                      color: Colors.black,
-                    ),
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(
+                    Icons.chevron_left,
+                    color: Colors.black,
                   ),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(500),
-                    child: CachedNetworkImage(
-                      width: 50,
-                      height: 50,
-                      imageUrl: list.isNotEmpty
-                          ? list[0].image ?? ""
-                          : auth.user!.image ?? "",
-                      errorWidget: (context, url, error) => const CircleAvatar(
-                          child: Icon(CupertinoIcons.person)),
-                    ),
+                ),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(500),
+                  child: CachedNetworkImage(
+                    width: 50,
+                    height: 50,
+                    imageUrl: list.isNotEmpty
+                        ? list[0].image ?? ""
+                        : auth.user!.image ?? "",
+                    errorWidget: (context, url, error) =>
+                        const CircleAvatar(child: Icon(CupertinoIcons.person)),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          list.isNotEmpty
-                              ? list[0].name ?? ""
-                              : auth.user!.name ?? "",
-                          maxLines: 1,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: appTextPrimaryColor,
-                            fontWeight: FontWeight.w500,
-                          ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        list.isNotEmpty
+                            ? list[0].name ?? ""
+                            : auth.user!.name ?? "",
+                        maxLines: 1,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: appTextPrimaryColor,
+                          fontWeight: FontWeight.w500,
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          list.isNotEmpty
-                              ? list[0].isOnline!
-                                  ? 'Online'
-                                  : MyDateUtil.getLastActiveTime(
-                                      context: context,
-                                      lastActive: list[0].lastActive ?? "")
-                              : MyDateUtil.getLastActiveTime(
-                                  context: context,
-                                  lastActive: auth.user!.lastActive ?? ""),
-                          maxLines: 1,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: appTextPrimaryColor,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        list.isNotEmpty
+                            ? list[0].isOnline!
+                                ? 'Online'
+                                : MyDateUtil.getLastActiveTime(
+                                    context: context,
+                                    lastActive: list[0].lastActive ?? "")
+                            : MyDateUtil.getLastActiveTime(
+                                context: context,
+                                lastActive: auth.user!.lastActive ?? ""),
+                        maxLines: 1,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: appTextPrimaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Builder(builder: (context) {
+                  if (widget.order.fromMarketPlace) {
+                    return const SizedBox();
+                  }
+                  return Container(
+                    width: 150,
+                    padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Builder(builder: (context) {
+                                String text = "ยังไม่ชำระเงิน";
+                                if (orderDetail?.paymentStatus == "paid") {
+                                  text = "ชำระเรียบร้อยแล้ว";
+                                }
+                                return Text(
+                                  "สถานะการชำระเงิน : \n$text",
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.end,
+                                );
+                              }),
+                              Text(
+                                "คอร์สเรียน : ${orderDetail?.title ?? ""}",
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.end,
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  Builder(builder: (context) {
-                    if (widget.order.fromMarketPlace) {
-                      return const SizedBox();
-                    }
-                    return StreamBuilder(
-                        stream: chat.getOrderStatus(widget.order.id ?? ""),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasError) {
-                            return Text("Something went wrong");
-                          } else if (snapshot.hasData &&
-                              snapshot.data!.exists) {
-                            Map<String, dynamic> data =
-                                snapshot.data!.data() as Map<String, dynamic>;
-                            return Builder(builder: (context) {
-                              if (data['status'] == 'payment') {
-                                return GestureDetector(
-                                  onTap: () {
-                                    var route = MaterialPageRoute(
-                                      builder: (context) =>
-                                          CreateCourseLivePage(
-                                        tutorId: auth.uid ?? "",
-                                        studentId: widget.order.studentId,
-                                        studentName: list[0].name ?? "",
-                                      ),
-                                    );
-                                    Navigator.push(context, route);
-                                  },
-                                  child: Container(
-                                    width: 100,
-                                    height: 30,
-                                    margin: const EdgeInsets.fromLTRB(
-                                        0, 10, 10, 10),
-                                    padding:
-                                        const EdgeInsets.fromLTRB(5, 0, 5, 0),
-                                    alignment: Alignment.center,
-                                    decoration: BoxDecoration(
-                                      color: primaryColor,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: const Text(
-                                      "สร้างออเดอร์",
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              }
-                              return Container(
-                                width: 80,
-                                margin:
-                                    const EdgeInsets.fromLTRB(0, 10, 10, 10),
-                                padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  color: greyColor2,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: const Text(
-                                  "ยังไม่ชำระ",
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              );
-                            });
-                          }
-                          return SizedBox();
-                        });
-                  }),
-                ],
-              ),
-              Builder(builder: (context) {
-                if (widget.order.fromMarketPlace) {
-                  return const SizedBox();
-                }
-                return Container(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
-                  child: Row(
-                    children: [
-                      const Expanded(child: SizedBox()),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Builder(builder: (context) {
-                            String text = "ยังไม่ชำระเงิน";
-                            if (orderDetail?.status == "payment") {
-                              text = "ชำระเรียบร้อยแล้ว";
-                            }
-                            return Text("สถานะการชำระเงิน : $text");
-                          }),
-                          Text("คอร์สเรียน : ${orderDetail?.title ?? ""}"),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              }),
-            ],
+                  );
+                }),
+              ],
+            ),
           );
         },
       ),
@@ -386,9 +318,8 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                       keyboardType: TextInputType.multiline,
                       maxLines: null,
                       onTap: () {
-                        if (_showEmoji) {
+                        if (_showEmoji)
                           setState(() => _showEmoji = !_showEmoji);
-                        }
                       },
                       decoration: const InputDecoration(
                         hintText: 'พิมพ์ข้อความ',
@@ -456,14 +387,14 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                     widget.chat.chatId ?? "",
                     widget.chat.tutorId ?? "",
                     _textController.text,
-                    Type.text,
+                    MessageType.text,
                   );
                 } else {
                   chat.sendMessage(
                       widget.chat.chatId ?? "",
                       widget.chat.tutorId ?? "",
                       _textController.text,
-                      Type.text);
+                      MessageType.text);
                 }
 
                 _textController.text = '';

@@ -799,7 +799,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             isRecordingOn = !isRecordingOn;
           });
           print('RECORDING_STOPPED:$recordIndex');
-          sendMessage('RECORDING_STOPPED:$recordIndex', stopwatch.elapsed.inMilliseconds);
+          sendMessage('RECORDING_STOPPED:$recordIndex',
+              stopwatch.elapsed.inMilliseconds);
           await fetchRecording(widget.meetingId);
           break;
         case 'RECORDING_STOPPING':
@@ -818,7 +819,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             isRecordingOn = !isRecordingOn;
           });
           print('RECORDING_STARTED:$recordIndex');
-          sendMessage('RECORDING_STARTED:$recordIndex', stopwatch.elapsed.inMilliseconds);
+          sendMessage('RECORDING_STARTED:$recordIndex',
+              stopwatch.elapsed.inMilliseconds);
           break;
         default:
       }
@@ -894,12 +896,15 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   Future<void> updateAudioFile(recordList) async {
     var calendars = courseController.courseData?.calendars;
     int indexToUpdate = calendars!.indexWhere((element) =>
-    element.start?.compareTo(DateTime.fromMillisecondsSinceEpoch(widget.startTime)) == 0);
+        element.start?.compareTo(
+            DateTime.fromMillisecondsSinceEpoch(widget.startTime)) ==
+        0);
 
     if (indexToUpdate != -1) {
       calendars[indexToUpdate].audioFile = recordList;
     }
-    await courseController.updateCourseDetails(courseController.courseData);
+    await courseController.updateCourseDetails(
+        context, courseController.courseData);
   }
 
   Future<bool> _onWillPopScope() async {
@@ -1622,7 +1627,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                 S.w(16.0),
                 InkWell(
                   onTap: () async {
-                    if(isRecordingOn){
+                    if (isRecordingOn) {
                       showAlertRecordingDialog(context);
                     } else {
                       showCloseDialog(context, () {
@@ -1643,7 +1648,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                             MaterialPageRoute(
                               builder: (context) => Nav(),
                             ),
-                                (route) => false);
+                            (route) => false);
                       });
                     }
                     // await meeting.stopRecording();
@@ -1823,21 +1828,21 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                 Material(
                   child: InkWell(
                     onTap: () async {
-                      if(!isRecordingLoading) {
+                      if (!isRecordingLoading) {
                         if (!isRecordingOn) {
-                          await meeting.startRecording(config: {
-                            "mode": "audio"
-                          });
+                          await meeting
+                              .startRecording(config: {"mode": "audio"});
                         } else {
                           await meeting.stopRecording();
                         }
                       }
                     },
                     child: Image.asset(
-                      isRecordingLoading ? ImageAssets.loading :
-                      isRecordingOn
-                          ? ImageAssets.recordDis
-                          : ImageAssets.recordEnable,
+                      isRecordingLoading
+                          ? ImageAssets.loading
+                          : isRecordingOn
+                              ? ImageAssets.recordDis
+                              : ImageAssets.recordEnable,
                       height: 44,
                       width: 44,
                     ),
@@ -2851,21 +2856,20 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             S.h(8),
             InkWell(
               onTap: () async {
-                if(!isRecordingLoading) {
+                if (!isRecordingLoading) {
                   if (!isRecordingOn) {
-                    await meeting.startRecording(config: {
-                      "mode": "audio"
-                    });
+                    await meeting.startRecording(config: {"mode": "audio"});
                   } else {
                     await meeting.stopRecording();
                   }
                 }
               },
               child: Image.asset(
-                isRecordingLoading ? ImageAssets.loading :
-                isRecordingOn
-                    ? ImageAssets.recordDis
-                    : ImageAssets.recordEnable,
+                isRecordingLoading
+                    ? ImageAssets.loading
+                    : isRecordingOn
+                        ? ImageAssets.recordDis
+                        : ImageAssets.recordEnable,
                 height: 44,
                 width: 44,
               ),

@@ -105,8 +105,8 @@ class _PaymentPageState extends State<PaymentPage> {
                   Builder(builder: (context) {
                     String text = "รอชำระค่าบริการ";
                     Color color = Colors.orange;
-                    switch (orderDetail.status) {
-                      case "payment":
+                    switch (orderDetail.paymentStatus) {
+                      case "paid":
                         text = "ชำระค่าบริการเรียบร้อย";
                         color = Colors.green;
                         break;

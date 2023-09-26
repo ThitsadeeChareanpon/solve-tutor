@@ -324,8 +324,8 @@ class _UpdateCourseLiveTabState extends State<UpdateCourseLiveTab>
       onPressed: () async {
         await Alert.showOverlay(
           asyncFunction: () async {
-            await courseController
-                .updateCourseDetails(courseController.courseData);
+            await courseController.updateCourseDetails(
+                context, courseController.courseData);
           },
           context: context,
           loadingWidget: Alert.getOverlayScreen(),

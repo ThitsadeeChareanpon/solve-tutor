@@ -4,12 +4,13 @@
 
 import 'dart:convert';
 
-OrderClassModel orderMockModelFromJson(String str) =>
-    OrderClassModel.fromJson(json.decode(str));
+OrderCourseModel orderMockModelFromJson(String str) =>
+    OrderCourseModel.fromJson(json.decode(str));
 
-String orderMockModelToJson(OrderClassModel data) => json.encode(data.toJson());
+String orderMockModelToJson(OrderCourseModel data) =>
+    json.encode(data.toJson());
 
-class OrderClassModel {
+class OrderCourseModel {
   String? id;
   String? tutorId;
   String? studentId;
@@ -30,7 +31,7 @@ class OrderClassModel {
   bool fromMarketPlace;
   bool fromAnnounce;
 
-  OrderClassModel({
+  OrderCourseModel({
     this.id,
     this.tutorId,
     this.studentId,
@@ -52,8 +53,8 @@ class OrderClassModel {
     this.fromAnnounce = false,
   });
 
-  factory OrderClassModel.fromJson(Map<String, dynamic> json) =>
-      OrderClassModel(
+  factory OrderCourseModel.fromJson(Map<String, dynamic> json) =>
+      OrderCourseModel(
         id: json["id"],
         tutorId: json["tutorId"],
         studentId: json["studentId"],

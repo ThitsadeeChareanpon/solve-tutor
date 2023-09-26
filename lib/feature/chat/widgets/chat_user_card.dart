@@ -2,14 +2,14 @@
 // import 'package:flutter/cupertino.dart';
 // import 'package:flutter/material.dart';
 // import 'package:provider/provider.dart';
-// import 'package:solve_tutor/featureauthentication/models/user_model.dart';
-// import 'package:solve_tutor/featureauthentication/service/auth_provider.dart';
-// import 'package:solve_tutor/feature/chat/widgets/profile_dialog.dart';
-// import 'package:solve_tutor/featureutils/my_date_util.dart';
-// import 'package:solve_tutor/feature/chat/models/message.dart';
-// import 'package:solve_tutor/feature/chat/pages/chat_room_page.dart';
-// import 'package:solve_tutor/feature/chat/service/chat_provider.dart';
-// import 'package:solve_tutor/featurewidgets/sizer.dart';
+// import 'package:slove_tutor/featureauthentication/models/user_model.dart';
+// import 'package:slove_tutor/featureauthentication/service/auth_provider.dart';
+// import 'package:slove_tutor/feature/chat/widgets/profile_dialog.dart';
+// import 'package:slove_tutor/featureutils/my_date_util.dart';
+// import 'package:slove_tutor/feature/chat/models/message.dart';
+// import 'package:slove_tutor/feature/chat/pages/chat_room_page.dart';
+// import 'package:slove_tutor/feature/chat/service/chat_provider.dart';
+// import 'package:slove_tutor/featurewidgets/sizer.dart';
 
 // class ChatUserCard extends StatefulWidget {
 //   final UserModel user;
