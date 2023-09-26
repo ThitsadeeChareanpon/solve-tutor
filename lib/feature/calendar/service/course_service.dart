@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:solve_tutor/constants/school_subject_constants.dart';
@@ -32,9 +33,12 @@ class CourseService {
       final courses = await course.getDocumentById(id);
       final medias =
           FirestoreService('medias/${courses!['data']['tutor_id']}/docs_list');
-      if (courses['data']['document_id'] != null) {
+      if (courses['data']['document_id'] != null &&
+          courses['data']['document_id'] != '') {
         final docData =
             await medias.getDocumentById(courses['data']['document_id']);
+        log('docData');
+        log(docData.toString());
         if (docData != null) {
           courses['data']['document'] = docData['data'];
           await course.updateDocumentById(
