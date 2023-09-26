@@ -8,7 +8,6 @@ import 'package:solve_tutor/feature/calendar/model/level_model.dart';
 import 'package:solve_tutor/feature/calendar/model/subject_model.dart';
 import 'package:solve_tutor/firebase/firestore.dart';
 
-
 class CourseService {
   final endpoint = Endpoint();
   final client = AppClient();
@@ -31,15 +30,24 @@ class CourseService {
   Future<CourseModel> getCourseById(String id) async {
     try {
       final courses = await course.getDocumentById(id);
-      final medias = FirestoreService('medias/${courses!['data']['tutor_id']}/docs_list');
+      final medias =
+          FirestoreService('medias/${courses!['data']['tutor_id']}/docs_list');
       if (courses['data']['document_id'] != null) {
-        final docData = await medias.getDocumentById(courses['data']['document_id']);
+        final docData =
+            await medias.getDocumentById(courses['data']['document_id']);
         if (docData != null) {
           courses['data']['document'] = docData['data'];
-          await course.updateDocumentById(id, {'document_count': docData['data']['doc_files'].length}, courses['data']['tutor_id']);
-          courses['data']['document_count'] = docData['data']['doc_files'].length;
+          await course.updateDocumentById(
+              id,
+              {'document_count': docData['data']['doc_files'].length},
+              courses['data']['tutor_id']);
+          courses['data']['document_count'] =
+              docData['data']['doc_files'].length;
         } else {
-          await course.updateDocumentById(id, {'document_id': '', 'document_count': 0}, courses['data']['tutor_id']);
+          await course.updateDocumentById(
+              id,
+              {'document_id': '', 'document_count': 0},
+              courses['data']['tutor_id']);
           courses['data']['document_id'] = '';
         }
       }
@@ -104,7 +112,7 @@ class CourseService {
     }
   }
 
-  Future<void> updateCourseDestails(
+  Future<void> updateCourseDetails(
     CourseModel courseData,
   ) async {
     try {
@@ -113,7 +121,8 @@ class CourseService {
         "tutor_id": courseData.tutorId,
         "update_data": courseData.toJson()
       };
-      await course.updateDocumentById(body['id'], body['update_data'], body['tutor_id']);
+      await course.updateDocumentById(
+          body['id'], body['update_data'], body['tutor_id']);
     } catch (error) {
       rethrow;
     }
@@ -129,7 +138,8 @@ class CourseService {
         "tutor_id": courseData.tutorId,
         "update_data": {"publishing": value}
       };
-      await course.updateDocumentById(body['id'], body['update_data'], body['tutor_id']);
+      await course.updateDocumentById(
+          body['id'], body['update_data'], body['tutor_id']);
     } catch (error) {
       rethrow;
     }

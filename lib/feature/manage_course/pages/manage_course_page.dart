@@ -76,21 +76,21 @@ class _ManageCoursePageState extends State<ManageCoursePage> {
                     //   content:
                     //       "ดูคอร์สขายดี, รายได้ของคุณ, จำนวนนักเรียนในคอร์ส, รีวิว, และคะแนนของคุณ",
                     // ),
-                    // gridCard(
-                    //   context,
-                    //   onTap: () async {
-                    //     await Navigator.push(
-                    //       context,
-                    //       MaterialPageRoute(
-                    //         builder: (context) => MyCourseVDOPage(
-                    //           tutorId: auth?.uid ?? "",
-                    //         ),
-                    //       ),
-                    //     );
-                    //   },
-                    //   image: 'assets/images/menu_my_course.png',
-                    //   title: "คอร์ส Marketplace",
-                    // ),
+                    gridCard(
+                      context,
+                      onTap: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MyCourseVDOPage(
+                              tutorId: auth?.uid ?? "",
+                            ),
+                          ),
+                        );
+                      },
+                      image: 'assets/images/menu_my_course.png',
+                      title: "คอร์ส Marketplace",
+                    ),
                     gridCard(
                       context,
                       onTap: () async {

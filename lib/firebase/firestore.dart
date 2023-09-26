@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FirestoreService {
@@ -22,12 +24,13 @@ class FirestoreService {
       });
       return documentRef.id;
     } catch (error) {
-      print('Error adding document: $error');
+      log('Error adding document: $error');
       throw Exception('Failed to add document');
     }
   }
 
-  Future<String> createDocument(String id, Map<String, dynamic> data, String user) async {
+  Future<String> createDocument(
+      String id, Map<String, dynamic> data, String user) async {
     try {
       final checked = await getDocumentById(id);
       if (checked != null) {
@@ -45,7 +48,7 @@ class FirestoreService {
       });
       return documentRef.id;
     } catch (error) {
-      print('Error creating document: $error');
+      log('Error creating document: $error');
       throw Exception('Failed to create document');
     }
   }
@@ -62,7 +65,7 @@ class FirestoreService {
       });
       return documents;
     } catch (error) {
-      print('Error querying documents: $error');
+      log('Error querying documents: $error');
       throw Exception('Failed to query documents');
     }
   }
@@ -77,12 +80,13 @@ class FirestoreService {
         return null;
       }
     } catch (error) {
-      print('Error getting document: $error');
+      log('Error getting document: $error');
       throw Exception('Failed to get document');
     }
   }
 
-  Future<List> getDocumentsWhere(String field, dynamic operator, dynamic value) async {
+  Future<List> getDocumentsWhere(
+      String field, dynamic operator, dynamic value) async {
     try {
       Query query;
 
@@ -128,12 +132,13 @@ class FirestoreService {
       });
       return documents;
     } catch (error) {
-      print('Error querying documents: $error');
+      log('Error querying documents: $error');
       throw Exception('Failed to query documents');
     }
   }
 
-  Future<bool> updateDocumentById(String id, Map<String, dynamic> data, String user) async {
+  Future<bool> updateDocumentById(
+      String id, Map<String, dynamic> data, String user) async {
     try {
       final documentRef = collection.doc(id);
       final timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -144,7 +149,7 @@ class FirestoreService {
       });
       return true;
     } catch (error) {
-      print('Error updating document: $error');
+      log('Error updating document: $error');
       throw Exception('Failed to update document');
     }
   }
@@ -155,12 +160,13 @@ class FirestoreService {
       await documentRef.delete();
       return true;
     } catch (error) {
-      print('Error deleting document: $error');
+      log('Error deleting document: $error');
       throw Exception('Failed to delete document');
     }
   }
 
-  Future<bool> createDocumentsInBatch(List<Map<String, dynamic>> dataArray, String user) async {
+  Future<bool> createDocumentsInBatch(
+      List<Map<String, dynamic>> dataArray, String user) async {
     try {
       final batch = FirebaseFirestore.instance.batch();
       final timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -180,12 +186,13 @@ class FirestoreService {
       await batch.commit();
       return true;
     } catch (error) {
-      print('Error creating documents in batch: $error');
+      log('Error creating documents in batch: $error');
       throw Exception('Failed to create documents in batch');
     }
   }
 
-  Future<bool> updateDocumentsInBatch(List<Map<String, dynamic>> updatesArray, String user) async {
+  Future<bool> updateDocumentsInBatch(
+      List<Map<String, dynamic>> updatesArray, String user) async {
     try {
       final batch = FirebaseFirestore.instance.batch();
       final timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -203,7 +210,7 @@ class FirestoreService {
       await batch.commit();
       return true;
     } catch (error) {
-      print('Error updating documents in batch: $error');
+      log('Error updating documents in batch: $error');
       throw Exception('Failed to update documents in batch');
     }
   }
@@ -218,12 +225,13 @@ class FirestoreService {
       await batch.commit();
       return true;
     } catch (error) {
-      print('Error deleting documents in batch: $error');
+      log('Error deleting documents in batch: $error');
       throw Exception('Failed to delete documents in batch');
     }
   }
 
-  Future<bool> performBatchOperations(List<Map<String, dynamic>> operations, String user) async {
+  Future<bool> performBatchOperations(
+      List<Map<String, dynamic>> operations, String user) async {
     try {
       final batch = FirebaseFirestore.instance.batch();
       final timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -254,14 +262,14 @@ class FirestoreService {
             batch.delete(documentRef);
             break;
           default:
-            print('Invalid operation type: $type');
+            log('Invalid operation type: $type');
         }
       });
 
       await batch.commit();
       return true;
     } catch (error) {
-      print('Error performing batch operations: $error');
+      log('Error performing batch operations: $error');
       throw Exception('Failed to perform batch operations');
     }
   }
