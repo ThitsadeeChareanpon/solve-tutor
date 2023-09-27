@@ -276,9 +276,10 @@ class _LessonTabLiveState extends State<LessonTabLive> {
         await Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => DialogFileManagerLive(
-                    tutorId: courseController.courseData?.tutorId ?? '',
-                  )),
+            builder: (context) => DialogFileManagerLive(
+              tutorId: courseController.courseData?.tutorId ?? '',
+            ),
+          ),
         );
         setState(() {});
       },

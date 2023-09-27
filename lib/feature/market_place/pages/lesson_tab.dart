@@ -245,7 +245,7 @@ class _LessonTabState extends State<LessonTab> {
         final String documentId = await Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => DialogFileManagerLive(
+            builder: (context) => DialogFileManager(
               tutorId: courseController.courseData?.tutorId ?? '',
             ),
           ),
@@ -282,9 +282,10 @@ class _LessonTabState extends State<LessonTab> {
         await Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => DialogFileManager(
-                    tutorId: courseController.courseData?.tutorId ?? '',
-                  )),
+            builder: (context) => DialogFileManager(
+              tutorId: courseController.courseData?.tutorId ?? '',
+            ),
+          ),
         );
         setState(() {});
       },

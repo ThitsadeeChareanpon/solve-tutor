@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:solve_tutor/feature/calendar/constants/constants.dart';
@@ -49,6 +50,7 @@ class _DialogFileManagerState extends State<DialogFileManager> {
   void dispose() {
     super.dispose();
     courseController.courseFilter.clear();
+    courseController.selectedDocumentIndex = null;
   }
 
   @override
@@ -240,92 +242,98 @@ class _DialogFileManagerState extends State<DialogFileManager> {
           mainAxisSpacing: 4,
           crossAxisSpacing: 8,
           children: List.generate(documents.length, (index) {
-            return GestureDetector(onTap: () async {
-              courseController.setSelectedDocument(index);
-              courseController.courseData?.document = documents[index];
-              courseController.courseData?.documentId = documents[index].id;
-            }, child: Consumer<CourseController>(builder: (_, course, child) {
-              return Column(
-                children: [
-                  (documents[index].data?.docFiles?.isEmpty == true)
-                      ? Expanded(
-                          child: Image.asset(
-                            ImageAssets.emptyCourse,
-                            width: double.infinity,
-                            fit: BoxFit.fitHeight,
-                          ),
-                        )
-                      : Expanded(
-                          child: Container(
-                            margin: const EdgeInsets.all(10.0),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(5.0),
-                              border: Border.all(color: Colors.grey),
-                              image: documents[index]
-                                          .data
-                                          ?.docFiles
-                                          ?.isNotEmpty ==
-                                      true
-                                  ? DecorationImage(
-                                      image: NetworkImage(
-                                        documents[index]
-                                                .data
-                                                ?.docFiles
-                                                ?.first ??
-                                            '',
+            return GestureDetector(
+              onTap: () async {
+                courseController.setSelectedDocument(index);
+                courseController.courseData?.document = documents[index];
+                courseController.courseData?.documentId = documents[index].id;
+              },
+              child: Consumer<CourseController>(builder: (_, course, child) {
+                return Column(
+                  children: [
+                    (documents[index].data?.docFiles?.isEmpty == true)
+                        ? Expanded(
+                            child: Image.asset(
+                              ImageAssets.emptyCourse,
+                              width: double.infinity,
+                              fit: BoxFit.fitHeight,
+                            ),
+                          )
+                        : Expanded(
+                            child: Container(
+                              margin: const EdgeInsets.all(10.0),
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  CachedNetworkImage(
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                    imageBuilder: (context, imageProvider) =>
+                                        Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(5.0),
+                                        border: Border.all(color: Colors.grey),
+                                        image: DecorationImage(
+                                          image: imageProvider,
+                                          fit: BoxFit.contain,
+                                        ),
                                       ),
-                                      fit: BoxFit.cover,
-                                      colorFilter: ColorFilter.mode(
-                                          course.selectedDocumentIndex != index
-                                              ? Colors.black
-                                              : Colors.grey,
-                                          BlendMode.screen),
-                                    )
-                                  : DecorationImage(
-                                      image: const AssetImage(
-                                        ImageAssets.emptyCourse,
-                                      ),
-                                      fit: BoxFit.cover,
-                                      colorFilter: ColorFilter.mode(
-                                          course.selectedDocumentIndex != index
-                                              ? Colors.black
-                                              : Colors.grey,
-                                          BlendMode.screen),
                                     ),
+                                    imageUrl: documents[index]
+                                            .data
+                                            ?.docFiles
+                                            ?.first ??
+                                        '',
+                                    placeholder: (context, url) => const Center(
+                                        child: CircularProgressIndicator()),
+                                    errorWidget: (context, url, error) =>
+                                        const Icon(Icons.error),
+                                  ),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(5.0),
+                                      color:
+                                          course.selectedDocumentIndex != index
+                                              ? Colors.transparent
+                                              : Colors.black.withOpacity(0.5),
+                                    ),
+                                  )
+                                ],
+                              ),
                             ),
                           ),
+                    // : Expanded(
+                    //     child: CachedNetworkImage(
+                    //       width: double.infinity,
+                    //       fit: BoxFit.fitHeight,
+                    //       imageUrl:
+                    //           documents[index].data?.docFiles?.first ?? '',
+                    //       colorBlendMode: BlendMode.lighten,
+                    //       color: course.slectedDocumentIndex != index
+                    //           ? Colors.transparent
+                    //           : Colors.grey,
+                    //       placeholder: (context, url) => const Center(
+                    //           child: CircularProgressIndicator()),
+                    //       errorWidget: (context, url, error) =>
+                    //           const Icon(Icons.error),
+                    //     ),
+                    //   ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Text(
+                        documents[index].data?.documentName ?? '',
+                        style: CustomStyles.med14Gray878787.copyWith(
+                          color: course.selectedDocumentIndex != index
+                              ? Colors.black
+                              : Colors.grey,
                         ),
-                  // : Expanded(
-                  //     child: CachedNetworkImage(
-                  //       width: double.infinity,
-                  //       fit: BoxFit.fitHeight,
-                  //       imageUrl:
-                  //           documents[index].data?.docFiles?.first ?? '',
-                  //       colorBlendMode: BlendMode.lighten,
-                  //       color: course.slectedDocumentIndex != index
-                  //           ? Colors.transparent
-                  //           : Colors.grey,
-                  //       placeholder: (context, url) => const Center(
-                  //           child: CircularProgressIndicator()),
-                  //       errorWidget: (context, url, error) =>
-                  //           const Icon(Icons.error),
-                  //     ),
-                  //   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text(
-                      documents[index].data?.documentName ?? '',
-                      style: CustomStyles.med14Gray878787.copyWith(
-                        color: course.selectedDocumentIndex != index
-                            ? Colors.black
-                            : Colors.grey,
                       ),
                     ),
-                  ),
-                ],
-              );
-            }));
+                  ],
+                );
+              }),
+            );
           }).toList()),
     );
   }
@@ -370,7 +378,7 @@ class _DialogFileManagerState extends State<DialogFileManager> {
       ),
       onPressed: () {
         if (courseController.courseData?.document != null) {
-          Navigator.of(context).pop(courseController.courseData?.document);
+          Navigator.of(context).pop(courseController.courseData?.document?.id);
         }
       },
       child: Row(

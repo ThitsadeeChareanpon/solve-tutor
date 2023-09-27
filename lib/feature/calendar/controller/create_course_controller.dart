@@ -29,7 +29,7 @@ class CourseController extends ChangeNotifier {
   var selectedLevel = '';
   var selectedSubject = '';
   var indexSelected = 0;
-  var selectedDocumentIndex = 0;
+  int? selectedDocumentIndex;
   var isLoading = false;
   var keywordTextEditingController = TextEditingController();
   List<String> studentIds = [];

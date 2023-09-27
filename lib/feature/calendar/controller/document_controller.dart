@@ -53,13 +53,13 @@ class DocumentController extends ChangeNotifier {
     documentName.text = document.data?.documentName ?? '';
   }
 
-  claerData() {
+  clearData() {
     if (documentName.text.isNotEmpty) {
       documentName.clear();
     }
   }
 
-  dlastChangeName(String value) {
+  lastChangeName(String value) {
     documentName.text = value;
   }
 
@@ -198,7 +198,7 @@ class DocumentController extends ChangeNotifier {
     }
   }
 
-  Future<void> updateDocumentDestails(DocumentModel documentData) async {
+  Future<void> updateDocumentDetails(DocumentModel documentData) async {
     try {
       await DocumentService().updateDocumentDestails(documentData);
 

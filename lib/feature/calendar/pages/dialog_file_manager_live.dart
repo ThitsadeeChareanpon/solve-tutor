@@ -243,90 +243,98 @@ class _DialogFileManagerLiveState extends State<DialogFileManagerLive> {
           mainAxisSpacing: 4,
           crossAxisSpacing: 8,
           children: List.generate(documents.length, (index) {
-            return GestureDetector(onTap: () async {
-              await courseController.setSelectedDocument(index);
-              courseController.courseData?.document = documents[index];
-              courseController.courseData?.documentId = documents[index].id;
-            }, child:
-                Consumer<CourseLiveController>(builder: (_, course, child) {
-              return Column(
-                children: [
-                  (documents[index].data?.docFiles?.isEmpty == true)
-                      ? Expanded(
-                          child: Image.asset(
-                            ImageAssets.emptyCourse,
-                            width: double.infinity,
-                            fit: BoxFit.fitHeight,
-                          ),
-                        )
-                      : Expanded(
-                          child: Container(
-                            margin: const EdgeInsets.all(10.0),
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                CachedNetworkImage(
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                  imageBuilder: (context, imageProvider) =>
-                                      Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(5.0),
-                                      border: Border.all(color: Colors.grey),
-                                      image: DecorationImage(
-                                        image: imageProvider,
-                                        fit: BoxFit.contain,
+            return GestureDetector(
+              onTap: () async {
+                await courseController.setSelectedDocument(index);
+                courseController.courseData?.document = documents[index];
+                courseController.courseData?.documentId = documents[index].id;
+              },
+              child:
+                  Consumer<CourseLiveController>(builder: (_, course, child) {
+                return Column(
+                  children: [
+                    (documents[index].data?.docFiles?.isEmpty == true)
+                        ? Expanded(
+                            child: Image.asset(
+                              ImageAssets.emptyCourse,
+                              width: double.infinity,
+                              fit: BoxFit.fitHeight,
+                            ),
+                          )
+                        : Expanded(
+                            child: Container(
+                              margin: const EdgeInsets.all(10.0),
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  CachedNetworkImage(
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                    imageBuilder: (context, imageProvider) =>
+                                        Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(5.0),
+                                        border: Border.all(color: Colors.grey),
+                                        image: DecorationImage(
+                                          image: imageProvider,
+                                          fit: BoxFit.contain,
+                                        ),
                                       ),
                                     ),
+                                    imageUrl: documents[index]
+                                            .data
+                                            ?.docFiles
+                                            ?.first ??
+                                        '',
+                                    placeholder: (context, url) => const Center(
+                                        child: CircularProgressIndicator()),
+                                    errorWidget: (context, url, error) =>
+                                        const Icon(Icons.error),
                                   ),
-                                  imageUrl:
-                                      documents[index].data?.docFiles?.first ??
-                                          '',
-                                  placeholder: (context, url) => const Center(
-                                      child: CircularProgressIndicator()),
-                                  errorWidget: (context, url, error) =>
-                                      const Icon(Icons.error),
-                                ),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(5.0),
-                                    color: course.selectedDocumentIndex != index
-                                        ? Colors.transparent
-                                        : Colors.black.withOpacity(0.5),
-                                  ),
-                                )
-                              ],
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(5.0),
+                                      color:
+                                          course.selectedDocumentIndex != index
+                                              ? Colors.transparent
+                                              : Colors.black.withOpacity(0.5),
+                                    ),
+                                  )
+                                ],
+                              ),
                             ),
                           ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Text(
+                        documents[index].data?.documentName ?? '',
+                        style: CustomStyles.med14Gray878787.copyWith(
+                          color: course.selectedDocumentIndex != index
+                              ? Colors.black
+                              : Colors.grey,
                         ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text(
-                      documents[index].data?.documentName ?? '',
-                      style: CustomStyles.med14Gray878787.copyWith(
-                        color: course.selectedDocumentIndex != index
-                            ? Colors.black
-                            : Colors.grey,
                       ),
                     ),
-                  ),
-                ],
-              );
-            }));
+                  ],
+                );
+              }),
+            );
           }).toList()),
     );
   }
 
   _bottom() {
     return Container(
-        height: 72,
-        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-        width: double.infinity,
-        color: CustomColors.grayE5E6E9,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [_backToDocument(), _chooseDocButton()],
-        ));
+      height: 72,
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      width: double.infinity,
+      color: CustomColors.grayE5E6E9,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [_backToDocument(), _chooseDocButton()],
+      ),
+    );
   }
 
   Widget _backToDocument() {

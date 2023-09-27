@@ -615,7 +615,7 @@ class _UpdateDocumentFormState extends State<UpdateDocumentForm> {
               try {
                 // print(documentController.document.toJson());
                 await documentController
-                    .updateDocumentDestails(documentController.document);
+                    .updateDocumentDetails(documentController.document);
               } catch (e) {
                 requestError = true;
               }
