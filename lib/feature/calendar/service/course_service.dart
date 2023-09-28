@@ -56,7 +56,7 @@ class CourseService {
         }
       }
       Map<String, dynamic> json = {'data': courses};
-      print(json['data']);
+      log(json['data']);
       var data = json['data'];
       return CourseModel.fromJson(data);
     } catch (error) {

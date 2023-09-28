@@ -49,15 +49,13 @@ class _UpdateCourseTabState extends State<UpdateCourseTab>
           log('init course edit page');
           final course = await courseController.getCourseById(widget.courseId);
           log('getCourseById');
+          log(course.document!.data!.docFiles!.length.toString());
           await courseController.setInitData(course);
-          log('setInitData');
           // await courseController.(course);
           await courseController
               .getCalendarListAll(courseController.courseData?.tutorId ?? '');
-          log('getCalendarListAll');
           await courseController.getDataCalendarList(
               courseController.courseData?.calendars ?? []);
-          log('getDataCalendarList');
         },
         context: context,
       );

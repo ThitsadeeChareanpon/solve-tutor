@@ -11,6 +11,7 @@ class CourseModel {
   String? detailsText;
   String? tutorId;
   String? documentId;
+  int? documentCount;
   DocumentModel? document;
   List<Lessons>? lessons = [];
   DateTime? createTime;
@@ -32,6 +33,7 @@ class CourseModel {
     this.detailsText,
     this.tutorId,
     this.documentId,
+    this.documentCount,
     this.document,
     this.lessons,
     this.createTime,
@@ -59,6 +61,7 @@ class CourseModel {
           id: data['document_id'], data: Data.fromJson(data['document']));
     }
     documentId = data['document_id'] ?? '';
+    documentCount = data['document_count'] ?? 0;
     if (data['lessons'] != null) {
       lessons = <Lessons>[];
       data['lessons'].forEach((v) {
