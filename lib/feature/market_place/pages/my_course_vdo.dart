@@ -361,7 +361,7 @@ class _MyCourseVDOPageState extends State<MyCourseVDOPage> {
                 ] else ...[
                   Image.asset(
                     ImageAssets.emptyCourse,
-                    height: 200,
+                    height: 180,
                     width: double.infinity,
                     fit: BoxFit.fitHeight,
                   ),
@@ -411,7 +411,6 @@ class _MyCourseVDOPageState extends State<MyCourseVDOPage> {
                     ],
                   ),
                 ),
-                S.h(8),
                 _buttonCard(courseModel),
               ],
             ),
