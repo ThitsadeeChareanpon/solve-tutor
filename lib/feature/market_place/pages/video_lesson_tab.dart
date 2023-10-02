@@ -17,6 +17,7 @@ import 'package:solve_tutor/feature/calendar/widgets/format_date.dart';
 import 'package:solve_tutor/feature/calendar/widgets/widgets.dart';
 import 'package:solve_tutor/feature/cheet/pages/alert_other.dart';
 import 'package:solve_tutor/feature/market_place/pages/dialog_file_manager.dart';
+import 'package:solve_tutor/feature/market_place/pages/record_course.dart';
 import 'package:solve_tutor/feature/market_place/pages/reorderable_view_page.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
@@ -445,7 +446,7 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
             style: CustomStyles.med14Gray878787,
           ),
           const SizedBox(height: 10),
-          _buttonRecordVideo()
+          _buttonRecordSolvepad(lesson!)
         ],
       ),
     );
@@ -602,7 +603,7 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
     );
   }
 
-  Widget _buttonRecordVideo() {
+  Widget _buttonRecordSolvepad(Lessons lesson) {
     return ElevatedButton.icon(
       icon: const Icon(
         Icons.radio_button_checked_rounded,
@@ -615,7 +616,17 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
           color: CustomColors.white,
         ),
       ),
-      onPressed: () async {},
+      onPressed: () async {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => RecordCourse(
+              lesson: lesson,
+              courseId: courseController.courseData!.id!,
+            ),
+          ),
+        );
+      },
       style: ElevatedButton.styleFrom(
         backgroundColor: CustomColors.redF44336,
         shape:

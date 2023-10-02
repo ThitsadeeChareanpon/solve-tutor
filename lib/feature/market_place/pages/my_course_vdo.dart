@@ -41,9 +41,6 @@ class _MyCourseVDOPageState extends State<MyCourseVDOPage> {
     courseController.initialize();
     await courseController.getLevels();
     await courseController.getSubjects();
-    print('getData');
-    print(courseController.courseList.length);
-    print(courseController.courseList[1].documentCount);
   }
 
   @override

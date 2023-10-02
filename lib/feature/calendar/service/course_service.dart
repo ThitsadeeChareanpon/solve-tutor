@@ -37,8 +37,6 @@ class CourseService {
           courses['data']['document_id'] != '') {
         final docData =
             await medias.getDocumentById(courses['data']['document_id']);
-        log('docData');
-        log(docData.toString());
         if (docData != null) {
           courses['data']['document'] = docData['data'];
           await course.updateDocumentById(
@@ -56,7 +54,6 @@ class CourseService {
         }
       }
       Map<String, dynamic> json = {'data': courses};
-      log(json['data']);
       var data = json['data'];
       return CourseModel.fromJson(data);
     } catch (error) {

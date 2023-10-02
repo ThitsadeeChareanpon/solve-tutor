@@ -46,10 +46,7 @@ class _UpdateCourseTabState extends State<UpdateCourseTab>
         loadingWidget: Alert.getOverlayScreen(),
         asyncFunction: () async {
           // ues courseId get course details
-          log('init course edit page');
           final course = await courseController.getCourseById(widget.courseId);
-          log('getCourseById');
-          log(course.document!.data!.docFiles!.length.toString());
           await courseController.setInitData(course);
           // await courseController.(course);
           await courseController
