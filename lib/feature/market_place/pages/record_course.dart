@@ -1,80 +1,48 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-import 'package:videosdk/videosdk.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:solve_tutor/feature/calendar/controller/create_course_controller.dart';
+import 'package:flutter_sound/flutter_sound.dart';
 import 'package:sizer/sizer.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:permission_handler/permission_handler.dart';
+import 'package:audio_session/audio_session.dart';
+import 'package:flutter_sound_platform_interface/flutter_sound_recorder_platform_interface.dart';
 
-import '../../../nav.dart';
 import '../../calendar/constants/custom_styles.dart';
-import '../../calendar/controller/create_course_live_controller.dart';
+import '../../calendar/model/course_model.dart';
 import '../../calendar/widgets/sizebox.dart';
-import '../components/close_dialog.dart';
-import '../components/divider.dart';
-import '../components/divider_vertical.dart';
-import '../components/leaderboard.dart';
+
 import '../../calendar/constants/assets_manager.dart';
 import '../../calendar/constants/custom_colors.dart';
-import '../../calendar/helper/utility_helper.dart';
-import '../components/room_loading_screen.dart';
-import '../components/view_all_student_mobile.dart';
-import '../solvepad/solve_watch.dart';
-import '../solvepad/solvepad_drawer.dart';
-import '../solvepad/solvepad_stroke_model.dart';
-import '../quiz/quiz_model.dart';
-import '../utils/api.dart';
-import '../utils/responsive.dart';
+import '../../live_classroom/components/close_dialog.dart';
+import '../../live_classroom/components/divider.dart';
+import '../../live_classroom/components/divider_vertical.dart';
+import '../../live_classroom/components/leaderboard.dart';
+import '../../live_classroom/components/room_loading_screen.dart';
+import '../../live_classroom/quiz/quiz_model.dart';
+import '../../live_classroom/solvepad/solve_watch.dart';
+import '../../live_classroom/solvepad/solvepad_drawer.dart';
+import '../../live_classroom/solvepad/solvepad_stroke_model.dart';
+import '../../live_classroom/utils/responsive.dart';
 
-class TutorLiveClassroom extends StatefulWidget {
-  final String meetingId, userId, token, displayName, courseId;
-  final bool micEnabled, camEnabled, chatEnabled, isHost, isMock;
-  final int startTime;
-  const TutorLiveClassroom({
+class RecordCourse extends StatefulWidget {
+  final String courseId;
+  final Lessons lesson;
+  const RecordCourse({
     Key? key,
-    required this.meetingId,
-    required this.userId,
-    required this.token,
-    required this.displayName,
-    required this.isHost,
+    required this.lesson,
     required this.courseId,
-    required this.startTime,
-    this.micEnabled = true,
-    this.camEnabled = false,
-    this.chatEnabled = false,
-    this.isMock = false,
   }) : super(key: key);
 
   @override
-  State<TutorLiveClassroom> createState() => _LiveClassroomSolvepadState();
+  State<RecordCourse> createState() => _RecordCourseState();
 }
 
-class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
-  // Conference
-  bool isRecordingOn = false;
-  bool isRecordingLoading = false;
-  int recordIndex = 0;
-  bool showChatSnackbar = false;
-  String recordingState = "RECORDING_STOPPED";
-  late Room meeting;
-  bool _joined = false;
-  Stream? shareStream;
-  Stream? videoStream;
-  Stream? audioStream;
-  Stream? remoteParticipantShareStream;
-  bool fullScreen = false;
-
-  // WSS
-  WebSocketChannel? channel;
-  final dataTextController = TextEditingController();
-  List<dynamic> data = [];
-  bool allowSending = true;
-
+class _RecordCourseState extends State<RecordCourse> {
   // Screen and tools
   bool _switchValue = true;
   bool _switchShareValue = true;
@@ -91,12 +59,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   int _selectedIndexLines = 0;
   late bool isSelected;
   bool isChecked = false;
-  int _studentColorIndex = 0;
-  int _studentStrokeWidthIndex = 0;
-  bool _requestScreenShare = false;
-  bool _isViewingFocusStudent = false;
-  String focusedStudentId = '';
-  String focusedStudentName = '';
 
   final List _listLines = [
     {
@@ -172,81 +134,21 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   );
   int focusQuestion = 0;
   int radioTest = 0;
-  List students = [];
-  List studentsDisplay = [
-    {
-      "image": ImageAssets.avatarMen,
-      "name": "My Screen",
-      "status_txt": "Sharing screen...",
-      "share_now": "N",
-      "status_share": "enable",
-    },
-    {
-      "image": ImageAssets.avatarWomen,
-      "name": "Dianne Russel",
-      "status_txt": "Sharing screen...",
-      "share_now": "Y",
-      "status_share": "enable",
-    },
-    {
-      "image": ImageAssets.avatarWomen,
-      "name": "Darlene Robertson",
-      "status_txt": "Sharing screen...",
-      "share_now": "N",
-      "status_share": "enable",
-    },
-    {
-      "image": ImageAssets.avatarMen,
-      "name": "Marvin McKinney",
-      "status_txt": "Sharing screen...",
-      "share_now": "N",
-      "status_share": "enable",
-    },
-    {
-      "image": ImageAssets.avatarWomen,
-      "name": "Kathryn Murphy",
-      "status_txt": "Sharing screen...",
-      "share_now": "N",
-      "status_share": "enable",
-    },
-    {
-      "image": ImageAssets.avatarDisWomen,
-      "name": "Bessie Cooper",
-      "status_txt": "Not sharing",
-      "share_now": "N",
-      "status_share": "disable",
-    },
-    {
-      "image": ImageAssets.avatarDisMen,
-      "name": "Jacob Jones",
-      "status_txt": "Not sharing",
-      "share_now": "N",
-      "status_share": "disable",
-    },
-    {
-      "image": ImageAssets.avatarDisMen,
-      "name": "Ralph Edwards",
-      "status_txt": "Not sharing",
-      "share_now": "N",
-      "status_share": "disable",
-    },
-  ];
 
   // ---------- VARIABLE: Solve Pad data
   late List<String> _pages = [];
   final List<List<SolvepadStroke?>> _penPoints = [[]];
   final List<List<SolvepadStroke?>> _laserPoints = [[]];
   final List<List<SolvepadStroke?>> _highlighterPoints = [[]];
-  final List<List<SolvepadStroke?>> _studentPenPoints = [[]];
-  final List<List<SolvepadStroke?>> _studentLaserPoints = [[]];
-  final List<List<SolvepadStroke?>> _studentHighlighterPoints = [[]];
   final List<Offset> _eraserPoints = [const Offset(-100, -100)];
-  final List<Offset> _studentEraserPoints = [const Offset(-100, -100)];
   final List<List<Offset?>> _replayPoints = [[]];
+  List<Offset?> _currentActionData = [];
+  final List<String?> _currentScrollData = [];
+  List<int> _currentActionTimestamp = [];
   DrawingMode _mode = DrawingMode.drag;
-  DrawingMode _studentMode = DrawingMode.drag;
-  final SolveStopwatch stopwatch = SolveStopwatch();
-  Size studentSolvepadSize = const Size(1059.0, 547.0);
+  final SolveStopwatch solveStopwatch = SolveStopwatch();
+
+  // ---------- VARIABLE: Solve Size
   Size mySolvepadSize = const Size(1059.0, 547.0);
   double sheetImageRatio = 0.708;
   double studentImageWidth = 0;
@@ -258,24 +160,39 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   double scaleY = 0;
 
   // ---------- VARIABLE: Solve Pad features
+  String _formattedElapsedTime = 'Recording 00:00:00';
+  final List<List<int>> _timeHistory = [];
+  final List<Map<String, dynamic>> _actionHistory = [];
   bool _isPrevBtnActive = false;
   bool _isNextBtnActive = true;
   int? activePointerId;
+  bool _isForwarding = false;
+  bool _isBackwarding = false;
+  int _replayOuterIndex = 0;
+  int _replayInnerIndex = 0;
 
   // ---------- VARIABLE: page control
-  String _formattedElapsedTime = ' 00 : 00 : 00 ';
   Timer? _laserTimer;
-  Timer? _studentLaserTimer;
-  Timer? _meetingTimer;
+  Timer? _recordTimer;
   int _currentPage = 0;
+  int _currentReplayPage = 0;
   final PageController _pageController = PageController();
   final List<TransformationController> _transformationController = [];
-  var courseController = CourseLiveController();
+  var courseController = CourseController();
   late String courseName;
   bool isCourseLoaded = false;
+  bool isRecording = false;
+  bool isRecordEnd = false;
+  bool isReplaying = false;
 
-  // ---------- VARIABLE: message control
-  late Map<String, Function(String)> handlers;
+  // ---------- VARIABLE: recorder
+  Codec _codec = Codec.aacMP4;
+  String _mPath = 'tau_file.mp4';
+  FlutterSoundPlayer? _mPlayer = FlutterSoundPlayer();
+  FlutterSoundRecorder? _mRecorder = FlutterSoundRecorder();
+  bool _mPlayerIsInited = false;
+  bool _mRecorderIsInited = false;
+  bool _mplaybackReady = false;
 
   /// TODO: Get rid of all Mockup reference
   @override
@@ -292,31 +209,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
         SystemUiOverlay.bottom,
       ]);
     });
-    initTimer();
     initPagingBtn();
-    if (!widget.isMock) {
-      initPagesData();
-      initMessageHandler();
-      initConference();
-    } else {
-      _joined = true;
-      mockInitPageData();
-    }
-  }
-
-  void mockInitPageData() {
-    setState(() {
-      _pages = [
-        'https://firebasestorage.googleapis.com/v0/b/solve-f1778.appspot.com/o/test(gun)%2FexampleSheet1.jpg?alt=media&token=27676570-4031-4c6b-b6bc-4280fbbcd116',
-        'https://firebasestorage.googleapis.com/v0/b/solve-f1778.appspot.com/o/test(gun)%2FexampleSheet2.jpg?alt=media&token=8ec3a135-85a6-4cac-abdd-b8d0df094ce3',
-      ];
-      for (int i = 1; i < 2; i++) {
-        _addPage();
-      }
-      courseName = 'Mockup Test';
-      micEnable = false;
-      isCourseLoaded = true;
-    });
+    initPagesData();
   }
 
   Future<void> initPagesData() async {
@@ -341,23 +235,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
         }
       }
       courseName = courseController.courseData!.courseName!;
-      micEnable = widget.micEnabled;
       isCourseLoaded = true;
-    });
-    var courseStudents = courseController.courseData!.studentDetails;
-    List<Map<String, dynamic>>? studentsJson =
-        courseStudents?.map((student) => student.toJson()).toList();
-    setState(() {
-      students = studentsJson!.cast<dynamic>();
-    });
-  }
-
-  void initTimer() {
-    stopwatch.start();
-    _meetingTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        _formattedElapsedTime = _formatElapsedTime(stopwatch.elapsed);
-      });
     });
   }
 
@@ -374,338 +252,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     }
   }
 
-  void initSolvepadScaling(double solvepadWidth, double solvepadHeight) {
-    studentImageWidth = studentSolvepadSize.height * sheetImageRatio;
-    studentExtraSpaceX = (studentSolvepadSize.width - studentImageWidth) / 2;
-    mySolvepadSize = Size(solvepadWidth, solvepadHeight);
-    myImageWidth = mySolvepadSize.height * sheetImageRatio;
-    myExtraSpaceX = (mySolvepadSize.width - myImageWidth) / 2;
-    scaleImageX = myImageWidth / studentImageWidth;
-    scaleX = mySolvepadSize.width / studentSolvepadSize.width;
-    scaleY = mySolvepadSize.height / studentSolvepadSize.height;
-  }
-
-  void initConference() {
-    Room room = VideoSDK.createRoom(
-        roomId: widget.meetingId,
-        token: widget.token,
-        displayName: widget.displayName,
-        micEnabled: widget.micEnabled,
-        camEnabled: false,
-        maxResolution: 'hd',
-        multiStream: true,
-        defaultCameraIndex: 1,
-        notification: const NotificationInfo(
-          title: "Video SDK",
-          message: "Video SDK is sharing screen in the meeting",
-          icon: "notification_share", // drawable icon name
-        ),
-        mode: Mode.CONFERENCE);
-    registerMeetingEvents(room);
-    room.join();
-  }
-
-  void initWss() {
-    channel = WebSocketChannel.connect(
-      Uri.parse(
-          'ws://35.240.169.164:3000/${widget.courseId}/${widget.startTime}'),
-    );
-
-    channel?.stream.listen((message) {
-      // if (_requestScreenShare) {
-      setState(() {
-        var decodedMessage = json.decode(message);
-        print('json message');
-        print(decodedMessage);
-
-        var item = decodedMessage[0];
-        var data = item['data'];
-        var uid = item['uid'];
-
-        if (uid != focusedStudentId &&
-            !data.startsWith('StudentShareScreen') &&
-            !data.startsWith('RequestSolvepadSize')) {
-          return;
-        }
-        if (data.startsWith('StudentShareScreen')) {
-          var parts = data.split(':');
-          var status = parts[1];
-          double solvepadWidth = mySolvepadSize.width;
-          double solvepadHeight = mySolvepadSize.height;
-          if (status == 'enable') {
-            solvepadWidth = double.parse(parts[2]);
-            solvepadHeight = double.parse(parts[3]);
-            _isViewingFocusStudent = true;
-          } else {
-            focusedStudentId = '';
-            focusedStudentName = '';
-            cleanStudentSolvepad();
-          }
-          updateStudentData(uid, status, solvepadWidth, solvepadHeight);
-        } // listen to student drawing
-        else if (data.startsWith('RequestSolvepadSize')) {
-          sendMessage(
-            'SetSolvepad:${mySolvepadSize.width}:${mySolvepadSize.height}',
-            stopwatch.elapsed.inMilliseconds,
-          );
-          if (students.isEmpty) return;
-          var studentIndex = getStudentIndex(uid);
-          if (studentIndex == -1) {
-            print('ID not found');
-            print(students.length);
-            print(students[0]);
-            print(students[1]);
-            print(students[2]);
-            print(students[3]);
-          } else {
-            setState(() {
-              students[studentIndex]['attend'] = true;
-            });
-          }
-        } else {
-          for (var entry in handlers.entries) {
-            if (data.startsWith(entry.key)) {
-              entry.value(data);
-              break;
-            }
-          }
-        }
-      });
-      // }
-    });
-  }
-
-  void initMessageHandler() {
-    handlers = {
-      'Offset': handleMessageOffset,
-      'Erase': handleMessageErase,
-      'null': handleMessageNull,
-      'DrawingMode': handleMessageDrawingMode,
-      'StrokeColor': handleMessageStrokeColor,
-      'StrokeWidth': handleMessageStrokeWidth,
-      'ScrollZoom': handleMessageScrollZoom,
-      'ChangePage': handleMessageChangePage,
-      'InstantArt': handleMessageInstantArt,
-    };
-  }
-
-  void handleMessageOffset(String data) {
-    var offset = convertToOffset(data);
-    Color strokeColor = _strokeColors[_studentColorIndex];
-    double strokeWidth = _strokeWidths[_studentStrokeWidthIndex];
-    switch (_studentMode) {
-      case DrawingMode.drag:
-        break;
-      case DrawingMode.pen:
-        _studentPenPoints[_currentPage]
-            .add(SolvepadStroke(offset, strokeColor, strokeWidth));
-        break;
-      case DrawingMode.laser:
-        _studentLaserPoints[_currentPage]
-            .add(SolvepadStroke(offset, strokeColor, strokeWidth));
-        _studentLaserDrawing();
-        break;
-      case DrawingMode.highlighter:
-        _studentHighlighterPoints[_currentPage]
-            .add(SolvepadStroke(offset, strokeColor, strokeWidth));
-        break;
-      case DrawingMode.eraser:
-        _studentEraserPoints[_currentPage] = offset;
-        break;
-      default:
-        break;
-    }
-  }
-
-  void handleMessageErase(String data) {
-    var parts = data.split('.');
-    var index = int.parse(parts.last);
-    if (data.startsWith('Erase.pen')) {
-      removePointStack(_studentPenPoints[_currentPage], index);
-    } else if (data.startsWith('Erase.high')) {
-      removePointStack(_studentHighlighterPoints[_currentPage], index);
-    }
-  }
-
-  void handleMessageNull(String data) {
-    switch (_studentMode) {
-      case DrawingMode.drag:
-        break;
-      case DrawingMode.pen:
-        _studentPenPoints[_currentPage].add(null);
-        break;
-      case DrawingMode.laser:
-        _studentLaserPoints[_currentPage].add(null);
-        _studentLaserTimer =
-            Timer(const Duration(milliseconds: 1500), _studentStopLaserDrawing);
-        break;
-      case DrawingMode.highlighter:
-        _studentHighlighterPoints[_currentPage].add(null);
-        break;
-      case DrawingMode.eraser:
-        _studentEraserPoints[_currentPage] = const Offset(-100, -100);
-        break;
-      default:
-        break;
-    }
-  }
-
-  void handleMessageDrawingMode(String data) {
-    String modeString = data.replaceAll('DrawingMode.', '');
-    DrawingMode drawingMode = DrawingMode.values.firstWhere(
-        (e) => e.toString() == 'DrawingMode.$modeString',
-        orElse: () => DrawingMode.drag);
-    _studentMode = drawingMode;
-  }
-
-  void handleMessageStrokeColor(String data) {
-    var parts = data.split('.');
-    var index = int.parse(parts.last);
-    _studentColorIndex = index;
-  }
-
-  void handleMessageStrokeWidth(String data) {
-    var parts = data.split('.');
-    var index = int.parse(parts.last);
-    _studentStrokeWidthIndex = index;
-  }
-
-  void handleMessageScrollZoom(String data) {
-    var parts = data.split(':');
-    var scrollX = double.parse(parts[1]);
-    var scrollY = double.parse(parts[2]);
-    var zoom = double.parse(parts.last);
-    _transformationController[_currentPage].value = Matrix4.identity()
-      ..translate(scaleScrollX(scrollX), scaleScrollY(scrollY))
-      ..scale(zoom);
-  }
-
-  void handleMessageChangePage(String data) {
-    var parts = data.split(':');
-    var pageNumber = int.parse(parts.last);
-    _pageController.animateToPage(
-      pageNumber,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
-  }
-
-  void handleMessageInstantArt(String data) {
-    var parts = data.split('|');
-    var page = int.parse(parts[1]);
-    var scrollX = double.parse(parts[2]);
-    var scrollY = double.parse(parts[3]);
-    var zoom = double.parse(parts[4]);
-    var pen = parts[5];
-    var high = parts[6];
-    _pageController.animateToPage(
-      page,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
-    _transformationController[page].value = Matrix4.identity()
-      ..translate(scaleScrollX(scrollX), scaleScrollY(scrollY))
-      ..scale(zoom);
-
-    List decodedPen = jsonDecode(pen);
-    _studentPenPoints[page] = decodedPen.map<SolvepadStroke?>((stroke) {
-      if (stroke == null) {
-        return null;
-      } else {
-        Offset scaledOffset =
-            scaleOffset(Offset(stroke['offset']['dx'], stroke['offset']['dy']));
-        Color color = Color(int.parse(stroke['color'], radix: 16));
-        return SolvepadStroke(scaledOffset, color, stroke['width']);
-      }
-    }).toList();
-    List decodedHigh = jsonDecode(high);
-    _studentHighlighterPoints[page] =
-        decodedHigh.map<SolvepadStroke?>((stroke) {
-      if (stroke == null) {
-        return null;
-      } else {
-        Offset scaledOffset =
-            scaleOffset(Offset(stroke['offset']['dx'], stroke['offset']['dy']));
-        Color color = Color(int.parse(stroke['color'], radix: 16));
-        return SolvepadStroke(scaledOffset, color, stroke['width']);
-      }
-    }).toList();
-  }
-
-  Offset convertToOffset(String offsetString) {
-    final matched = RegExp(r'Offset\((.*), (.*)\)').firstMatch(offsetString);
-    final dx = double.tryParse(matched!.group(1)!);
-    final dy = double.tryParse(matched.group(2)!);
-    var returnOffset = Offset(dx!, dy!);
-    return scaleOffset(returnOffset);
-  }
-
-  Offset scaleOffset(Offset offset) {
-    double studentWidth = studentSolvepadSize.width;
-    double studentHeight = studentSolvepadSize.height;
-    double studentImageWidth = studentHeight * sheetImageRatio;
-    double studentExtraSpaceX = (studentWidth - studentImageWidth) / 2;
-
-    double myWidth = mySolvepadSize.width;
-    double myHeight = mySolvepadSize.height;
-    double myImageWidth = myHeight * sheetImageRatio;
-    double myExtraSpaceX = (myWidth - myImageWidth) / 2;
-    // double diffExtraSpaceX = myExtraSpaceX - hostExtraSpaceX;
-
-    double scaleImageX = myImageWidth / studentImageWidth;
-    double scaleY = myHeight / studentHeight;
-
-    return Offset(
-        (offset.dx - studentExtraSpaceX) * scaleImageX + myExtraSpaceX,
-        offset.dy * scaleY);
-  }
-
-  double scaleScrollX(double scrollX) => scrollX * scaleX;
-  double scaleScrollY(double scrollY) => scrollY * scaleY;
-
-  void updateStudentData(String userId, String status,
-      [double solvepadWidth = 1059, double solvepadHeight = 547]) {
-    for (var student in students) {
-      if (student['id'] == userId) {
-        setState(() {
-          student['status_share'] = status;
-          if (status == 'enable') {
-            student['solvepad_size'] = '$solvepadWidth,$solvepadHeight';
-          }
-        });
-        break;
-      }
-    }
-  }
-
-  void changeSolvepadScaling(double solvepadWidth, double solvepadHeight) {
-    setState(() {
-      studentSolvepadSize = Size(solvepadWidth, solvepadHeight);
-      studentImageWidth = solvepadHeight * sheetImageRatio;
-      studentExtraSpaceX = (solvepadWidth - studentImageWidth) / 2;
-      myImageWidth = mySolvepadSize!.height * sheetImageRatio;
-      myExtraSpaceX = (mySolvepadSize!.width - myImageWidth) / 2;
-      scaleImageX = myImageWidth / studentImageWidth;
-      scaleX = mySolvepadSize!.width / studentSolvepadSize.width;
-      scaleY = mySolvepadSize!.height / studentSolvepadSize.height;
-    });
-  }
-
-  void cleanStudentSolvepad() {
-    setState(() {
-      for (var list in _studentPenPoints) {
-        list.clear();
-      }
-      for (var list in _studentLaserPoints) {
-        list.clear();
-      }
-      for (var list in _studentHighlighterPoints) {
-        list.clear();
-      }
-      _studentMode = DrawingMode.drag;
-    });
-  }
-
   @override
   dispose() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -716,194 +262,9 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       DeviceOrientation.landscapeLeft,
     ]);
     _pageController.dispose();
-    _meetingTimer?.cancel();
+    _recordTimer?.cancel();
+    _laserTimer?.cancel();
     super.dispose();
-  }
-
-  // ---------- FUNCTION: WSS
-  void closeChanel() {
-    channel?.sink.close();
-  }
-
-  void sendMessage(dynamic data, int time) {
-    if (widget.isMock) return;
-    try {
-      final message =
-          json.encode({'uid': widget.userId, 'data': data, 'time': time});
-      channel?.sink.add(message);
-    } catch (e) {
-      print('Error sending message: $e');
-    }
-  }
-
-  // ---------- FUNCTION: conference
-  int getStudentIndex(String studentId) {
-    for (int i = 0; i < students.length; i++) {
-      if (students[i]['id'] == studentId) {
-        return i;
-      }
-    }
-    return -1; // Return -1 if the student with the given ID is not found
-  }
-
-  void registerMeetingEvents(Room _meeting) {
-    // Called when joined in meeting
-    _meeting.on(
-      Events.roomJoined,
-      () {
-        setState(() {
-          meeting = _meeting;
-          _joined = true;
-          updateMeetingCode();
-          // meeting.startRecording(config: {"mode": "audio"});
-          initWss();
-        });
-      },
-    );
-
-    _meeting.on(Events.participantJoined, (Participant participant) {
-      print('Student Join');
-      print(participant.displayName);
-      print(participant.id);
-    });
-
-    _meeting.on(Events.participantLeft, (Participant participant) {
-      print('Student Left');
-      print(participant.displayName);
-      print(participant.id);
-    });
-
-    // Called when meeting is ended
-    _meeting.on(Events.roomLeft, (String? errorMsg) {
-      if (errorMsg != null) {
-        print("Meeting left due to $errorMsg !!");
-      }
-      Navigator.pop(context);
-      // Navigator.pushAndRemoveUntil(
-      //     context,
-      //     MaterialPageRoute(builder: (context) => const JoinScreen()),
-      //     (route) => false);
-    });
-
-    // Called when recording is started
-    _meeting.on(Events.recordingStateChanged, (String status) async {
-      print('Conference Recording Changed');
-      print(status);
-      setState(() {
-        recordingState = status;
-      });
-      switch (status) {
-        case 'RECORDING_STOPPED':
-          setState(() {
-            isRecordingLoading = false;
-            isRecordingOn = !isRecordingOn;
-          });
-          print('RECORDING_STOPPED:$recordIndex');
-          sendMessage('RECORDING_STOPPED:$recordIndex',
-              stopwatch.elapsed.inMilliseconds);
-          await fetchRecording(widget.meetingId);
-          break;
-        case 'RECORDING_STOPPING':
-          setState(() {
-            isRecordingLoading = true;
-          });
-          break;
-        case 'RECORDING_STARTING':
-          setState(() {
-            isRecordingLoading = true;
-          });
-          break;
-        case 'RECORDING_STARTED':
-          setState(() {
-            isRecordingLoading = false;
-            isRecordingOn = !isRecordingOn;
-          });
-          print('RECORDING_STARTED:$recordIndex');
-          sendMessage('RECORDING_STARTED:$recordIndex',
-              stopwatch.elapsed.inMilliseconds);
-          break;
-        default:
-      }
-    });
-
-    // Called when stream is enabled
-    _meeting.localParticipant.on(Events.streamEnabled, (Stream _stream) {
-      if (_stream.kind == 'audio') {
-        setState(() {
-          audioStream = _stream;
-        });
-      }
-    });
-
-    // Called when stream is disabled
-    _meeting.localParticipant.on(Events.streamDisabled, (Stream _stream) {
-      if (_stream.kind == 'video' && videoStream?.id == _stream.id) {
-        setState(() {
-          videoStream = null;
-        });
-      } else if (_stream.kind == 'audio' && audioStream?.id == _stream.id) {
-        setState(() {
-          audioStream = null;
-        });
-      } else if (_stream.kind == 'share' && shareStream?.id == _stream.id) {
-        setState(() {
-          shareStream = null;
-        });
-      }
-    });
-
-    // Called when presenter is changed
-    _meeting.on(Events.presenterChanged, (_activePresenterId) {
-      Participant? activePresenterParticipant =
-          _meeting.participants[_activePresenterId];
-
-      // Get Share Stream
-      Stream? _stream = activePresenterParticipant?.streams.values
-          .singleWhere((e) => e.kind == "share");
-
-      setState(() => remoteParticipantShareStream = _stream);
-    });
-
-    _meeting.on(
-        Events.error,
-        (error) => {
-              print('meeting function error'),
-              print(error['name'].toString()),
-              print(error['message'].toString())
-            });
-  }
-
-  Future<void> fetchRecording(meetingID) async {
-    try {
-      List recordList = [];
-      var record = await fetchRecordings(widget.token, meetingID);
-      // print('record url');
-      // print(record);
-      recordIndex += 1;
-      record.forEach((r) {
-        if (r['file'] != null) {
-          // print(r['file']['fileUrl']);
-          recordList.add(r['file']['fileUrl']);
-        }
-      });
-      print(recordList);
-      await updateAudioFile(recordList);
-    } catch (error) {
-      print('fetchRecording error: $error');
-    }
-  }
-
-  Future<void> updateAudioFile(recordList) async {
-    var calendars = courseController.courseData?.calendars;
-    int indexToUpdate = calendars!.indexWhere((element) =>
-        element.start?.compareTo(
-            DateTime.fromMillisecondsSinceEpoch(widget.startTime)) ==
-        0);
-
-    if (indexToUpdate != -1) {
-      calendars[indexToUpdate].audioFile = recordList;
-    }
-    await courseController.updateCourseDetails(courseController.courseData);
   }
 
   Future<bool> _onWillPopScope() async {
@@ -911,19 +272,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-    if (widget.isMock) {
-      Navigator.pop(context);
-    }
-    closeChanel();
-    meeting.leave();
     return true;
-  }
-
-  void updateMeetingCode() {
-    FirebaseFirestore.instance
-        .collection('course_live')
-        .doc(widget.courseId)
-        .update({'currentMeetingCode': meeting.id});
   }
 
   void updateRatio(String url) {
@@ -936,6 +285,40 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     }));
   }
 
+  // ---------- FUNCTION: page control
+  void _addPage() {
+    setState(() {
+      _penPoints.add([]);
+      _laserPoints.add([]);
+      _highlighterPoints.add([]);
+      _eraserPoints.add(const Offset(-100, -100));
+      _replayPoints.add([]);
+    });
+  }
+
+  void _onPageViewChange(int page) {
+    setState(() {
+      for (var point in _laserPoints) {
+        point.clear();
+      }
+      _currentPage = page;
+      _penPoints[_currentPage].add(null);
+    });
+    updateDataHistory(_mode);
+    if (isRecording) {
+      _timeHistory.add([solveStopwatch.elapsed.inMilliseconds]);
+      _actionHistory.add({'action': 'change_page', 'data': page});
+    }
+  }
+
+  String _formatElapsedTime(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    String hours = twoDigits(duration.inHours);
+    String minutes = twoDigits(duration.inMinutes.remainder(60));
+    String seconds = twoDigits(duration.inSeconds.remainder(60));
+    return 'Recording $hours:$minutes:$seconds';
+  }
+
   // ---------- FUNCTION: solve pad feature
   double square(double x) => x * x;
   double sqrDistanceBetween(Offset p1, Offset p2) =>
@@ -946,17 +329,9 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     if (mode == DrawingMode.pen) {
       pointStack = _penPoints[_currentPage];
       removePointStack(pointStack, index);
-      sendMessage(
-        'Erase.pen.$index',
-        stopwatch.elapsed.inMilliseconds,
-      );
     } else if (mode == DrawingMode.highlighter) {
       pointStack = _highlighterPoints[_currentPage];
       removePointStack(pointStack, index);
-      sendMessage(
-        'Erase.high.$index',
-        stopwatch.elapsed.inMilliseconds,
-      );
     }
   }
 
@@ -993,54 +368,693 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     });
   }
 
-  void _studentLaserDrawing() {
-    _studentLaserTimer?.cancel();
-  }
-
-  void _studentStopLaserDrawing() {
+  void _initRecord() {
+    solveStopwatch.reset();
+    solveStopwatch.start();
+    _startRecordTimer();
     setState(() {
-      _studentLaserPoints[_currentPage].clear();
+      isRecording = !isRecording;
+      _timeHistory.add([solveStopwatch.elapsed.inMilliseconds]);
+      _actionHistory
+          .add({'action': 'start/stop-recording', 'data': _currentPage});
     });
   }
 
-  // ---------- FUNCTION: page control
-  void _addPage() {
-    setState(() {
-      _penPoints.add([]);
-      _laserPoints.add([]);
-      _highlighterPoints.add([]);
-      _eraserPoints.add(const Offset(-100, -100));
-      _replayPoints.add([]);
-      _studentPenPoints.add([]);
-      _studentLaserPoints.add([]);
-      _studentHighlighterPoints.add([]);
-      _studentEraserPoints.add(const Offset(-100, -100));
+  void _startRecordTimer() {
+    _recordTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        _formattedElapsedTime = _formatElapsedTime(solveStopwatch.elapsed);
+      });
     });
   }
 
-  void _onPageViewChange(int page) {
+  void _stopSolvePadRecord() {
     setState(() {
-      for (var point in _laserPoints) {
+      _timeHistory.add(List<int>.from(_currentActionTimestamp));
+      _actionHistory.add({
+        'action':
+            '${_mode.toString()}|$_selectedIndexColors|$_selectedIndexLines',
+        'data': _mode == DrawingMode.drag
+            ? List<String?>.from(_currentScrollData)
+            : List<Offset?>.from(_currentActionData)
+      });
+      _currentActionTimestamp.clear();
+      _currentActionData.clear();
+      _timeHistory.add([solveStopwatch.elapsed.inMilliseconds]);
+      _actionHistory
+          .add({'action': 'start/stop-recording', 'data': _currentPage});
+    });
+    solveStopwatch.reset();
+    _stopRecordTimer();
+  }
+
+  void _stopRecordTimer() {
+    _recordTimer?.cancel();
+    _recordTimer = null;
+    _formattedElapsedTime = 'Record end';
+    setState(() {
+      isRecordEnd = true;
+    });
+  }
+
+  void _initReplay() {
+    setState(() {
+      isReplaying = !isReplaying;
+      for (var point in _penPoints) {
         point.clear();
       }
-      _currentPage = page;
-      _penPoints[_currentPage].add(null);
+      for (var point in _replayPoints) {
+        point.clear();
+      }
+      for (var point in _highlighterPoints) {
+        point.clear();
+      }
+      _replay();
     });
   }
 
-  String _formatElapsedTime(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    String hours = twoDigits(duration.inHours);
-    String minutes = twoDigits(duration.inMinutes.remainder(60));
-    String seconds = twoDigits(duration.inSeconds.remainder(60));
-    return ' $hours : $minutes : $seconds ';
+  // ---------- FUNCTION: solve pad core
+  Future<void> _replay() async {
+    solveStopwatch.reset();
+    solveStopwatch.start();
+
+    setState(() {
+      isReplaying = true;
+      _isBackwarding = false;
+    });
+
+    log(_actionHistory.toString(), name: "action History");
+    // log(_timeHistory.toString(), name: "time History");
+
+    bool isFirstLoop = true;
+    while (_isBackwarding || isFirstLoop) {
+      isFirstLoop = false;
+      await _replayLoop(_replayOuterIndex, _replayInnerIndex);
+    }
+
+    _replayOuterIndex = 0;
+    _replayInnerIndex = 0;
+    _currentReplayPage = 0;
+    isReplaying = false;
+    solveStopwatch.stop();
+    log(' --------- end loop ----------');
+  }
+
+  Future<void> _replayLoop(int outerIndex, int innerIndex) async {
+    _isBackwarding = false;
+    bool shouldBreak = false;
+    for (int i = outerIndex; i < _actionHistory.length; i++) {
+      if (shouldBreak) {
+        break;
+      }
+      if (_actionHistory[i]['action'].startsWith('DrawingMode.pen') &&
+          _actionHistory[i]['data'].length > 0) {
+        var parts = _actionHistory[i]['action'].split('|');
+        _selectedIndexColors = int.parse(parts[1]);
+        _selectedIndexLines = int.parse(parts[2]);
+        int currentPointIndex = outerIndex == i ? innerIndex : 0;
+        while (currentPointIndex < _actionHistory[i]['data'].length) {
+          var timeSet = _timeHistory[i];
+          if (_isBackwarding) {
+            List<int> backPos =
+                getBackwardPosition(i, solveStopwatch.elapsed.inMilliseconds);
+            _extremeSkip(backPos[0], backPos[1]);
+            _replayOuterIndex = backPos[0];
+            _replayInnerIndex = backPos[1];
+            shouldBreak = true;
+            break;
+          }
+          await Future.delayed(const Duration(milliseconds: 0), () {
+            if (_isForwarding) {
+              int skippedTimeIndex = getSkippedIndex(timeSet, currentPointIndex,
+                  solveStopwatch.elapsed.inMilliseconds, timeSet.length - 1, 1);
+              for (currentPointIndex;
+                  currentPointIndex < skippedTimeIndex;
+                  currentPointIndex++) {
+                setState(() {
+                  _penPoints[_currentReplayPage] =
+                      List.from(_penPoints[_currentReplayPage])
+                        ..add(
+                          _actionHistory[i]['data'][currentPointIndex] != null
+                              ? SolvepadStroke(
+                                  _actionHistory[i]['data'][currentPointIndex],
+                                  _strokeColors[_selectedIndexColors],
+                                  _strokeWidths[_selectedIndexLines])
+                              : null,
+                        );
+                });
+              }
+              if (skippedTimeIndex != _timeHistory[i].length ||
+                  _timeHistory[i + 1][0] <=
+                      solveStopwatch.elapsed.inMilliseconds) {
+                _isForwarding = false;
+              }
+            }
+            if (solveStopwatch.elapsed.inMilliseconds >=
+                timeSet[currentPointIndex]) {
+              setState(() {
+                _penPoints[_currentReplayPage] =
+                    List.from(_penPoints[_currentReplayPage])
+                      ..add(
+                        _actionHistory[i]['data'][currentPointIndex] != null
+                            ? SolvepadStroke(
+                                _actionHistory[i]['data'][currentPointIndex],
+                                _strokeColors[_selectedIndexColors],
+                                _strokeWidths[_selectedIndexLines])
+                            : null,
+                      );
+              });
+              currentPointIndex += 1;
+            }
+          });
+        }
+      } //
+      else if (_actionHistory[i]['action']
+              .startsWith('DrawingMode.highlighter') &&
+          _actionHistory[i]['data'].length > 0) {
+        var parts = _actionHistory[i]['action'].split('|');
+        _selectedIndexColors = int.parse(parts[1]);
+        _selectedIndexLines = int.parse(parts[2]);
+        int currentPointIndex = outerIndex == i ? innerIndex : 0;
+        while (currentPointIndex < _actionHistory[i]['data'].length) {
+          var timeSet = _timeHistory[i];
+          if (_isBackwarding) {
+            List<int> backPos =
+                getBackwardPosition(i, solveStopwatch.elapsed.inMilliseconds);
+            _extremeSkip(backPos[0], backPos[1]);
+            _replayOuterIndex = backPos[0];
+            _replayInnerIndex = backPos[1];
+            shouldBreak = true;
+            break;
+          }
+          await Future.delayed(const Duration(milliseconds: 0), () {
+            if (_isForwarding) {
+              int skippedTimeIndex = getSkippedIndex(timeSet, currentPointIndex,
+                  solveStopwatch.elapsed.inMilliseconds, timeSet.length - 1, 1);
+              for (currentPointIndex;
+                  currentPointIndex < skippedTimeIndex;
+                  currentPointIndex++) {
+                setState(() {
+                  _highlighterPoints[_currentReplayPage] =
+                      List.from(_highlighterPoints[_currentReplayPage])
+                        ..add(
+                          _actionHistory[i]['data'][currentPointIndex] != null
+                              ? SolvepadStroke(
+                                  _actionHistory[i]['data'][currentPointIndex],
+                                  _strokeColors[_selectedIndexColors],
+                                  _strokeWidths[_selectedIndexLines])
+                              : null,
+                        );
+                });
+              }
+              if (skippedTimeIndex != _timeHistory[i].length ||
+                  _timeHistory[i + 1][0] <=
+                      solveStopwatch.elapsed.inMilliseconds) {
+                _isForwarding = false;
+              }
+            }
+            if (solveStopwatch.elapsed.inMilliseconds >=
+                timeSet[currentPointIndex]) {
+              setState(() {
+                _highlighterPoints[_currentReplayPage] =
+                    List.from(_highlighterPoints[_currentReplayPage])
+                      ..add(
+                        _actionHistory[i]['data'][currentPointIndex] != null
+                            ? SolvepadStroke(
+                                _actionHistory[i]['data'][currentPointIndex],
+                                _strokeColors[_selectedIndexColors],
+                                _strokeWidths[_selectedIndexLines])
+                            : null,
+                      );
+              });
+              currentPointIndex += 1;
+            }
+          });
+        }
+      } //
+      else if (_actionHistory[i]['action'].startsWith('DrawingMode.laser') &&
+          _actionHistory[i]['data'].length > 0) {
+        var parts = _actionHistory[i]['action'].split('|');
+        _selectedIndexColors = int.parse(parts[1]);
+        _selectedIndexLines = int.parse(parts[2]);
+        int currentPointIndex = outerIndex == i ? innerIndex : 0;
+        while (currentPointIndex < _actionHistory[i]['data'].length) {
+          var timeSet = _timeHistory[i];
+          if (_isBackwarding) {
+            List<int> backPos =
+                getBackwardPosition(i, solveStopwatch.elapsed.inMilliseconds);
+            _extremeSkip(backPos[0], backPos[1]);
+            _replayOuterIndex = backPos[0];
+            _replayInnerIndex = backPos[1];
+            shouldBreak = true;
+            break;
+          }
+          await Future.delayed(const Duration(milliseconds: 0), () {
+            if (_isForwarding) {
+              int skippedTimeIndex = getSkippedIndex(timeSet, currentPointIndex,
+                  solveStopwatch.elapsed.inMilliseconds, timeSet.length - 1, 1);
+              for (currentPointIndex;
+                  currentPointIndex < skippedTimeIndex;
+                  currentPointIndex++) {
+                setState(() {
+                  _laserPoints[_currentReplayPage] =
+                      List.from(_laserPoints[_currentReplayPage])
+                        ..add(
+                          _actionHistory[i]['data'][currentPointIndex] != null
+                              ? SolvepadStroke(
+                                  _actionHistory[i]['data'][currentPointIndex],
+                                  _strokeColors[_selectedIndexColors],
+                                  _strokeWidths[_selectedIndexLines])
+                              : null,
+                        );
+                  if (currentPointIndex != 0 &&
+                      timeSet[currentPointIndex] -
+                              timeSet[currentPointIndex - 1] >
+                          1500) {
+                    _stopLaserDrawing();
+                  }
+                });
+              }
+              if (skippedTimeIndex != _timeHistory[i].length ||
+                  _timeHistory[i + 1][0] <=
+                      solveStopwatch.elapsed.inMilliseconds) {
+                _isForwarding = false;
+              }
+            }
+            if (solveStopwatch.elapsed.inMilliseconds >=
+                timeSet[currentPointIndex]) {
+              setState(() {
+                _laserPoints[_currentReplayPage] =
+                    List.from(_laserPoints[_currentReplayPage])
+                      ..add(
+                        _actionHistory[i]['data'][currentPointIndex] != null
+                            ? SolvepadStroke(
+                                _actionHistory[i]['data'][currentPointIndex],
+                                _strokeColors[_selectedIndexColors],
+                                _strokeWidths[_selectedIndexLines])
+                            : null,
+                      );
+              });
+              if (_actionHistory[i]['data'][currentPointIndex] == null) {
+                _laserTimer = Timer(
+                    const Duration(milliseconds: 1500), _stopLaserDrawing);
+              } else {
+                _laserDrawing();
+              }
+              currentPointIndex += 1;
+            }
+          });
+        }
+      } //
+      else if (_actionHistory[i]['action'].startsWith('DrawingMode.eraser') &&
+          _actionHistory[i]['data'].length > 0) {
+        int currentPointIndex = outerIndex == i ? innerIndex : 0;
+        while (currentPointIndex < _actionHistory[i]['data'].length) {
+          if (_isBackwarding) {
+            List<int> backPos =
+                getBackwardPosition(i, solveStopwatch.elapsed.inMilliseconds);
+            _extremeSkip(backPos[0], backPos[1]);
+            _replayOuterIndex = backPos[0];
+            _replayInnerIndex = backPos[1];
+            shouldBreak = true;
+            break;
+          }
+          await Future.delayed(const Duration(milliseconds: 0), () {
+            var timeSet = _timeHistory[i];
+            if (_isForwarding) {
+              int skippedTimeIndex = getSkippedIndex(timeSet, currentPointIndex,
+                  solveStopwatch.elapsed.inMilliseconds, timeSet.length - 1, 1);
+              for (currentPointIndex;
+                  currentPointIndex < skippedTimeIndex;
+                  currentPointIndex++) {
+                setState(() {
+                  _eraserPoints[_currentReplayPage] =
+                      _actionHistory[i]['data'][currentPointIndex];
+                });
+                int penHit = _replayPoints[_currentReplayPage].indexWhere(
+                    (point) =>
+                        (point != null) &&
+                        sqrDistanceBetween(point,
+                                _actionHistory[i]['data'][currentPointIndex]) <=
+                            100);
+                int highlightHit = _highlighterPoints[_currentReplayPage]
+                    .indexWhere((point) =>
+                        (point != null) &&
+                        sqrDistanceBetween(point.offset,
+                                _actionHistory[i]['data'][currentPointIndex]) <=
+                            100);
+                if (penHit != -1) {
+                  doErase(penHit, DrawingMode.pen);
+                }
+                if (highlightHit != -1) {
+                  doErase(highlightHit, DrawingMode.highlighter);
+                }
+              }
+              if (skippedTimeIndex != _timeHistory[i].length ||
+                  _timeHistory[i + 1][0] <=
+                      solveStopwatch.elapsed.inMilliseconds) {
+                _isForwarding = false;
+              }
+            }
+            if (solveStopwatch.elapsed.inMilliseconds >=
+                timeSet[currentPointIndex]) {
+              setState(() {
+                _eraserPoints[_currentReplayPage] =
+                    _actionHistory[i]['data'][currentPointIndex];
+              });
+              int penHit = _replayPoints[_currentReplayPage].indexWhere(
+                  (point) =>
+                      (point != null) &&
+                      sqrDistanceBetween(point,
+                              _actionHistory[i]['data'][currentPointIndex]) <=
+                          100);
+              int highlightHit = _highlighterPoints[_currentReplayPage]
+                  .indexWhere((point) =>
+                      (point != null) &&
+                      sqrDistanceBetween(point.offset,
+                              _actionHistory[i]['data'][currentPointIndex]) <=
+                          100);
+              if (penHit != -1) {
+                doErase(penHit, DrawingMode.pen);
+              }
+              if (highlightHit != -1) {
+                doErase(highlightHit, DrawingMode.highlighter);
+              }
+              currentPointIndex += 1;
+            }
+          });
+        }
+      } //
+      else if (_actionHistory[i]['action'].startsWith('DrawingMode.drag') &&
+          _actionHistory[i]['data'].length > 0) {
+        log('in replay: page_scroll');
+        int currentPointIndex = outerIndex == i ? innerIndex : 0;
+        while (currentPointIndex < _actionHistory[i]['data'].length) {
+          await Future.delayed(const Duration(milliseconds: 0), () {
+            var timeSet = _timeHistory[i];
+            if (solveStopwatch.elapsed.inMilliseconds >=
+                timeSet[currentPointIndex]) {
+              _transformationController[_currentReplayPage]
+                  .value = Matrix4.identity()
+                ..setTranslationRaw(
+                    0,
+                    double.parse(_actionHistory[i]['data'][currentPointIndex]) *
+                        2,
+                    0)
+                ..scale(_transformationController[_currentReplayPage]
+                    .value
+                    .getMaxScaleOnAxis());
+
+              currentPointIndex += 1;
+            }
+          });
+        }
+      } //
+      else if (_actionHistory[i]['action'] == 'change_page' ||
+          _actionHistory[i]['action'] == 'start/stop-recording') {
+        int currentPointIndex = 0;
+        while (currentPointIndex <= 0) {
+          await Future.delayed(const Duration(milliseconds: 1), () {
+            if (solveStopwatch.elapsed.inMilliseconds >=
+                _timeHistory[i][currentPointIndex]) {
+              setState(() {
+                _currentReplayPage = _actionHistory[i]['data'];
+              });
+              _pageController.animateToPage(_currentReplayPage,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeIn);
+              currentPointIndex += 1;
+            }
+          });
+        }
+      }
+    }
+  }
+
+  void _extremeSkip(int outerLoopIndex, int innerLoopIndex) {
+    _clearReplayDisplay();
+    for (int i = 0; i <= outerLoopIndex; i++) {
+      if (_actionHistory[i]['action'] == 'DrawingMode.pen' &&
+          _actionHistory[i]['data'].length > 0) {
+        int forLength = (i == outerLoopIndex)
+            ? innerLoopIndex
+            : _actionHistory[i]['data'].length;
+        for (int j = 0; j <= forLength - 1; j++) {
+          setState(() {
+            _replayPoints[_currentReplayPage] =
+                List.from(_replayPoints[_currentReplayPage])
+                  ..add(_actionHistory[i]['data'][j]);
+          });
+        }
+      } //
+      else if (_actionHistory[i]['action'] == 'DrawingMode.highlighter' &&
+          _actionHistory[i]['data'].length > 0) {
+        int forLength = (i == outerLoopIndex)
+            ? innerLoopIndex
+            : _actionHistory[i]['data'].length;
+        for (int j = 0; j <= forLength - 1; j++) {
+          setState(() {
+            _highlighterPoints[_currentReplayPage] =
+                List.from(_highlighterPoints[_currentReplayPage])
+                  ..add(_actionHistory[i]['data'][j]);
+          });
+        }
+      } //
+      else if (_actionHistory[i]['action'] == 'DrawingMode.laser' &&
+          _actionHistory[i]['data'].length > 0) {
+        int forLength = (i == outerLoopIndex)
+            ? innerLoopIndex
+            : _actionHistory[i]['data'].length;
+        for (int j = 0; j <= forLength - 1; j++) {
+          setState(() {
+            _laserPoints[_currentReplayPage] =
+                List.from(_laserPoints[_currentReplayPage])
+                  ..add(_actionHistory[i]['data'][j]);
+          });
+          if (_actionHistory[i]['data'][j] == null) {
+            _laserTimer =
+                Timer(const Duration(milliseconds: 1500), _stopLaserDrawing);
+          } else {
+            _laserDrawing();
+          }
+        }
+      } //
+      else if (_actionHistory[i]['action'] == 'DrawingMode.eraser' &&
+          _actionHistory[i]['data'].length > 0) {
+        int forLength = (i == outerLoopIndex)
+            ? innerLoopIndex
+            : _actionHistory[i]['data'].length;
+        for (int j = 0; j <= forLength - 1; j++) {
+          setState(() {
+            _eraserPoints[_currentReplayPage] = _actionHistory[i]['data'][j];
+          });
+          int penHit = _replayPoints[_currentReplayPage].indexWhere((point) =>
+              (point != null) &&
+              sqrDistanceBetween(point, _actionHistory[i]['data'][j]) <= 100);
+          int highlightHit = _highlighterPoints[_currentReplayPage].indexWhere(
+              (point) =>
+                  (point != null) &&
+                  sqrDistanceBetween(
+                          point.offset, _actionHistory[i]['data'][j]) <=
+                      100);
+          if (penHit != -1) {
+            doErase(penHit, DrawingMode.pen);
+          }
+          if (highlightHit != -1) {
+            doErase(highlightHit, DrawingMode.highlighter);
+          }
+        }
+      } //
+      else if (_actionHistory[i]['action'] == 'change_page' ||
+          _actionHistory[i]['action'] == 'start/stop-recording') {
+        if (solveStopwatch.elapsed.inMilliseconds >= _timeHistory[i][0]) {
+          setState(() {
+            _currentReplayPage = _actionHistory[i]['data'];
+          });
+        }
+      }
+    }
+    log('end _extreme');
+  }
+
+  void _clearReplayDisplay() {
+    for (var point in _replayPoints) {
+      point.clear();
+    }
+    for (var point in _laserPoints) {
+      point.clear();
+    }
+    for (var point in _highlighterPoints) {
+      point.clear();
+    }
+  }
+
+  List<int> getBackwardPosition(int outerIndex, int elapse) {
+    int backwardOuterIndex = 0;
+    int backwardInnerIndex = 0;
+    for (int i = outerIndex; i > 0; i--) {
+      int backIndex = getSkippedIndex(
+          _timeHistory[i], 0, elapse, _timeHistory[i].length - 1, 0);
+      if (backIndex > 0 || i == 1 || _timeHistory[i - 1].last < elapse) {
+        backwardOuterIndex = i;
+        backwardInnerIndex = backIndex;
+        break;
+      }
+    }
+    return [backwardOuterIndex, backwardInnerIndex];
+  }
+
+  int getSkippedIndex(
+      List<int> sortedList, int start, int input, int end, int direction) {
+    while (start <= end) {
+      int mid = (start + end) ~/ 2;
+      if (sortedList[mid] < input) {
+        if (mid == sortedList.length - 1 || sortedList[mid + 1] >= input) {
+          return mid;
+        }
+        start = mid + 1;
+      } else {
+        end = mid - 1;
+      }
+    }
+    return direction == 0 ? 0 : sortedList.length - 1;
+  }
+
+  void updateDataHistory(updateMode) {
+    if (!isRecording) return;
+    if (_mode != DrawingMode.drag) {
+      _timeHistory.add(List<int>.from(_currentActionTimestamp));
+      _actionHistory.add({
+        'action':
+            '${_mode.toString()}|$_selectedIndexColors|$_selectedIndexLines',
+        'data': List<Offset?>.from(_currentActionData)
+      });
+      _currentActionTimestamp.clear();
+      _currentActionData.clear();
+      _mode = updateMode;
+    } else {
+      _timeHistory.add(List<int>.from(_currentActionTimestamp));
+      _actionHistory.add({
+        'action':
+            '${_mode.toString()}|$_selectedIndexColors|$_selectedIndexLines',
+        'data': List<String?>.from(_currentScrollData)
+      });
+      _currentActionTimestamp.clear();
+      _currentActionData.clear();
+      _mode = updateMode;
+    }
+  }
+
+  // ---------- FUNCTION: recording and playback
+  Future<void> openTheRecorder() async {
+    if (!kIsWeb) {
+      var status = await Permission.microphone.request();
+      if (status != PermissionStatus.granted) {
+        throw RecordingPermissionException('Microphone permission not granted');
+      }
+    }
+    await _mRecorder!.openRecorder();
+    if (!await _mRecorder!.isEncoderSupported(_codec) && kIsWeb) {
+      _codec = Codec.opusWebM;
+      _mPath = 'tau_file.webm';
+      if (!await _mRecorder!.isEncoderSupported(_codec) && kIsWeb) {
+        _mRecorderIsInited = true;
+        return;
+      }
+    }
+    final session = await AudioSession.instance;
+    await session.configure(AudioSessionConfiguration(
+      avAudioSessionCategory: AVAudioSessionCategory.playAndRecord,
+      avAudioSessionCategoryOptions:
+          AVAudioSessionCategoryOptions.allowBluetooth |
+              AVAudioSessionCategoryOptions.defaultToSpeaker,
+      avAudioSessionMode: AVAudioSessionMode.spokenAudio,
+      avAudioSessionRouteSharingPolicy:
+          AVAudioSessionRouteSharingPolicy.defaultPolicy,
+      avAudioSessionSetActiveOptions: AVAudioSessionSetActiveOptions.none,
+      androidAudioAttributes: const AndroidAudioAttributes(
+        contentType: AndroidAudioContentType.speech,
+        flags: AndroidAudioFlags.none,
+        usage: AndroidAudioUsage.voiceCommunication,
+      ),
+      androidAudioFocusGainType: AndroidAudioFocusGainType.gain,
+      androidWillPauseWhenDucked: true,
+    ));
+
+    _mRecorderIsInited = true;
+  }
+
+  void record() {
+    _mRecorder!
+        .startRecorder(
+      toFile: _mPath,
+      codec: _codec,
+      audioSource: AudioSource.microphone,
+    )
+        .then((value) {
+      setState(() {});
+    });
+  }
+
+  void stopRecorder() async {
+    await _mRecorder!.stopRecorder().then((value) {
+      setState(() {
+        //var url = value;
+        _mplaybackReady = true;
+      });
+    });
+  }
+
+  void playPlayer() {
+    assert(_mPlayerIsInited &&
+        _mplaybackReady &&
+        _mRecorder!.isStopped &&
+        _mPlayer!.isStopped);
+    _mPlayer!
+        .startPlayer(
+            fromURI: _mPath,
+            whenFinished: () {
+              setState(() {});
+            })
+        .then((value) {
+      setState(() {});
+    });
+  }
+
+  void stopPlayer() {
+    _mPlayer!.stopPlayer().then((value) {
+      setState(() {});
+    });
+  }
+
+  void getRecorderFn() {
+    if (!_mRecorderIsInited || !_mPlayer!.isStopped) {
+      log('return from 1st condition', name: "getRecorderFn");
+      return;
+    }
+    if (_mRecorder!.isStopped) {
+      record();
+    } else {
+      stopRecorder();
+    }
+  }
+
+  void getPlaybackFn() {
+    if (!_mPlayerIsInited || !_mplaybackReady || !_mRecorder!.isStopped) {
+      return;
+    }
+    if (_mPlayer!.isStopped) {
+      playPlayer();
+    } else {
+      stopPlayer();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: _onWillPopScope,
-      child: _joined && isCourseLoaded
+      child: isCourseLoaded
           ? Scaffold(
               backgroundColor: CustomColors.grayCFCFCF,
               body: !Responsive.isMobile(context)
@@ -1074,27 +1088,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
               ),
             ],
           ),
-
-          /// Status ShareScreen
-          Positioned(
-            top: 145,
-            right: 60,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                if (!micEnable)
-                  statusScreenRed("You’re Muted", ImageAssets.micMuteRed),
-                S.h(16),
-                // if (_requestScreenShare && (focusedStudentId == ''))
-                //   statusScreenRed(
-                //       "Wait for student to share", ImageAssets.micMuteRed),
-                if (focusedStudentId != '' && _isViewingFocusStudent)
-                  statusStudentShareScreen(
-                      "หน้าจอ: $focusedStudentName", ImageAssets.avatarWomen),
-              ],
-            ),
-          ),
-          showListStudents(),
           if (openColors)
             Positioned(
               left: 150,
@@ -1124,13 +1117,10 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                               InkWell(
                                 onTap: () {
                                   setState(() {
+                                    updateDataHistory(_mode);
                                     _selectedIndexColors = index;
                                     openColors = !openColors;
                                   });
-                                  sendMessage(
-                                    'StrokeColor.$index',
-                                    stopwatch.elapsed.inMilliseconds,
-                                  );
                                 },
                                 child: Padding(
                                   padding: const EdgeInsets.all(3.0),
@@ -1174,14 +1164,9 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                           return InkWell(
                               onTap: () {
                                 setState(() {
-                                  setState(() {
-                                    _selectedIndexLines = index;
-                                    openLines = !openLines;
-                                  });
-                                  sendMessage(
-                                    'StrokeWidth.$index',
-                                    stopwatch.elapsed.inMilliseconds,
-                                  );
+                                  updateDataHistory(_mode);
+                                  _selectedIndexLines = index;
+                                  openLines = !openLines;
                                 });
                               },
                               child: Column(
@@ -1225,15 +1210,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
           ///tools widget
           if (!selectedTools) toolsMobile(),
           if (selectedTools) toolsActiveMobile(),
-
-          /// Status ShareScreen
-          statusShareScreenMobile(),
-
-          /// Control display
-          toolsControlMobile(),
-
-          /// For list Student
-          showListStudentsMobile(),
         ],
       ),
     );
@@ -1244,10 +1220,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
         double solvepadWidth = constraints.maxWidth;
-        double solvepadHeight = constraints.maxHeight;
-        if (mySolvepadSize.width != solvepadWidth) {
-          initSolvepadScaling(solvepadWidth, solvepadHeight);
-        }
         return Stack(children: [
           PageView.builder(
             onPageChanged: _onPageViewChange,
@@ -1267,22 +1239,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                 alignment: const Alignment(-1, -1),
                 minScale: 1.0,
                 maxScale: 4.0,
-                onInteractionUpdate: (ScaleUpdateDetails details) {
-                  var translation =
-                      _transformationController[index].value.getTranslation();
-                  double scale = _transformationController[index]
-                      .value
-                      .getMaxScaleOnAxis();
-                  double originalTranslationY = translation.y;
-                  double originalTranslationX = translation.x;
-
-                  if (_mode == DrawingMode.drag) {
-                    sendMessage(
-                      'ScrollZoom:${originalTranslationX.toStringAsFixed(2)}:${originalTranslationY.toStringAsFixed(2)}:${scale.toStringAsFixed(2)}',
-                      stopwatch.elapsed.inMilliseconds,
-                    );
-                  }
-                },
                 child: Stack(
                   children: [
                     Center(
@@ -1299,11 +1255,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                           child: Listener(
                             onPointerDown: (details) {
                               if (activePointerId != null) return;
+                              if (!isRecording) return;
                               activePointerId = details.pointer;
-                              sendMessage(
-                                details.localPosition.toString(),
-                                stopwatch.elapsed.inMilliseconds,
-                              );
                               switch (_mode) {
                                 case DrawingMode.pen:
                                   _penPoints[_currentPage].add(
@@ -1312,6 +1265,13 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                         _strokeColors[_selectedIndexColors],
                                         _strokeWidths[_selectedIndexLines]),
                                   );
+                                  _currentActionData =
+                                      List.from(_currentActionData)
+                                        ..add(details.localPosition);
+                                  _currentActionTimestamp = List.from(
+                                      _currentActionTimestamp)
+                                    ..add(
+                                        solveStopwatch.elapsed.inMilliseconds);
                                   break;
                                 case DrawingMode.laser:
                                   _laserPoints[_currentPage].add(
@@ -1320,6 +1280,13 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                         _strokeColors[_selectedIndexColors],
                                         _strokeWidths[_selectedIndexLines]),
                                   );
+                                  _currentActionData =
+                                      List.from(_currentActionData)
+                                        ..add(details.localPosition);
+                                  _currentActionTimestamp = List.from(
+                                      _currentActionTimestamp)
+                                    ..add(
+                                        solveStopwatch.elapsed.inMilliseconds);
                                   _laserDrawing();
                                   break;
                                 case DrawingMode.highlighter:
@@ -1329,10 +1296,20 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                         _strokeColors[_selectedIndexColors],
                                         _strokeWidths[_selectedIndexLines]),
                                   );
+                                  _currentActionData =
+                                      List.from(_currentActionData)
+                                        ..add(details.localPosition);
+                                  _currentActionTimestamp = List.from(
+                                      _currentActionTimestamp)
+                                    ..add(
+                                        solveStopwatch.elapsed.inMilliseconds);
                                   break;
                                 case DrawingMode.eraser:
                                   _eraserPoints[_currentPage] =
                                       details.localPosition;
+                                  _currentActionData.add(details.localPosition);
+                                  _currentActionTimestamp.add(
+                                      solveStopwatch.elapsed.inMilliseconds);
                                   int penHit = _penPoints[_currentPage]
                                       .indexWhere((point) =>
                                           (point?.offset != null) &&
@@ -1360,11 +1337,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                             },
                             onPointerMove: (details) {
                               if (activePointerId != details.pointer) return;
+                              if (!isRecording) return;
                               activePointerId = details.pointer;
-                              sendMessage(
-                                details.localPosition.toString(),
-                                stopwatch.elapsed.inMilliseconds,
-                              );
                               switch (_mode) {
                                 case DrawingMode.pen:
                                   setState(() {
@@ -1373,6 +1347,13 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                         _strokeColors[_selectedIndexColors],
                                         _strokeWidths[_selectedIndexLines]));
                                   });
+                                  _currentActionData =
+                                      List.from(_currentActionData)
+                                        ..add(details.localPosition);
+                                  _currentActionTimestamp = List.from(
+                                      _currentActionTimestamp)
+                                    ..add(
+                                        solveStopwatch.elapsed.inMilliseconds);
                                   break;
                                 case DrawingMode.laser:
                                   setState(() {
@@ -1383,6 +1364,13 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                           _strokeWidths[_selectedIndexLines]),
                                     );
                                   });
+                                  _currentActionData =
+                                      List.from(_currentActionData)
+                                        ..add(details.localPosition);
+                                  _currentActionTimestamp = List.from(
+                                      _currentActionTimestamp)
+                                    ..add(
+                                        solveStopwatch.elapsed.inMilliseconds);
                                   _laserDrawing();
                                   break;
                                 case DrawingMode.highlighter:
@@ -1394,12 +1382,22 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                           _strokeWidths[_selectedIndexLines]),
                                     );
                                   });
+                                  _currentActionData =
+                                      List.from(_currentActionData)
+                                        ..add(details.localPosition);
+                                  _currentActionTimestamp = List.from(
+                                      _currentActionTimestamp)
+                                    ..add(
+                                        solveStopwatch.elapsed.inMilliseconds);
                                   break;
                                 case DrawingMode.eraser:
                                   setState(() {
                                     _eraserPoints[_currentPage] =
                                         details.localPosition;
                                   });
+                                  _currentActionData.add(details.localPosition);
+                                  _currentActionTimestamp.add(
+                                      solveStopwatch.elapsed.inMilliseconds);
                                   int penHit = _penPoints[_currentPage]
                                       .indexWhere((point) =>
                                           (point?.offset != null) &&
@@ -1427,25 +1425,47 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                             },
                             onPointerUp: (details) {
                               if (activePointerId != details.pointer) return;
+                              if (!isRecording) return;
                               activePointerId = null;
-                              sendMessage(
-                                'null',
-                                stopwatch.elapsed.inMilliseconds,
-                              );
                               switch (_mode) {
                                 case DrawingMode.pen:
                                   _penPoints[_currentPage].add(null);
+                                  _currentActionData =
+                                      List.from(_currentActionData)..add(null);
+                                  _currentActionTimestamp = List.from(
+                                      _currentActionTimestamp)
+                                    ..add(
+                                        solveStopwatch.elapsed.inMilliseconds);
                                   break;
                                 case DrawingMode.laser:
                                   _laserPoints[_currentPage].add(null);
+                                  _currentActionData =
+                                      List.from(_currentActionData)..add(null);
+                                  _currentActionTimestamp = List.from(
+                                      _currentActionTimestamp)
+                                    ..add(
+                                        solveStopwatch.elapsed.inMilliseconds);
                                   _laserTimer = Timer(
                                       const Duration(milliseconds: 1500),
                                       _stopLaserDrawing);
                                   break;
                                 case DrawingMode.highlighter:
                                   _highlighterPoints[_currentPage].add(null);
+                                  _currentActionData =
+                                      List.from(_currentActionData)..add(null);
+                                  _currentActionTimestamp = List.from(
+                                      _currentActionTimestamp)
+                                    ..add(
+                                        solveStopwatch.elapsed.inMilliseconds);
                                   break;
                                 case DrawingMode.eraser:
+                                  _currentActionData =
+                                      List.from(_currentActionData)
+                                        ..add(const Offset(-100, -100));
+                                  _currentActionTimestamp = List.from(
+                                      _currentActionTimestamp)
+                                    ..add(
+                                        solveStopwatch.elapsed.inMilliseconds);
                                   setState(() {
                                     _eraserPoints[_currentPage] =
                                         const Offset(-100, -100);
@@ -1457,25 +1477,47 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                             },
                             onPointerCancel: (details) {
                               if (activePointerId != details.pointer) return;
+                              if (!isRecording) return;
                               activePointerId = null;
-                              sendMessage(
-                                'null',
-                                stopwatch.elapsed.inMilliseconds,
-                              );
                               switch (_mode) {
                                 case DrawingMode.pen:
                                   _penPoints[_currentPage].add(null);
+                                  _currentActionData =
+                                      List.from(_currentActionData)..add(null);
+                                  _currentActionTimestamp = List.from(
+                                      _currentActionTimestamp)
+                                    ..add(
+                                        solveStopwatch.elapsed.inMilliseconds);
                                   break;
                                 case DrawingMode.laser:
                                   _laserPoints[_currentPage].add(null);
+                                  _currentActionData =
+                                      List.from(_currentActionData)..add(null);
+                                  _currentActionTimestamp = List.from(
+                                      _currentActionTimestamp)
+                                    ..add(
+                                        solveStopwatch.elapsed.inMilliseconds);
                                   _laserTimer = Timer(
                                       const Duration(milliseconds: 1500),
                                       _stopLaserDrawing);
                                   break;
                                 case DrawingMode.highlighter:
                                   _highlighterPoints[_currentPage].add(null);
+                                  _currentActionData =
+                                      List.from(_currentActionData)..add(null);
+                                  _currentActionTimestamp = List.from(
+                                      _currentActionTimestamp)
+                                    ..add(
+                                        solveStopwatch.elapsed.inMilliseconds);
                                   break;
                                 case DrawingMode.eraser:
+                                  _currentActionData =
+                                      List.from(_currentActionData)
+                                        ..add(const Offset(-100, -100));
+                                  _currentActionTimestamp = List.from(
+                                      _currentActionTimestamp)
+                                    ..add(
+                                        solveStopwatch.elapsed.inMilliseconds);
                                   setState(() {
                                     _eraserPoints[_currentPage] =
                                         const Offset(-100, -100);
@@ -1486,16 +1528,12 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                               }
                             },
                             child: CustomPaint(
-                              painter: SolvepadDrawerLive(
+                              painter: SolvepadDrawerMarketplace(
                                 _penPoints[index],
                                 _replayPoints[index],
                                 _eraserPoints[index],
                                 _laserPoints[index],
                                 _highlighterPoints[index],
-                                _studentPenPoints[index],
-                                _studentLaserPoints[index],
-                                _studentHighlighterPoints[index],
-                                _studentEraserPoints[index],
                               ),
                             ),
                           ),
@@ -1507,20 +1545,87 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
               );
             },
           ),
-          if (_requestScreenShare)
-            IgnorePointer(
-              ignoring: true,
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Colors.blue,
-                    width: 3.0, // choose the width of the border
-                  ),
-                ),
-              ),
-            ),
         ]);
       }),
+    );
+  }
+
+  Widget recordCourseButton() {
+    return Center(
+      child: SizedBox(
+        width: 70,
+        height: 100,
+        child: GestureDetector(
+          onTap: () {
+            if (!isRecording) {
+              _initRecord();
+            } // Before record
+            else {
+              _stopSolvePadRecord();
+            }
+          },
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 14.0),
+            decoration: BoxDecoration(
+                color: isRecording
+                    ? CustomColors.gray363636
+                    : CustomColors.redFF4201,
+                shape: BoxShape.circle),
+            child: isRecording
+                ? const Icon(
+                    Icons.stop,
+                    size: 20,
+                    color: CustomColors.white,
+                  )
+                : const Icon(
+                    Icons.radio_button_checked_rounded,
+                    size: 20,
+                    color: Colors.white,
+                  ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget replayRecordButton() {
+    return Center(
+      child: SizedBox(
+        width: 70,
+        height: 100,
+        child: GestureDetector(
+          onTap: () {
+            if (!isReplaying) {
+              _initReplay();
+            } // before replay
+            else {
+              log('pause replay');
+              setState(() {
+                isReplaying = false;
+              });
+            }
+          },
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 14.0),
+            decoration: BoxDecoration(
+                color: isReplaying
+                    ? CustomColors.gray363636
+                    : CustomColors.redFF4201,
+                shape: BoxShape.circle),
+            child: isReplaying
+                ? const Icon(
+                    Icons.pause,
+                    size: 20,
+                    color: CustomColors.white,
+                  )
+                : const Icon(
+                    Icons.play_arrow,
+                    size: 20,
+                    color: Colors.white,
+                  ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -1536,7 +1641,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             Expanded(
               flex: 3,
               child: Text(
-                widget.isMock ? "คอร์สปรับพื้นฐานคณิตศาสตร์" : courseName,
+                courseName,
                 style: CustomStyles.bold16Black363636Overflow,
                 maxLines: 1,
               ),
@@ -1545,7 +1650,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             Expanded(
               flex: 4,
               child: Text(
-                widget.isMock ? "คอร์สปรับพื้นฐานคณิตศาสตร์" : courseName,
+                courseName,
                 style: CustomStyles.bold16Black363636Overflow,
                 maxLines: 1,
               ),
@@ -1559,124 +1664,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                 maxLines: 1,
               ),
             ),
-          Expanded(
-            flex: Responsive.isDesktop(context) ? 3 : 4,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                // Container(
-                //   height: 32,
-                //   width: 145,
-                //   decoration: const BoxDecoration(
-                //     color: CustomColors.pinkFFCDD2,
-                //     borderRadius: BorderRadius.all(
-                //       Radius.circular(defaultPadding),
-                //     ),
-                //   ),
-                //   child: InkWell(
-                //     onTap: () async {
-                //       print('test tapped');
-                //       await meeting.stopRecording();
-                //       await fetchRecording(widget.meetingId);
-                //     },
-                //     child: Row(
-                //       mainAxisAlignment: MainAxisAlignment.center,
-                //       children: [
-                //         Image.asset(
-                //           ImageAssets.lowSignal,
-                //           height: 22,
-                //           width: 18,
-                //         ),
-                //         S.w(10),
-                //         Flexible(
-                //           child: Text(
-                //             "สัญญาณอ่อน",
-                //             style: CustomStyles.bold14redB71C1C,
-                //             maxLines: 1,
-                //             overflow: TextOverflow.ellipsis,
-                //           ),
-                //         ),
-                //       ],
-                //     ),
-                //   ),
-                // ),
-                S.w(16.0),
-                Container(
-                  height: 11,
-                  width: 11,
-                  decoration: BoxDecoration(
-                      color: CustomColors.redF44336,
-                      borderRadius: BorderRadius.circular(100)
-                      //more than 50% of width makes circle
-                      ),
-                ),
-                S.w(4.0),
-                RichText(
-                  text: TextSpan(
-                    text: 'Live Time: ',
-                    style: CustomStyles.med14redFF4201,
-                    children: <TextSpan>[
-                      TextSpan(
-                        text: _formattedElapsedTime,
-                        style: CustomStyles.med14Gray878787,
-                      ),
-                    ],
-                  ),
-                ),
-                S.w(16.0),
-                InkWell(
-                  onTap: () async {
-                    if (isRecordingOn) {
-                      showAlertRecordingDialog(context);
-                    } else {
-                      showCloseDialog(context, () {
-                        sendMessage(
-                          'EndMeeting',
-                          stopwatch.elapsed.inMilliseconds,
-                        );
-                        if (!widget.isMock) {
-                          meeting.end();
-                          closeChanel();
-                          FirebaseFirestore.instance
-                              .collection('course_live')
-                              .doc(widget.courseId)
-                              .update({'currentMeetingCode': ''});
-                        }
-                        Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => Nav(),
-                            ),
-                            (route) => false);
-                      });
-                    }
-                    // await meeting.stopRecording();
-                    // await fetchRecording(widget.meetingId);
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: defaultPadding * 1,
-                      vertical: defaultPadding / 1.5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: CustomColors.redF44336,
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "ปิดห้องเรียน",
-                          style: CustomStyles.bold14White,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                S.w(Responsive.isTablet(context) ? 5 : 24),
-              ],
-            ),
-          )
         ],
       ),
     );
@@ -1696,7 +1683,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
         children: [
           S.w(Responsive.isTablet(context) ? 5 : 24),
           Expanded(
-            flex: 2,
             child: Align(
               alignment: Alignment.centerLeft,
               child: Container(
@@ -1731,10 +1717,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                         onTap: () {
                           if (_pageController.hasClients &&
                               _pageController.page!.toInt() != 0) {
-                            sendMessage(
-                              'ChangePage:${_currentPage - 1}',
-                              stopwatch.elapsed.inMilliseconds,
-                            );
                             _pageController.animateToPage(
                               _pageController.page!.toInt() - 1,
                               duration: const Duration(milliseconds: 300),
@@ -1788,10 +1770,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                             if (_pageController.hasClients &&
                                 _pageController.page!.toInt() !=
                                     _pages.length - 1) {
-                              sendMessage(
-                                'ChangePage:${_currentPage + 1}',
-                                stopwatch.elapsed.inMilliseconds,
-                              );
                               _pageController.animateToPage(
                                 _pageController.page!.toInt() + 1,
                                 duration: const Duration(milliseconds: 300),
@@ -1820,240 +1798,76 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             ),
           ),
           Expanded(
-            flex: 3,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Material(
-                  child: InkWell(
-                    onTap: () async {
-                      if (!isRecordingLoading) {
-                        if (!isRecordingOn) {
-                          await meeting
-                              .startRecording(config: {"mode": "audio"});
-                        } else {
-                          await meeting.stopRecording();
-                        }
-                      }
-                    },
-                    child: Image.asset(
-                      isRecordingLoading
-                          ? ImageAssets.loading
-                          : isRecordingOn
-                              ? ImageAssets.recordDis
-                              : ImageAssets.recordEnable,
-                      height: 44,
-                      width: 44,
-                    ),
+                InkWell(
+                  onTap: () {
+                    setState(() {
+                      micEnable = !micEnable;
+                    });
+                  },
+                  child: Image.asset(
+                    micEnable ? ImageAssets.micEnable : ImageAssets.micDis,
+                    height: 44,
+                    width: 44,
                   ),
                 ),
-                S.w(defaultPadding),
-                Material(
-                  child: InkWell(
-                    onTap: () {
-                      setState(() {
-                        micEnable = !micEnable;
-                      });
-                      if (micEnable && !widget.isMock) {
-                        meeting.unmuteMic();
-                      } else {
-                        meeting.muteMic();
-                      }
-                    },
-                    child: Image.asset(
-                      micEnable ? ImageAssets.micEnable : ImageAssets.micDis,
-                      height: 44,
-                      width: 44,
-                    ),
-                  ),
-                ),
-                // S.w(defaultPadding),
-                // InkWell(
-                //   onTap: () {
-                //     setState(() {
-                //       displayEnable = !displayEnable;
-                //     });
-                //     meeting.startRecording(config: {"mode": "audio"});
-                //   },
-                //   child: Image.asset(
-                //     displayEnable
-                //         ? ImageAssets.displayEnable
-                //         : ImageAssets.displayDis,
-                //     height: 44,
-                //     width: 44,
-                //   ),
-                // ),
-                // S.w(defaultPadding),
-
-                ///todo Icon share for disable
-                // Image.asset(
-                //   ImageAssets.shareQa,
-                //   height: 44,
-                //   width: 44,
-                // ),
-                // Stack(
-                //   children: [
-                //     InkWell(
-                //       onTap: () {
-                //         quizSelectModal();
-                //         // showDialog(
-                //         //     context: context,
-                //         //     builder: (context) => const QuizSelect());
-                //
-                //         // showDialog(
-                //         //     context: context,
-                //         //     builder: (context) => _buildQuiz());
-                //       },
-                //       child: Image.asset(
-                //         ImageAssets.icShareAction,
-                //         height: 44,
-                //         width: 44,
-                //       ),
-                //     ),
-                //     Padding(
-                //       padding: const EdgeInsets.only(left: 32, bottom: 1),
-                //       child: Container(
-                //         decoration: const BoxDecoration(
-                //             color: CustomColors.black363636,
-                //             shape: BoxShape.circle),
-                //         width: 25,
-                //         height: 25,
-                //         child: Center(
-                //           child: Text(
-                //             "12",
-                //             style: CustomStyles.bold11White,
-                //           ),
-                //         ),
-                //       ),
-                //     ),
-                //   ],
-                // ),
-
-                ///End icon share
                 S.w(defaultPadding),
                 const DividerVer(),
-                S.w(defaultPadding),
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.blue,
-                      style: BorderStyle.solid,
-                      width: 2.0,
-                    ),
-                    borderRadius: BorderRadius.circular(100),
-                    color: CustomColors.whitePrimary,
-                  ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Transform.scale(
-                        scale: 0.7,
-                        child: CupertinoSwitch(
-                          trackColor: Colors.blue.withOpacity(0.1),
-                          activeColor: Colors.blue,
-                          value: _requestScreenShare,
-                          onChanged: (bool value) {
-                            setState(() {
-                              _requestScreenShare = value;
-                              showStudent = value;
-                            });
-                            sendMessage(
-                              'RequestScreenShare:$value',
-                              stopwatch.elapsed.inMilliseconds,
-                            );
-                          },
-                        ),
-                      ),
-                      Text("ให้นักเรียนแชร์จอ",
-                          textAlign: TextAlign.center,
-                          style: CustomStyles.bold14bluePrimary),
-                      S.w(4)
-                    ],
+                if (!isRecordEnd) recordCourseButton(),
+                if (isRecordEnd) S.w(defaultPadding),
+                RichText(
+                  text: TextSpan(
+                    text: _formattedElapsedTime,
+                    style: CustomStyles.bold14RedF44336,
                   ),
                 ),
-                S.w(32),
+                if (isRecordEnd) replayRecordButton(),
               ],
             ),
           ),
-
-          /// Statistics
-          // Expanded(
-          //     flex: 2,
-          //     child: Align(
-          //       alignment: Alignment.centerRight,
-          //       child: InkWell(
-          //         onTap: () {
-          //           print('Go to Statistics');
-          //           showLeader(context);
-          //         },
-          //         child: Container(
-          //           decoration: BoxDecoration(
-          //             border: Border.all(
-          //               color: CustomColors.grayCFCFCF,
-          //               style: BorderStyle.solid,
-          //               width: 1.0,
-          //             ),
-          //             borderRadius: BorderRadius.circular(8),
-          //             color: CustomColors.whitePrimary,
-          //           ),
-          //           padding:
-          //               const EdgeInsets.symmetric(horizontal: 1, vertical: 6),
-          //           child: Padding(
-          //             padding: const EdgeInsets.all(6.0),
-          //             child: Row(
-          //               mainAxisSize: MainAxisSize.min,
-          //               mainAxisAlignment: MainAxisAlignment.center,
-          //               children: <Widget>[
-          //                 Image.asset(
-          //                   ImageAssets.leaderboard,
-          //                   height: 23,
-          //                   width: 25,
-          //                 ),
-          //                 S.w(8),
-          //                 Container(
-          //                   width: 1,
-          //                   height: 24,
-          //                   color: CustomColors.grayCFCFCF,
-          //                 ),
-          //                 S.w(8),
-          //                 Image.asset(
-          //                   ImageAssets.checkTrue,
-          //                   height: 18,
-          //                   width: 18,
-          //                 ),
-          //                 if (!Responsive.isTablet(context)) S.w(8.0),
-          //                 Text("100%", style: CustomStyles.bold14Gray878787),
-          //                 if (!Responsive.isTablet(context)) S.w(8.0),
-          //                 Image.asset(
-          //                   ImageAssets.x,
-          //                   height: 18,
-          //                   width: 18,
-          //                 ),
-          //                 if (!Responsive.isTablet(context)) S.w(8.0),
-          //                 Text("100%", style: CustomStyles.bold14Gray878787),
-          //                 if (!Responsive.isTablet(context)) S.w(8.0),
-          //                 Image.asset(
-          //                   ImageAssets.icQa,
-          //                   height: 18,
-          //                   width: 18,
-          //                 ),
-          //                 if (!Responsive.isTablet(context)) S.w(8.0),
-          //                 Text("100%", style: CustomStyles.bold14Gray878787),
-          //                 if (!Responsive.isTablet(context)) S.w(8.0),
-          //                 Image.asset(
-          //                   ImageAssets.arrowNextCircle,
-          //                   width: 21,
-          //                 ),
-          //               ],
-          //             ),
-          //           ),
-          //         ),
-          //       ),
-          //     )),
-          // S.w(Responsive.isTablet(context) ? 5 : 24),
+          Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                SizedBox(
+                  width: 200,
+                  height: 40,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: CustomColors.greenPrimary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0), // <-- Radius
+                      ), // NEW
+                    ),
+                    onPressed: () {
+                      log('upload');
+                    },
+                    child: Row(
+                      children: [
+                        Text('อัพโหลด solvepad',
+                            style: CustomStyles.bold14White),
+                        S.w(8),
+                        Container(
+                          width: 3,
+                          height: 16,
+                          color: CustomColors.whitePrimary,
+                        ),
+                        S.w(2),
+                        const Icon(
+                          Icons.arrow_forward,
+                          color: CustomColors.whitePrimary,
+                          size: 20.0,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          S.w(16.0),
         ],
       ),
     );
@@ -2104,36 +1918,24 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                   ],
                                 )),
                           Expanded(
-                              flex: 2,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  S.w(16.0),
-                                  Container(
-                                    height: 11,
-                                    width: 11,
-                                    decoration: BoxDecoration(
-                                        color: CustomColors.redF44336,
-                                        borderRadius: BorderRadius.circular(100)
-                                        //more than 50% of width makes circle
-                                        ),
-                                  ),
-                                  S.w(4.0),
-                                  RichText(
-                                    text: TextSpan(
-                                      text: 'Live Time: ',
-                                      style: CustomStyles.med14redFF4201,
-                                      children: <TextSpan>[
-                                        TextSpan(
-                                          text: _formattedElapsedTime,
-                                          style: CustomStyles.med14Gray878787,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  S.w(defaultPadding),
-                                ],
-                              ))
+                            flex: 2,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                S.w(16.0),
+                                Container(
+                                  height: 11,
+                                  width: 11,
+                                  decoration: BoxDecoration(
+                                      color: CustomColors.redF44336,
+                                      borderRadius: BorderRadius.circular(100)
+                                      //more than 50% of width makes circle
+                                      ),
+                                ),
+                                S.w(defaultPadding),
+                              ],
+                            ),
+                          )
                         ],
                       ),
                     ),
@@ -2208,10 +2010,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                     onTap: () {
                       if (_pageController.hasClients &&
                           _pageController.page!.toInt() != 0) {
-                        sendMessage(
-                          'ChangePage:${_currentPage - 1}',
-                          stopwatch.elapsed.inMilliseconds,
-                        );
                         _pageController.animateToPage(
                           _pageController.page!.toInt() - 1,
                           duration: const Duration(milliseconds: 300),
@@ -2262,10 +2060,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                         if (_pageController.hasClients &&
                             _pageController.page!.toInt() !=
                                 _pages.length - 1) {
-                          sendMessage(
-                            'ChangePage:${_currentPage + 1}',
-                            stopwatch.elapsed.inMilliseconds,
-                          );
                           _pageController.animateToPage(
                             _pageController.page!.toInt() + 1,
                             duration: const Duration(milliseconds: 300),
@@ -2290,81 +2084,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
               ],
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Transform.scale(
-                scale: 0.6,
-                child: CupertinoSwitch(
-                  trackColor: Colors.blue.withOpacity(0.1),
-                  activeColor: Colors.blue,
-                  value: _requestScreenShare,
-                  onChanged: (bool value) {
-                    sendMessage(
-                      'RequestScreenShare:$value',
-                      stopwatch.elapsed.inMilliseconds,
-                    );
-                    setState(() {
-                      _requestScreenShare = value;
-                      showStudent = value;
-                    });
-                  },
-                ),
-              ),
-              Text("ให้นักเรียนแชร์จอ",
-                  textAlign: TextAlign.center,
-                  style: CustomStyles.bold14bluePrimary),
-              S.w(defaultPadding),
-              // Container(
-              //   height: 32,
-              //   decoration: BoxDecoration(
-              //     border: Border.all(
-              //       color: CustomColors.grayCFCFCF,
-              //       style: BorderStyle.solid,
-              //       width: 1.0,
-              //     ),
-              //     borderRadius: BorderRadius.circular(8),
-              //     color: CustomColors.whitePrimary,
-              //   ),
-              //   child: Row(
-              //     mainAxisAlignment: MainAxisAlignment.center,
-              //     children: <Widget>[
-              //       S.w(8),
-              //       InkWell(
-              //         onTap: () {
-              //           showLeader(context);
-              //         },
-              //         child: Image.asset(
-              //           ImageAssets.leaderboard,
-              //           height: 24,
-              //           width: 24,
-              //         ),
-              //       ),
-              //       S.w(8),
-              //       Container(
-              //         width: 1,
-              //         height: double.infinity,
-              //         color: CustomColors.grayCFCFCF,
-              //       ),
-              //       S.w(8),
-              //       InkWell(
-              //         onTap: () {
-              //           setState(() {
-              //             showStudent = !showStudent;
-              //           });
-              //         },
-              //         child: Image.asset(
-              //           ImageAssets.shareGray,
-              //           height: 24,
-              //           width: 24,
-              //         ),
-              //       ),
-              //       S.w(8),
-              //     ],
-              //   ),
-              // )
-            ],
-          ),
           // / Statistics
           // Expanded(
           //     flex: 2,
@@ -2372,7 +2091,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
           //       alignment: Alignment.centerRight,
           //       child: InkWell(
           //         onTap: () {
-          //           print('Go to Statistics');
+          //           log('Go to Statistics');
           //           showLeader(context);
           //         },
           //         child: Container(
@@ -2523,9 +2242,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                     // Close popup
                                     openColors = !openColors;
                                   });
-                                  print('Tap : index $index');
-                                  print(
-                                      'Tap : _selectIndex $_selectedIndexColors');
+                                  log('Tap : index $index');
+                                  log('Tap : _selectIndex $_selectedIndexColors');
                                 },
                                 child: Image.asset(_listColors[index]['color'],
                                     width: 48),
@@ -2644,39 +2362,14 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                             });
                                             if (index == 0) {
                                               _mode = DrawingMode.drag;
-                                              sendMessage(
-                                                'DrawingMode.drag',
-                                                stopwatch
-                                                    .elapsed.inMilliseconds,
-                                              );
                                             } else if (index == 1) {
                                               _mode = DrawingMode.pen;
-                                              sendMessage(
-                                                'DrawingMode.pen',
-                                                stopwatch
-                                                    .elapsed.inMilliseconds,
-                                              );
                                             } else if (index == 2) {
                                               _mode = DrawingMode.highlighter;
-                                              sendMessage(
-                                                'DrawingMode.highlighter',
-                                                stopwatch
-                                                    .elapsed.inMilliseconds,
-                                              );
                                             } else if (index == 3) {
                                               _mode = DrawingMode.eraser;
-                                              sendMessage(
-                                                'DrawingMode.eraser',
-                                                stopwatch
-                                                    .elapsed.inMilliseconds,
-                                              );
                                             } else if (index == 4) {
                                               _mode = DrawingMode.laser;
-                                              sendMessage(
-                                                'DrawingMode.laser',
-                                                stopwatch
-                                                    .elapsed.inMilliseconds,
-                                              );
                                             }
                                           },
                                           child: Image.asset(
@@ -2710,7 +2403,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                               S.w(defaultPadding),
                               InkWell(
                                 onTap: () {
-                                  print("Pick Line");
+                                  log("Pick Line");
 
                                   setState(() {
                                     if (openColors || openMore == true) {
@@ -2728,7 +2421,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                               S.w(4),
                               // InkWell(
                               //   onTap: () {
-                              //     print("Clear");
+                              //     log("Clear");
                               //   },
                               //   child: Image.asset(
                               //     ImageAssets.bin,
@@ -2761,141 +2454,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     );
   }
 
-  Widget toolsControlMobile() {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: Padding(
-        padding: const EdgeInsets.only(right: 40),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            InkWell(
-              onTap: () {
-                showCloseDialog(context, () {
-                  sendMessage(
-                    'EndMeeting',
-                    stopwatch.elapsed.inMilliseconds,
-                  );
-                  if (!widget.isMock) {
-                    meeting.end();
-                    closeChanel();
-                    FirebaseFirestore.instance
-                        .collection('course_live')
-                        .doc(widget.courseId)
-                        .update({'currentMeetingCode': ''});
-                  }
-                  Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Nav(),
-                      ),
-                      (route) => false);
-                });
-              },
-              child: Image.asset(
-                ImageAssets.iconOut,
-                width: 44,
-              ),
-            ),
-            S.h(8),
-
-            ///For empty data
-            // InkWell(
-            //   onTap: () {},
-            //   child: Image.asset(
-            //     ImageAssets.shareQa,
-            //     width: 44,
-            //   ),
-            // ),
-
-            // Stack(
-            //   children: [
-            //     InkWell(
-            //       onTap: () {
-            //         quizSelectModal();
-            //       },
-            //       child: Image.asset(
-            //         ImageAssets.icShareAction,
-            //         height: 44,
-            //         width: 44,
-            //       ),
-            //     ),
-            //     Padding(
-            //       padding: const EdgeInsets.only(left: 24),
-            //       child: Container(
-            //         decoration: const BoxDecoration(
-            //             color: CustomColors.black363636,
-            //             shape: BoxShape.circle),
-            //         width: 25,
-            //         height: 25,
-            //         child: Center(
-            //           child: Text(
-            //             "12",
-            //             style: CustomStyles.bold11White,
-            //           ),
-            //         ),
-            //       ),
-            //     ),
-            //   ],
-            // ),
-            // S.h(8),
-            // InkWell(
-            //   onTap: () {
-            //     setState(() {
-            //       displayEnable = !displayEnable;
-            //     });
-            //   },
-            //   child: Image.asset(
-            //     displayEnable
-            //         ? ImageAssets.displayEnable
-            //         : ImageAssets.displayDis,
-            //     width: 44,
-            //   ),
-            // ),
-            S.h(8),
-            InkWell(
-              onTap: () async {
-                if (!isRecordingLoading) {
-                  if (!isRecordingOn) {
-                    await meeting.startRecording(config: {"mode": "audio"});
-                  } else {
-                    await meeting.stopRecording();
-                  }
-                }
-              },
-              child: Image.asset(
-                isRecordingLoading
-                    ? ImageAssets.loading
-                    : isRecordingOn
-                        ? ImageAssets.recordDis
-                        : ImageAssets.recordEnable,
-                height: 44,
-                width: 44,
-              ),
-            ),
-            S.h(8),
-            InkWell(
-              onTap: () {
-                setState(() {
-                  micEnable = !micEnable;
-                });
-                if (micEnable && !widget.isMock) {
-                  meeting.unmuteMic();
-                } else {
-                  meeting.muteMic();
-                }
-              },
-              child: Image.asset(
-                micEnable ? ImageAssets.micEnable : ImageAssets.micDis,
-                width: 44,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget tools() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -2907,7 +2465,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             child: AnimatedContainer(
               duration: const Duration(seconds: 1),
               curve: Curves.fastOutSlowIn,
-              height: selectedTools ? 270 : MediaQuery.of(context).size.height,
+              height: selectedTools ? 270 : 440,
               width: 120,
               decoration: BoxDecoration(
                 border: Border.all(
@@ -2933,7 +2491,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                   //       children: [
                   //         InkWell(
                   //           onTap: () {
-                  //             print("Undo");
+                  //             log("Undo");
                   //           },
                   //           child: Image.asset(
                   //             ImageAssets.undo,
@@ -2942,7 +2500,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                   //         ),
                   //         InkWell(
                   //           onTap: () {
-                  //             print("Redo");
+                  //             log("Redo");
                   //           },
                   //           child: Image.asset(
                   //             ImageAssets.redo,
@@ -2985,39 +2543,25 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                     InkWell(
                                       onTap: () {
                                         setState(() {
+                                          if (!isRecording) return;
                                           _selectedIndexTools = index;
                                         });
                                         if (index == 0) {
-                                          _mode = DrawingMode.drag;
-                                          sendMessage(
-                                            'DrawingMode.drag',
-                                            stopwatch.elapsed.inMilliseconds,
-                                          );
-                                        } else if (index == 1) {
-                                          _mode = DrawingMode.pen;
-                                          sendMessage(
-                                            'DrawingMode.pen',
-                                            stopwatch.elapsed.inMilliseconds,
-                                          );
-                                        } else if (index == 2) {
-                                          _mode = DrawingMode.highlighter;
-                                          sendMessage(
-                                            'DrawingMode.highlighter',
-                                            stopwatch.elapsed.inMilliseconds,
-                                          );
-                                        } else if (index == 3) {
-                                          _mode = DrawingMode.eraser;
-                                          sendMessage(
-                                            'DrawingMode.eraser',
-                                            stopwatch.elapsed.inMilliseconds,
-                                          );
-                                        } else if (index == 4) {
-                                          _mode = DrawingMode.laser;
-                                          sendMessage(
-                                            'DrawingMode.laser',
-                                            stopwatch.elapsed.inMilliseconds,
-                                          );
-                                        }
+                                          updateDataHistory(DrawingMode.drag);
+                                        } // drag
+                                        else if (index == 1) {
+                                          updateDataHistory(DrawingMode.pen);
+                                        } // pen
+                                        else if (index == 2) {
+                                          updateDataHistory(
+                                              DrawingMode.highlighter);
+                                        } // high
+                                        else if (index == 3) {
+                                          updateDataHistory(DrawingMode.eraser);
+                                        } // eraser
+                                        else if (index == 4) {
+                                          updateDataHistory(DrawingMode.laser);
+                                        } // laser
                                       },
                                       child: Image.asset(
                                         _selectedIndexTools == index
@@ -3093,7 +2637,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                   //     children: [
                                   //       InkWell(
                                   //         onTap: () {
-                                  //           print("Clear");
+                                  //           log("Clear");
                                   //         },
                                   //         child: Image.asset(
                                   //           ImageAssets.bin,
@@ -3102,7 +2646,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                   //       ),
                                   //       InkWell(
                                   //         onTap: () {
-                                  //           print("More");
+                                  //           log("More");
                                   //
                                   //           setState(() {
                                   //             if (openColors ||
@@ -3169,581 +2713,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   }
 
   ///Button for list student
-  Widget showListStudents() {
-    return Positioned(
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            InkWell(
-              onTap: () {
-                setState(() {
-                  showStudent = !showStudent;
-                });
-              },
-              child: Container(
-                height: 40,
-                width: 264,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                      color: CustomColors.grayE5E6E9,
-                      width: 1.0,
-                      style: BorderStyle.solid),
-                  color: CustomColors.whitePrimary,
-                  borderRadius: const BorderRadius.only(
-                    topRight: Radius.circular(8),
-                    topLeft: Radius.circular(8),
-                  ),
-                ),
-                child: Center(
-                  child: Image.asset(
-                    showStudent ? ImageAssets.arrowDown : ImageAssets.icShared,
-                    height: showStudent ? 16 : 22,
-                    width: showStudent ? 16 : 25,
-                  ),
-                ),
-              ),
-            ),
-            AnimatedContainer(
-              width: showStudent ? MediaQuery.of(context).size.width : 0,
-              height: showStudent ? 105 : 0,
-              decoration: BoxDecoration(
-                border: Border.all(
-                    color: CustomColors.grayE5E6E9,
-                    width: 1.0,
-                    style: BorderStyle.solid),
-                color: CustomColors.whitePrimary,
-                borderRadius: const BorderRadius.only(
-                  topRight: Radius.circular(8),
-                  topLeft: Radius.circular(8),
-                ),
-              ),
-              duration: const Duration(seconds: 1),
-              curve: Curves.fastOutSlowIn,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: Text(
-                        'แชร์จอ :',
-                        style: CustomStyles.bold14Gray878787,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    width: 1,
-                    height: 80,
-                    color: CustomColors.grayCFCFCF,
-                  ),
-                  S.w(defaultPadding),
-                  Expanded(
-                    flex: 5,
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      scrollDirection: Axis.horizontal,
-                      itemCount: students.length,
-                      itemBuilder: (BuildContext context, int index) => Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            flex: 3,
-                            child: InkWell(
-                              onTap: () {
-                                if (_requestScreenShare == true) {
-                                  setState(() {
-                                    focusedStudentId = students[index]['id'];
-                                    focusedStudentName =
-                                        students[index]['name'];
-                                  });
-                                  var size = students[index]['solvepad_size']
-                                      .split(',');
-                                  changeSolvepadScaling(double.parse(size[0]),
-                                      double.parse(size[1]));
-                                  sendMessage(
-                                    'FocusStudentScreen:${students[index]['id']}',
-                                    stopwatch.elapsed.inMilliseconds,
-                                  );
-                                }
-                              },
-                              child: ColorFiltered(
-                                colorFilter: students[index]['status_share'] ==
-                                        'enable'
-                                    ? const ColorFilter.mode(
-                                        Colors.transparent, BlendMode.multiply)
-                                    : const ColorFilter.matrix(<double>[
-                                        0.2126,
-                                        0.7152,
-                                        0.0722,
-                                        0,
-                                        0,
-                                        0.2126,
-                                        0.7152,
-                                        0.0722,
-                                        0,
-                                        0,
-                                        0.2126,
-                                        0.7152,
-                                        0.0722,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        1,
-                                        0,
-                                      ]),
-                                child: Container(
-                                  height: 62,
-                                  width: 62,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    image: DecorationImage(
-                                      fit: BoxFit.cover,
-                                      image: NetworkImage(
-                                        students[index]['image'],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: InkWell(
-                              child: SizedBox(
-                                width: 100,
-                                child: Text(
-                                  students[index]['name'],
-                                  textAlign: TextAlign.center,
-                                  style: CustomStyles.med14Black363636Overflow,
-                                  maxLines: 1,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Flexible(
-                    flex: 1,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Align(
-                            alignment: Alignment.centerRight,
-                            child: InkWell(
-                              onTap: () {
-                                viewAllStudentModal();
-                              },
-                              child: Text(
-                                'ทั้งหมด',
-                                style: CustomStyles.bold14greenPrimary,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: InkWell(
-                              onTap: () {
-                                viewAllStudentModal();
-                              },
-                              child: const Icon(
-                                Icons.arrow_forward_ios_rounded,
-                                color: CustomColors.greenPrimary,
-                                size: 18.0,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget showListStudentsMobile() {
-    return Positioned(
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            /// TODO: revise this
-            // if (showStudent)
-            //   InkWell(
-            //     onTap: () {
-            //       setState(() {
-            //         showStudent = false;
-            //       });
-            //     },
-            //     child: Container(
-            //       height: 40,
-            //       width: 264,
-            //       decoration: BoxDecoration(
-            //         border: Border.all(
-            //             color: CustomColors.grayE5E6E9,
-            //             width: 1.0,
-            //             style: BorderStyle.solid),
-            //         color: CustomColors.whitePrimary,
-            //         borderRadius: const BorderRadius.only(
-            //           topRight: Radius.circular(8),
-            //           topLeft: Radius.circular(8),
-            //         ),
-            //       ),
-            //       child: Center(
-            //         child: Image.asset(
-            //           ImageAssets.arrowDown,
-            //           height: showStudent ? 16 : 22,
-            //           width: showStudent ? 16 : 25,
-            //         ),
-            //       ),
-            //     ),
-            //   ),
-            AnimatedContainer(
-              width: showStudent ? mySolvepadSize.width : 0,
-              height: showStudent ? 105 : 0,
-              decoration: BoxDecoration(
-                border: Border.all(
-                    color: CustomColors.grayE5E6E9,
-                    width: 1.0,
-                    style: BorderStyle.solid),
-                color: CustomColors.whitePrimary,
-                borderRadius: const BorderRadius.only(
-                  topRight: Radius.circular(8),
-                  topLeft: Radius.circular(8),
-                ),
-              ),
-              duration: const Duration(seconds: 1),
-              curve: Curves.fastOutSlowIn,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 12),
-                        child: Text(
-                          'แชร์จอ:',
-                          style: CustomStyles.bold14Gray878787,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    width: 1,
-                    height: 80,
-                    color: CustomColors.grayCFCFCF,
-                  ),
-                  Expanded(
-                    flex: 5,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 12),
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        scrollDirection: Axis.horizontal,
-                        itemCount: students.length,
-                        itemBuilder: (BuildContext context, int index) =>
-                            Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Expanded(
-                              flex: 3,
-                              child: InkWell(
-                                onTap: () {
-                                  if (_requestScreenShare == true) {
-                                    setState(() {
-                                      focusedStudentId = students[index]['id'];
-                                      focusedStudentName =
-                                          students[index]['name'];
-                                    });
-                                    var size = students[index]['solvepad_size']
-                                        .split(',');
-                                    changeSolvepadScaling(
-                                      double.parse(size[0]),
-                                      double.parse(size[1]),
-                                    );
-                                    sendMessage(
-                                      'FocusStudentScreen:${students[index]['id']}',
-                                      stopwatch.elapsed.inMilliseconds,
-                                    );
-                                    showStudent = false;
-                                  }
-                                },
-                                child: ColorFiltered(
-                                  colorFilter: students[index]
-                                              ['status_share'] ==
-                                          'enable'
-                                      ? const ColorFilter.mode(
-                                          Colors.transparent,
-                                          BlendMode.multiply)
-                                      : const ColorFilter.matrix(<double>[
-                                          0.2126,
-                                          0.7152,
-                                          0.0722,
-                                          0,
-                                          0,
-                                          0.2126,
-                                          0.7152,
-                                          0.0722,
-                                          0,
-                                          0,
-                                          0.2126,
-                                          0.7152,
-                                          0.0722,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          1,
-                                          0,
-                                        ]),
-                                  child: Container(
-                                    height: 62,
-                                    width: 62,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      image: DecorationImage(
-                                        fit: BoxFit.cover,
-                                        image: NetworkImage(
-                                          students[index]['image'],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: InkWell(
-                                onTap: () {},
-                                child: SizedBox(
-                                  width: 100,
-                                  child: Text(
-                                    students[index]['name'],
-                                    textAlign: TextAlign.center,
-                                    style:
-                                        CustomStyles.med14Black363636Overflow,
-                                    maxLines: 1,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Align(
-                            alignment: Alignment.centerRight,
-                            child: InkWell(
-                              onTap: () async {
-                                final int? selectedIndex = await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ViewAllStudentMobile(
-                                      students: students,
-                                    ),
-                                  ),
-                                );
-                                print(selectedIndex);
-                                setState(() {
-                                  focusedStudentId =
-                                      students[selectedIndex!]['id'];
-                                  focusedStudentName =
-                                      students[selectedIndex]['name'];
-                                });
-                                if (selectedIndex == null) return;
-                                var size = students[selectedIndex]
-                                        ['solvepad_size']
-                                    .split(',');
-                                changeSolvepadScaling(double.parse(size[0]),
-                                    double.parse(size[1]));
-                                sendMessage(
-                                  'FocusStudentScreen:${students[selectedIndex]['id']}',
-                                  stopwatch.elapsed.inMilliseconds,
-                                );
-                                showStudent = false;
-                              },
-                              child: Text(
-                                'ทั้งหมด',
-                                style: CustomStyles.bold14greenPrimary,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: InkWell(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ViewAllStudentMobile(
-                                      students: students,
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: const Icon(
-                                Icons.arrow_forward_ios_rounded,
-                                color: CustomColors.greenPrimary,
-                                size: 18.0,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget statusStudentShareScreen(String txt, String img) {
-    return Container(
-      height: 36,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(32),
-        color: CustomColors.blueCFE8FC,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          S.w(defaultPadding),
-          Image.asset(
-            ImageAssets.displayBlue,
-            width: 22,
-          ),
-          S.w(10),
-          Text(
-            txt,
-            style: CustomStyles.bold14blue0D47A1,
-          ),
-          S.w(10),
-          Image.asset(
-            img,
-            width: 22,
-          ),
-          S.w(10),
-          Container(
-            width: 1,
-            height: 16,
-            color: CustomColors.blue0D47A1,
-          ),
-          S.w(10),
-          InkWell(
-              onTap: () {
-                sendMessage(
-                  'HostLeaveScreen:$focusedStudentId',
-                  stopwatch.elapsed.inMilliseconds,
-                );
-                focusedStudentId = '';
-                focusedStudentName = '';
-                cleanStudentSolvepad();
-              },
-              child: Text("ออก", style: CustomStyles.bold14blue0D47A1Line)),
-          S.w(defaultPadding),
-        ],
-      ),
-    );
-  }
-
-  Widget statusScreenRed(String txt, String img) {
-    return Container(
-      height: 36,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(32),
-        color: CustomColors.pinkFFCDD2,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          S.w(16),
-          Image.asset(
-            img,
-            width: 22,
-          ),
-          S.w(12),
-          Text(
-            txt,
-            style: CustomStyles.bold14RedB71C1C,
-          ),
-          S.w(16),
-        ],
-      ),
-    );
-  }
-
-  Widget statusShareScreen(String txt, String img) {
-    return Container(
-      height: 36,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(32),
-        color: CustomColors.greenB9E7C9,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          S.w(16),
-          Image.asset(
-            img,
-            width: 22,
-          ),
-          S.w(12),
-          Text(
-            txt,
-            style: CustomStyles.bold14greenPrimary,
-          ),
-          S.w(16),
-        ],
-      ),
-    );
-  }
-
-  Widget statusShareScreenMobile() {
-    return Positioned(
-      top: 70,
-      left: 70,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (!micEnable)
-            statusScreenRed(
-                "You’re Muted", ImageAssets.micMuteRed), // should be micMuteRed
-          S.h(16),
-          // TODO: reconsider this
-          if (focusedStudentId != '' && _isViewingFocusStudent)
-            statusStudentShareScreen(
-                "หน้าจอ: $focusedStudentName", ImageAssets.avatarWomen),
-        ],
-      ),
-    );
-  }
 
   Future<void> quizSelectModal() {
     Color getColor(Set<MaterialState> states) {
@@ -3969,7 +2938,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                                   value: quizList[index]
                                                       .isSelected,
                                                   onChanged: (bool? value) {
-                                                    print('checkbox tapped');
+                                                    log('checkbox tapped');
                                                     setState(() {
                                                       quizList[index]
                                                               .isSelected =
@@ -4336,124 +3305,120 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                   ))),
                         ),
                         Expanded(
-                            flex: 3,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                InkWell(
-                                  onTap: () {
-                                    setState(() {
-                                      micEnable = !micEnable;
-                                    });
-                                    if (micEnable && !widget.isMock) {
-                                      meeting.unmuteMic();
-                                    } else {
-                                      meeting.muteMic();
-                                    }
-                                  },
-                                  child: Image.asset(
-                                    micEnable
-                                        ? ImageAssets.micEnable
-                                        : ImageAssets.micDis,
-                                    height: 44,
-                                    width: 44,
-                                  ),
+                          flex: 3,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    micEnable = !micEnable;
+                                  });
+                                },
+                                child: Image.asset(
+                                  micEnable
+                                      ? ImageAssets.micEnable
+                                      : ImageAssets.micDis,
+                                  height: 44,
+                                  width: 44,
                                 ),
-                                S.w(defaultPadding),
-                                InkWell(
-                                  onTap: () {
-                                    setState(() {
-                                      displayEnable = !displayEnable;
-                                    });
-                                  },
-                                  child: Image.asset(
-                                    displayEnable
-                                        ? ImageAssets.displayEnable
-                                        : ImageAssets.displayDis,
-                                    height: 44,
-                                    width: 44,
-                                  ),
+                              ),
+                              S.w(defaultPadding),
+                              InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    displayEnable = !displayEnable;
+                                  });
+                                },
+                                child: Image.asset(
+                                  displayEnable
+                                      ? ImageAssets.displayEnable
+                                      : ImageAssets.displayDis,
+                                  height: 44,
+                                  width: 44,
                                 ),
-                                S.w(defaultPadding),
+                              ),
+                              S.w(defaultPadding),
 
-                                ///todo Icon share for disable
-                                // Image.asset(
-                                //   ImageAssets.shareQa,
-                                //   height: 44,
-                                //   width: 44,
-                                // ),
-                                Stack(
-                                  children: [
-                                    InkWell(
-                                      onTap: () {
-                                        quizSelectModal();
-                                      },
-                                      child: Image.asset(
-                                        ImageAssets.icShareAction,
-                                        height: 44,
-                                        width: 44,
-                                      ),
+                              ///todo Icon share for disable
+                              // Image.asset(
+                              //   ImageAssets.shareQa,
+                              //   height: 44,
+                              //   width: 44,
+                              // ),
+                              Stack(
+                                children: [
+                                  InkWell(
+                                    onTap: () {
+                                      quizSelectModal();
+                                    },
+                                    child: Image.asset(
+                                      ImageAssets.icShareAction,
+                                      height: 44,
+                                      width: 44,
                                     ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                          left: 32, bottom: 1),
-                                      child: Container(
-                                        decoration: const BoxDecoration(
-                                            color: CustomColors.black363636,
-                                            shape: BoxShape.circle),
-                                        width: 25,
-                                        height: 25,
-                                        child: Center(
-                                          child: Text(
-                                            "12",
-                                            style: CustomStyles.bold11White,
-                                          ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 32, bottom: 1),
+                                    child: Container(
+                                      decoration: const BoxDecoration(
+                                          color: CustomColors.black363636,
+                                          shape: BoxShape.circle),
+                                      width: 25,
+                                      height: 25,
+                                      child: Center(
+                                        child: Text(
+                                          "12",
+                                          style: CustomStyles.bold11White,
                                         ),
                                       ),
                                     ),
+                                  ),
+                                ],
+                              ),
+
+                              ///End icon share
+                              S.w(defaultPadding),
+                              const DividerVer(),
+                              S.w(defaultPadding),
+                              Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: CustomColors.grayCFCFCF,
+                                    style: BorderStyle.solid,
+                                    width: 1.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(100),
+                                  color: CustomColors.whitePrimary,
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 4, vertical: 1),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: <Widget>[
+                                    Transform.scale(
+                                      scale: 0.7,
+                                      child: CupertinoSwitch(
+                                        value: _switchValue,
+                                        onChanged: (bool value) {
+                                          setState(() {
+                                            _switchValue = value;
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                    Text("ให้นักเรียนแชร์จอ",
+                                        textAlign: TextAlign.center,
+                                        style: CustomStyles.bold14Gray878787),
+                                    S.w(4)
                                   ],
                                 ),
-
-                                ///End icon share
-                                S.w(defaultPadding),
-                                const DividerVer(),
-                                S.w(defaultPadding),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: CustomColors.grayCFCFCF,
-                                      style: BorderStyle.solid,
-                                      width: 1.0,
-                                    ),
-                                    borderRadius: BorderRadius.circular(100),
-                                    color: CustomColors.whitePrimary,
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 4, vertical: 1),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: <Widget>[
-                                      Transform.scale(
-                                        scale: 0.7,
-                                        child: CupertinoSwitch(
-                                          value: _switchValue,
-                                          onChanged: (bool value) {
-                                            setState(() {
-                                              _switchValue = value;
-                                            });
-                                          },
-                                        ),
-                                      ),
-                                      Text("ให้นักเรียนแชร์จอ",
-                                          textAlign: TextAlign.center,
-                                          style: CustomStyles.bold14Gray878787),
-                                      S.w(4)
-                                    ],
-                                  ),
-                                )
-                              ],
-                            )),
+                              )
+                            ],
+                          ),
+                        ),
 
                         /// Statistics
                         Expanded(
@@ -4462,7 +3427,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                               alignment: Alignment.centerRight,
                               child: InkWell(
                                 onTap: () {
-                                  print('Go to Statistics');
+                                  log('Go to Statistics');
                                   showLeader(context);
                                 },
                                 child: Container(
@@ -4760,386 +3725,5 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
         );
       },
     );
-  }
-
-  Future<void> viewAllStudentModal() {
-    return showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return Column(
-            children: [
-              ///Header
-              Material(
-                color: Colors.transparent,
-                child: Container(
-                  height: 60,
-                  color: CustomColors.whitePrimary,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      S.w(Responsive.isTablet(context) ? 5 : 24),
-                      if (Responsive.isTablet(context))
-                        Expanded(
-                          flex: 3,
-                          child: Text(
-                            courseName,
-                            style: CustomStyles.bold16Black363636Overflow,
-                            maxLines: 1,
-                          ),
-                        ),
-                      if (Responsive.isDesktop(context))
-                        Expanded(
-                          flex: 4,
-                          child: Text(
-                            courseName,
-                            style: CustomStyles.bold16Black363636Overflow,
-                            maxLines: 1,
-                          ),
-                        ),
-                      if (Responsive.isMobile(context))
-                        Expanded(
-                          flex: 2,
-                          child: Text(
-                            courseName,
-                            style: CustomStyles.bold16Black363636Overflow,
-                            maxLines: 1,
-                          ),
-                        ),
-                      Expanded(
-                        flex: Responsive.isDesktop(context) ? 3 : 4,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Container(
-                              height: 32,
-                              width: 145,
-                              // margin: EdgeInsets.only(top: defaultPadding),
-                              // padding: EdgeInsets.all(defaultPadding),
-                              decoration: const BoxDecoration(
-                                color: CustomColors.pinkFFCDD2,
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(defaultPadding),
-                                ),
-                              ),
-                              // child: Row(
-                              //   mainAxisAlignment: MainAxisAlignment.center,
-                              //   children: [
-                              //     Image.asset(
-                              //       ImageAssets.lowSignal,
-                              //       height: 22,
-                              //       width: 18,
-                              //     ),
-                              //     S.w(10),
-                              //     Flexible(
-                              //       child: Text(
-                              //         "สัญญาณอ่อน",
-                              //         style: CustomStyles.bold14redB71C1C,
-                              //         maxLines: 1,
-                              //         overflow: TextOverflow.ellipsis,
-                              //       ),
-                              //     ),
-                              //   ],
-                              // ),
-                            ),
-                            S.w(16.0),
-                            Container(
-                              height: 11,
-                              width: 11,
-                              decoration: BoxDecoration(
-                                  color: CustomColors.redF44336,
-                                  borderRadius: BorderRadius.circular(100)
-                                  //more than 50% of width makes circle
-                                  ),
-                            ),
-                            S.w(4.0),
-                            RichText(
-                              text: TextSpan(
-                                text: 'Live Time: ',
-                                style: CustomStyles.med14redFF4201,
-                                children: <TextSpan>[
-                                  TextSpan(
-                                    text: '01 : 59 : 59',
-                                    style: CustomStyles.med14Gray878787,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            S.w(16.0),
-                            InkWell(
-                              onTap: () {
-                                showCloseDialog(context, () {});
-                              },
-                              child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: defaultPadding * 1,
-                                    vertical: defaultPadding / 1.5,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: CustomColors.redF44336,
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        "ปิดห้องเรียน",
-                                        style: CustomStyles.bold14White,
-                                      ),
-                                    ],
-                                  )),
-                            ),
-                            S.w(Responsive.isTablet(context) ? 5 : 24),
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-
-              ///Modal list student
-              Expanded(
-                child: Dialog(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16.0),
-                  ),
-                  elevation: 0,
-                  backgroundColor: CustomColors.grayF3F3F3,
-                  child: SingleChildScrollView(
-                    child: SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.9,
-                      child: Padding(
-                        padding: const EdgeInsets.all(32.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                S.w(32),
-                                Text('สลับหน้าไปจอของ...',
-                                    style: CustomStyles.bold22Black363636),
-                                Expanded(child: Container()),
-                                SizedBox(
-                                  height: 40,
-                                  width: 220,
-                                  child: TextFormField(
-                                    keyboardType: TextInputType.visiblePassword,
-                                    decoration: InputDecoration(
-                                      labelText: 'ค้นหาชื่อผู้เรียน',
-                                      labelStyle: CustomStyles.med14Gray878787,
-                                      border: const OutlineInputBorder(),
-                                      suffixIcon: const Icon(
-                                        Icons.search,
-                                        size: 18,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                S.w(32),
-                              ],
-                            ),
-                            S.h(24),
-                            SizedBox(
-                              width: double.infinity,
-                              height: 340,
-                              child: GridView.builder(
-                                  primary: false,
-                                  gridDelegate:
-                                      const SliverGridDelegateWithFixedCrossAxisCount(
-                                          crossAxisCount: 2,
-                                          childAspectRatio: 18 / 4,
-                                          crossAxisSpacing: 20,
-                                          mainAxisSpacing: 20),
-                                  itemCount: students.length,
-                                  itemBuilder: (BuildContext context, index) {
-                                    return Container(
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                          color: CustomColors.whitePrimary,
-                                          borderRadius:
-                                              BorderRadius.circular(8)),
-                                      child: Row(
-                                        children: [
-                                          S.w(defaultPadding),
-                                          Image.network(
-                                            students[index]['image'],
-                                            height: 62,
-                                            width: 62,
-                                          ),
-                                          S.w(defaultPadding),
-                                          Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              SizedBox(
-                                                width: 118,
-                                                child: Text(
-                                                  students[index]['name'],
-                                                  style: CustomStyles
-                                                      .bold16Black363636Overflow,
-                                                  maxLines: 1,
-                                                ),
-                                              ),
-                                              S.h(4),
-                                              if (students[index]
-                                                      ['status_share'] !=
-                                                  'disable') ...[
-                                                Row(
-                                                  children: [
-                                                    Image.asset(
-                                                      ImageAssets.shareGreen,
-                                                      width: 22,
-                                                    ),
-                                                    S.w(3),
-                                                    Text(
-                                                      'Sharing Screen',
-                                                      style: CustomStyles
-                                                          .bold12greenPrimary,
-                                                    ),
-                                                  ],
-                                                ),
-                                              ] // if share
-                                              else ...[
-                                                Text(
-                                                  'Not allow sharing yet',
-                                                  style: CustomStyles
-                                                      .med12gray878787,
-                                                ),
-                                              ] // if not share
-                                            ],
-                                          ),
-                                          Expanded(child: Container()),
-                                          if (students[index]['status_share'] !=
-                                                  'disable' &&
-                                              students[index]['share_now'] ==
-                                                  'N')
-                                            SizedBox(
-                                              width: 80,
-                                              height: 30,
-                                              child: ElevatedButton(
-                                                  style:
-                                                      ElevatedButton.styleFrom(
-                                                    backgroundColor:
-                                                        CustomColors
-                                                            .greenPrimary,
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              8.0), // <-- Radius
-                                                    ), // NEW
-                                                  ),
-                                                  onPressed: () {
-                                                    Navigator.of(context).pop();
-                                                    if (_requestScreenShare ==
-                                                        true) {
-                                                      setState(() {
-                                                        focusedStudentId =
-                                                            students[index]
-                                                                ['id'];
-                                                        focusedStudentName =
-                                                            students[index]
-                                                                ['name'];
-                                                      });
-                                                      var size = students[index]
-                                                              ['solvepad_size']
-                                                          .split(',');
-                                                      changeSolvepadScaling(
-                                                          double.parse(size[0]),
-                                                          double.parse(
-                                                              size[1]));
-                                                      sendMessage(
-                                                        'FocusStudentScreen:${students[index]['id']}',
-                                                        stopwatch.elapsed
-                                                            .inMilliseconds,
-                                                      );
-                                                    }
-                                                  },
-                                                  child: Text('เลือก',
-                                                      style: CustomStyles
-                                                          .bold14White)),
-                                            ),
-                                          if (students[index]['share_now'] ==
-                                              'Y')
-                                            Container(
-                                              width: 118,
-                                              height: 30,
-                                              decoration: BoxDecoration(
-                                                border: Border.all(
-                                                  color:
-                                                      CustomColors.grayCFCFCF,
-                                                  style: BorderStyle.solid,
-                                                  width: 1.0,
-                                                ),
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                                color:
-                                                    CustomColors.whitePrimary,
-                                              ),
-                                              child: Center(
-                                                child: Text(
-                                                  "ออกจากการแชร์",
-                                                  style: CustomStyles
-                                                      .bold14Gray878787Overflow,
-                                                ),
-                                              ),
-                                            ),
-                                          S.w(8)
-                                        ],
-                                      ),
-                                    );
-                                  }),
-                            ),
-                            S.h(24),
-                            InkWell(
-                              onTap: () {
-                                Navigator.pop(context);
-                              },
-                              child: Container(
-                                width: 120,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: CustomColors.grayCFCFCF,
-                                    style: BorderStyle.solid,
-                                    width: 1.0,
-                                  ),
-                                  borderRadius: BorderRadius.circular(8),
-                                  color: CustomColors.whitePrimary,
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 4),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: <Widget>[
-                                    const Icon(
-                                      Icons.arrow_back,
-                                      size: 24,
-                                      color: CustomColors.gray878787,
-                                    ),
-                                    S.w(8),
-                                    Text("ย้อนกลับ",
-                                        textAlign: TextAlign.center,
-                                        style: CustomStyles.bold14Gray878787),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          );
-        });
   }
 }

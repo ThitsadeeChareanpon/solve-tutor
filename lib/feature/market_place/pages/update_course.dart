@@ -46,18 +46,13 @@ class _UpdateCourseTabState extends State<UpdateCourseTab>
         loadingWidget: Alert.getOverlayScreen(),
         asyncFunction: () async {
           // ues courseId get course details
-          log('init course edit page');
           final course = await courseController.getCourseById(widget.courseId);
-          log('getCourseById');
           await courseController.setInitData(course);
-          log('setInitData');
           // await courseController.(course);
           await courseController
               .getCalendarListAll(courseController.courseData?.tutorId ?? '');
-          log('getCalendarListAll');
           await courseController.getDataCalendarList(
               courseController.courseData?.calendars ?? []);
-          log('getDataCalendarList');
         },
         context: context,
       );

@@ -192,7 +192,7 @@ class _MyCourseVDOPageState extends State<MyCourseVDOPage> {
                 _rowDropdown(),
                 Expanded(
                   child: courseController.isLoading
-                      ? Column(
+                      ? const Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
@@ -233,13 +233,13 @@ class _MyCourseVDOPageState extends State<MyCourseVDOPage> {
           hintText: 'ค้นหา...',
           hintStyle: CustomStyles.med14Black363636
               .copyWith(color: CustomColors.grayCFCFCF),
-          // isDense: trueasas,
+          // isDense: true,
           border: const OutlineInputBorder(
             borderRadius: BorderRadius.all(
               Radius.circular(8.0),
             ),
           ),
-          prefixIcon: Icon(Icons.search),
+          prefixIcon: const Icon(Icons.search),
 
           // suffix: Text('${controller.courseNames.length}/70'),
         ),
@@ -299,23 +299,23 @@ class _MyCourseVDOPageState extends State<MyCourseVDOPage> {
     );
   }
 
-  Widget listMyCourse(List<CourseModel> courselist, BuildContext context) {
+  Widget listMyCourse(List<CourseModel> courseList, BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: GridView.count(
         crossAxisCount: _util.isTablet() ? 2 : 1,
         crossAxisSpacing: 16,
-        children: List.generate(courselist.length, (index) {
+        children: List.generate(courseList.length, (index) {
           return card(
-              courseModel: courselist[index],
+              courseModel: courseList[index],
               onTap: () async {
-                if (courselist[index].id?.isNotEmpty == true) {
+                if (courseList[index].id?.isNotEmpty == true) {
                   // ignore: use_build_context_synchronously
                   await Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) =>
-                          UpdateCourseTab(courseId: courselist[index].id ?? ''),
+                          UpdateCourseTab(courseId: courseList[index].id ?? ''),
                     ),
                   );
                 }
@@ -361,7 +361,7 @@ class _MyCourseVDOPageState extends State<MyCourseVDOPage> {
                 ] else ...[
                   Image.asset(
                     ImageAssets.emptyCourse,
-                    height: 200,
+                    height: 180,
                     width: double.infinity,
                     fit: BoxFit.fitHeight,
                   ),
@@ -411,7 +411,6 @@ class _MyCourseVDOPageState extends State<MyCourseVDOPage> {
                     ],
                   ),
                 ),
-                S.h(8),
                 _buttonCard(courseModel),
               ],
             ),
@@ -454,7 +453,7 @@ class _MyCourseVDOPageState extends State<MyCourseVDOPage> {
         Expanded(child: Container()),
         _videoView(course.lessons?.length ?? 0),
         S.w(20),
-        _documentView(course.document?.data?.docFiles?.length ?? 0),
+        _documentView(course.documentCount ?? 0),
       ],
     );
   }
@@ -474,7 +473,7 @@ class _MyCourseVDOPageState extends State<MyCourseVDOPage> {
           children: [
             _videoView(course.lessons?.length ?? 0),
             S.w(10),
-            _documentView(course.document?.data?.docFiles?.length ?? 0),
+            _documentView(course.documentCount ?? 0),
           ],
         ),
       ],

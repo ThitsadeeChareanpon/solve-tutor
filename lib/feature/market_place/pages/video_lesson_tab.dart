@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart' hide ReorderableList;
@@ -16,6 +17,7 @@ import 'package:solve_tutor/feature/calendar/widgets/format_date.dart';
 import 'package:solve_tutor/feature/calendar/widgets/widgets.dart';
 import 'package:solve_tutor/feature/cheet/pages/alert_other.dart';
 import 'package:solve_tutor/feature/market_place/pages/dialog_file_manager.dart';
+import 'package:solve_tutor/feature/market_place/pages/record_course.dart';
 import 'package:solve_tutor/feature/market_place/pages/reorderable_view_page.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
@@ -70,7 +72,7 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buttonSortLasson(),
+                    _buttonSortLesson(),
                     _buttonAddVDO(),
                   ],
                 ),
@@ -109,22 +111,23 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: Card(
-                color: CustomColors.grayEFF0F2,
-                elevation: 4,
-                child: Column(
-                  children: [
-                    _headBuilder(lesson, index),
-                    if (lesson?.isExpanded == true) ...[
-                      if (courseController.courseData?.courseType == 'vdo') ...[
-                        _bodyBuilderVDO(lesson),
-                      ],
-                      if (courseController.courseData?.courseType == 'pad') ...[
-                        _bodyBuilderPAD(lesson),
-                      ],
-                      _buttonDelete(lesson, index),
+              color: CustomColors.grayEFF0F2,
+              elevation: 4,
+              child: Column(
+                children: [
+                  _headBuilder(lesson, index),
+                  if (lesson?.isExpanded == true) ...[
+                    if (courseController.courseData?.courseType == 'vdo') ...[
+                      _bodyBuilderVDO(lesson),
                     ],
+                    if (courseController.courseData?.courseType == 'pad') ...[
+                      _bodyBuilderPAD(lesson),
+                    ],
+                    _buttonDelete(lesson, index),
                   ],
-                )),
+                ],
+              ),
+            ),
           );
         }),
       );
@@ -139,33 +142,32 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
           child: InkWell(
             onTap: () async {
               await showDialog(
-                  context: context,
-                  builder: (context) => AlertDeleteVideo(onTap: () async {
-                        await Alert.showOverlay(
-                          loadingWidget: Alert.getOverlayScreen(),
-                          asyncFunction: () async {
-                            try {
-                              final id = _getIdImage(lesson?.videoFiles ?? '');
-                              await courseController.deleteFileById(
-                                tutorId:
-                                    courseController.courseData?.tutorId ?? '',
-                                documentId:
-                                    courseController.courseData?.id ?? '',
-                                fileId: id,
-                              );
-                              lesson?.videoFiles = '';
-                              await courseController.updateCourseDetails(
-                                  courseController.courseData);
-                            } catch (e) {
-                              Navigator.of(context).pop();
-                              rethrow;
-                            }
-                          },
-                          context: context,
+                context: context,
+                builder: (context) => AlertDeleteVideo(onTap: () async {
+                  await Alert.showOverlay(
+                    loadingWidget: Alert.getOverlayScreen(),
+                    asyncFunction: () async {
+                      try {
+                        final id = _getIdImage(lesson?.videoFiles ?? '');
+                        await courseController.deleteFileById(
+                          tutorId: courseController.courseData?.tutorId ?? '',
+                          documentId: courseController.courseData?.id ?? '',
+                          fileId: id,
                         );
-                        // ignore: use_build_context_synchronously
+                        lesson?.videoFiles = '';
+                        await courseController
+                            .updateCourseDetails(courseController.courseData);
+                      } catch (e) {
                         Navigator.of(context).pop();
-                      }));
+                        rethrow;
+                      }
+                    },
+                    context: context,
+                  );
+                  // ignore: use_build_context_synchronously
+                  Navigator.of(context).pop();
+                }),
+              );
 
               setState(() {});
             },
@@ -282,7 +284,7 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
           quality: 75,
         ) ??
         '';
-    print("thumbnail file is located: $thumbnailPath");
+    log("thumbnail file is located: $thumbnailPath");
 
     final file = File(thumbnailPath);
     bytes = file.readAsBytesSync();
@@ -377,7 +379,7 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
                   ),
                 );
               } else {
-                return Column(
+                return const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
@@ -424,7 +426,6 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
           const SizedBox(height: 20),
           RichText(
             text: TextSpan(
-              text: 'Hello ',
               style: DefaultTextStyle.of(context).style,
               children: <TextSpan>[
                 TextSpan(
@@ -432,9 +433,10 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
                   style: CustomStyles.blod16gray878787,
                 ),
                 TextSpan(
-                    text: 'ได้สูงสุด 30 นาที',
-                    style: CustomStyles.med16Green
-                        .copyWith(fontWeight: FontWeight.bold)),
+                  text: 'ได้สูงสุด 30 นาที',
+                  style: CustomStyles.med16Green
+                      .copyWith(fontWeight: FontWeight.bold),
+                ),
               ],
             ),
           ),
@@ -444,7 +446,7 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
             style: CustomStyles.med14Gray878787,
           ),
           const SizedBox(height: 10),
-          _buttonRecoedVideo()
+          _buttonRecordSolvepad(lesson!)
         ],
       ),
     );
@@ -501,7 +503,6 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
             isExpanded: false,
           ),
         );
-        print(courseController.courseData?.lessons?.toList());
         setState(() {});
       },
       style: ElevatedButton.styleFrom(
@@ -602,7 +603,7 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
     );
   }
 
-  Widget _buttonRecoedVideo() {
+  Widget _buttonRecordSolvepad(Lessons lesson) {
     return ElevatedButton.icon(
       icon: const Icon(
         Icons.radio_button_checked_rounded,
@@ -615,7 +616,17 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
           color: CustomColors.white,
         ),
       ),
-      onPressed: () async {},
+      onPressed: () async {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => RecordCourse(
+              lesson: lesson,
+              courseId: courseController.courseData!.id!,
+            ),
+          ),
+        );
+      },
       style: ElevatedButton.styleFrom(
         backgroundColor: CustomColors.redF44336,
         shape:
@@ -624,7 +635,7 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
     );
   }
 
-  Widget _buttonSortLasson() {
+  Widget _buttonSortLesson() {
     return ElevatedButton(
       onPressed: () async {
         await Navigator.push(

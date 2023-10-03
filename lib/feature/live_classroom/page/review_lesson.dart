@@ -1260,7 +1260,7 @@ class _ReviewLessonState extends State<ReviewLesson>
                               }
                             },
                             child: CustomPaint(
-                              painter: SolvepadDrawer(
+                              painter: SolvepadDrawerLive(
                                 _penPoints[index],
                                 _replayPoints[index],
                                 _eraserPoints[index],
