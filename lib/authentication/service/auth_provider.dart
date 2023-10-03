@@ -5,11 +5,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:solve_tutor/authentication/models/user_model.dart';
+import 'package:solve_tutor/authentication/models/wallet.model.dart';
 
 class AuthProvider extends ChangeNotifier {
   final GoogleSignIn googleSignIn = GoogleSignIn();
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
   final FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
+  WalletModel? wallet;
   UserModel? user;
   String? uid;
 
@@ -29,7 +31,22 @@ class AuthProvider extends ChangeNotifier {
         if (user?.role == null || user?.role == "") {
           await updateRoleFirestore('tutor');
         }
+        await getWallet();
         // log('My Data: ${userFirebase.data()}');
+        notifyListeners();
+      }
+    });
+  }
+
+  getWallet() async {
+    uid = firebaseAuth.currentUser?.uid ?? "";
+    await firebaseFirestore
+        .collection('wallet')
+        .doc(uid)
+        .get()
+        .then((walletFirebase) async {
+      if (walletFirebase.exists) {
+        wallet = WalletModel.fromJson(walletFirebase.data()!);
         notifyListeners();
       }
     });

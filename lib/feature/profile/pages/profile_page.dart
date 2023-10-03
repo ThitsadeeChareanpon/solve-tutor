@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:solve_tutor/auth.dart';
 import 'package:solve_tutor/authentication/service/auth_provider.dart';
 import 'package:solve_tutor/constants/theme.dart';
+import 'package:solve_tutor/feature/payment/pages/solve_fund.dart';
 import 'package:solve_tutor/widgets/confirm_action_widget.dart';
 import 'package:solve_tutor/widgets/dialogs.dart';
 import 'package:solve_tutor/widgets/sizer.dart';
@@ -273,6 +274,38 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                   const SizedBox(height: 10),
+                  GestureDetector(
+                    onTap: ()
+                    async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SolveFundPage(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(20, 15, 20, 5),
+                      child: const Row(
+                        children: [
+                          SizedBox(width: 20),
+                          Expanded(
+                            child: Text(
+                              'ซื้อเหรียญ',
+                              style: TextStyle(
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                          Icon(
+                            Icons.chevron_right,
+                            color: primaryColor,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const Divider(thickness: 2),
                   settingCard(
                       title: 'เงื่อนไขข้อตกลงการใช้บริการ',
                       url: 'https://solve.in.th/terms-of-service/'),

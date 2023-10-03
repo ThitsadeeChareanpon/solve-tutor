@@ -60,7 +60,7 @@ dependencies:
   flutter_webrtc: ^0.9.34
   camera: ^0.10.5+2
   webview_flutter: ^4.2.2
-
+  crypto: ^3.0.3
   flutter_sound: ^9.2.13
 
 dev_dependencies:
