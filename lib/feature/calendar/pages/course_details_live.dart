@@ -30,7 +30,7 @@ class CourseDetailsLive extends StatefulWidget {
 class _CourseDetailsLiveState extends State<CourseDetailsLive> {
   final _util = UtilityHelper();
   var courseController = CourseLiveController();
-  DatabaseService dbService = DatabaseService();
+  FirebaseService dbService = FirebaseService();
   List<StudentModel> filterStudent = [];
   String textErrorAddStudent = '';
   DateTime? startTime;

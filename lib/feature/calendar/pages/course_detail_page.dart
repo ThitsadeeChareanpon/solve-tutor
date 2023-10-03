@@ -28,7 +28,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
   final _util = UtilityHelper();
   double? _ratingValue;
   var courseController = CourseLiveController();
-  DatabaseService dbService = DatabaseService();
+  FirebaseService dbService = FirebaseService();
   String tutorName = 'ติวเตอร์ ติวเตอร์';
   String tutorAbout = '';
   String tutorImage = '';

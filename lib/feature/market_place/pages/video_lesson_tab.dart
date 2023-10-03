@@ -148,13 +148,13 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
                     loadingWidget: Alert.getOverlayScreen(),
                     asyncFunction: () async {
                       try {
-                        final id = _getIdImage(lesson?.videoFiles ?? '');
+                        final id = _getIdImage(lesson?.media ?? '');
                         await courseController.deleteFileById(
                           tutorId: courseController.courseData?.tutorId ?? '',
                           documentId: courseController.courseData?.id ?? '',
                           fileId: id,
                         );
-                        lesson?.videoFiles = '';
+                        lesson?.media = '';
                         await courseController
                             .updateCourseDetails(courseController.courseData);
                       } catch (e) {
@@ -194,9 +194,8 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
                             await Alert.showOverlay(
                               loadingWidget: Alert.getOverlayScreen(),
                               asyncFunction: () async {
-                                if (lesson?.videoFiles?.isNotEmpty == true) {
-                                  final id =
-                                      _getIdImage(lesson?.videoFiles ?? '');
+                                if (lesson?.media?.isNotEmpty == true) {
+                                  final id = _getIdImage(lesson?.media ?? '');
                                   await courseController.deleteFileById(
                                     tutorId:
                                         courseController.courseData?.tutorId ??
@@ -205,7 +204,7 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
                                         courseController.courseData?.id ?? '',
                                     fileId: id,
                                   );
-                                  lesson?.videoFiles = '';
+                                  lesson?.media = '';
                                 }
                                 courseController.courseData?.lessons
                                     ?.removeAt(index);
@@ -276,7 +275,7 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
   Future<Uint8List> genThumbnail(Lessons? lesson) async {
     Uint8List bytes;
     final thumbnailPath = await VideoThumbnail.thumbnailFile(
-          video: '${lesson?.videoFiles}?download',
+          video: '${lesson?.media}?download',
           thumbnailPath: (await getTemporaryDirectory()).path,
           imageFormat: ImageFormat.PNG,
           maxHeight:
@@ -293,11 +292,11 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
   }
 
   _bodyBuilderVDO(Lessons? lesson) {
-    final id = _getIdImage(lesson?.videoFiles ?? '');
-    final timeStamp = _getTimeStamp(lesson?.videoFiles ?? '');
+    final id = _getIdImage(lesson?.media ?? '');
+    final timeStamp = _getTimeStamp(lesson?.media ?? '');
     int time = int.parse(timeStamp);
     var dateTime = FormatDate.dt(DateTime.fromMillisecondsSinceEpoch(time));
-    return lesson?.videoFiles?.isNotEmpty == true
+    return lesson?.media?.isNotEmpty == true
         ? FutureBuilder<Uint8List>(
             future: genThumbnail(lesson),
             builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -499,7 +498,7 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
           Lessons(
             lessonId: (courseController.courseData?.lessons?.length ?? 0) + 1,
             lessonName: '',
-            videoFiles: '',
+            media: '',
             isExpanded: false,
           ),
         );
@@ -588,7 +587,7 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
               videoUrl = await courseController.openFileVideo(
                   context: context,
                   courseData: courseController.courseData ?? CourseModel());
-              lesson?.videoFiles = videoUrl ?? '';
+              lesson?.media = videoUrl ?? '';
               await courseController
                   .updateCourseDetails(courseController.courseData);
             });
@@ -622,7 +621,7 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
           MaterialPageRoute(
             builder: (context) => RecordCourse(
               lesson: lesson,
-              courseId: courseController.courseData!.id!,
+              course: courseController.courseData!,
             ),
           ),
         );

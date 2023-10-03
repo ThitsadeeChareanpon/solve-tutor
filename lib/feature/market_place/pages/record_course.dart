@@ -1,9 +1,13 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:solve_tutor/feature/calendar/controller/create_course_controller.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:sizer/sizer.dart';
@@ -12,8 +16,11 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter_sound_platform_interface/flutter_sound_recorder_platform_interface.dart';
 
+import '../../../firebase/database.dart';
 import '../../calendar/constants/custom_styles.dart';
 import '../../calendar/model/course_model.dart';
+import '../../calendar/widgets/alert_overlay.dart';
+import '../../calendar/widgets/alert_snackbar.dart';
 import '../../calendar/widgets/sizebox.dart';
 
 import '../../calendar/constants/assets_manager.dart';
@@ -30,12 +37,12 @@ import '../../live_classroom/solvepad/solvepad_stroke_model.dart';
 import '../../live_classroom/utils/responsive.dart';
 
 class RecordCourse extends StatefulWidget {
-  final String courseId;
+  final CourseModel course;
   final Lessons lesson;
   const RecordCourse({
     Key? key,
     required this.lesson,
-    required this.courseId,
+    required this.course,
   }) : super(key: key);
 
   @override
@@ -134,6 +141,7 @@ class _RecordCourseState extends State<RecordCourse> {
   );
   int focusQuestion = 0;
   int radioTest = 0;
+  FirebaseService firebaseService = FirebaseService();
 
   // ---------- VARIABLE: Solve Pad data
   late List<String> _pages = [];
@@ -192,7 +200,7 @@ class _RecordCourseState extends State<RecordCourse> {
   FlutterSoundRecorder? _mRecorder = FlutterSoundRecorder();
   bool _mPlayerIsInited = false;
   bool _mRecorderIsInited = false;
-  bool _mplaybackReady = false;
+  bool _mPlaybackReady = false;
 
   /// TODO: Get rid of all Mockup reference
   @override
@@ -209,12 +217,26 @@ class _RecordCourseState extends State<RecordCourse> {
         SystemUiOverlay.bottom,
       ]);
     });
-    initPagingBtn();
+    initAudio();
     initPagesData();
+    initPagingBtn();
+  }
+
+  void initAudio() {
+    _mPlayer!.openPlayer().then((value) {
+      setState(() {
+        _mPlayerIsInited = true;
+      });
+    });
+    openTheRecorder().then((value) {
+      setState(() {
+        _mRecorderIsInited = true;
+      });
+    });
   }
 
   Future<void> initPagesData() async {
-    await courseController.getCourseById(widget.courseId);
+    await courseController.getCourseById(widget.course.id!);
     setState(() {
       if (courseController.courseData?.document?.data?.docFiles == null) {
         _pages = [
@@ -261,6 +283,10 @@ class _RecordCourseState extends State<RecordCourse> {
       DeviceOrientation.landscapeRight,
       DeviceOrientation.landscapeLeft,
     ]);
+    _mPlayer!.closePlayer();
+    _mPlayer = null;
+    _mRecorder!.closeRecorder();
+    _mRecorder = null;
     _pageController.dispose();
     _recordTimer?.cancel();
     _laserTimer?.cancel();
@@ -443,7 +469,7 @@ class _RecordCourseState extends State<RecordCourse> {
       _isBackwarding = false;
     });
 
-    log(_actionHistory.toString(), name: "action History");
+    // log(_actionHistory.toString(), name: "action History");
     // log(_timeHistory.toString(), name: "time History");
 
     bool isFirstLoop = true;
@@ -945,6 +971,42 @@ class _RecordCourseState extends State<RecordCourse> {
     }
   }
 
+  String _convertOffsetListToString(List<Offset?> offsetList) {
+    return offsetList
+        .map((offset) =>
+            '${offset?.dx.toStringAsFixed(2)}|${offset?.dy.toStringAsFixed(2)}')
+        .join(',');
+  }
+
+  String _convertActionHistoryToString(
+      List<Map<String, dynamic>> actionHistory) {
+    String actionContent = '[';
+    String colon = ',';
+    for (var i = 0; i < actionHistory.length; i++) {
+      if (i == actionHistory.length - 1) colon = '';
+      if (actionHistory[i]['action'] == 'DrawingMode.pen' ||
+          actionHistory[i]['action'] == 'DrawingMode.laser' ||
+          actionHistory[i]['action'] == 'DrawingMode.eraser') {
+        List<Offset?> offsetList = List<Offset?>.from(actionHistory[i]['data']);
+        String dataString = _convertOffsetListToString(offsetList);
+        actionContent +=
+            '{action: ${actionHistory[i]['action']}, data: $dataString}$colon';
+      } else {
+        actionContent += '${actionHistory[i]}$colon';
+      }
+    }
+    actionContent += ']';
+    return actionContent;
+  }
+
+  Future<void> writeToFile(String fileName, dynamic data) async {
+    Directory tempDir = await getTemporaryDirectory();
+    String tempPath = tempDir.path;
+    final file = File('$tempPath/$fileName');
+    final json = jsonEncode(data);
+    file.writeAsString(json);
+  }
+
   // ---------- FUNCTION: recording and playback
   Future<void> openTheRecorder() async {
     if (!kIsWeb) {
@@ -1000,14 +1062,14 @@ class _RecordCourseState extends State<RecordCourse> {
     await _mRecorder!.stopRecorder().then((value) {
       setState(() {
         //var url = value;
-        _mplaybackReady = true;
+        _mPlaybackReady = true;
       });
     });
   }
 
   void playPlayer() {
     assert(_mPlayerIsInited &&
-        _mplaybackReady &&
+        _mPlaybackReady &&
         _mRecorder!.isStopped &&
         _mPlayer!.isStopped);
     _mPlayer!
@@ -1040,7 +1102,7 @@ class _RecordCourseState extends State<RecordCourse> {
   }
 
   void getPlaybackFn() {
-    if (!_mPlayerIsInited || !_mplaybackReady || !_mRecorder!.isStopped) {
+    if (!_mPlayerIsInited || !_mPlaybackReady || !_mRecorder!.isStopped) {
       return;
     }
     if (_mPlayer!.isStopped) {
@@ -1563,6 +1625,7 @@ class _RecordCourseState extends State<RecordCourse> {
             else {
               _stopSolvePadRecord();
             }
+            getRecorderFn();
           },
           child: Container(
             margin: const EdgeInsets.symmetric(vertical: 14.0),
@@ -1604,6 +1667,7 @@ class _RecordCourseState extends State<RecordCourse> {
                 isReplaying = false;
               });
             }
+            getPlaybackFn();
           },
           child: Container(
             margin: const EdgeInsets.symmetric(vertical: 14.0),
@@ -1841,8 +1905,29 @@ class _RecordCourseState extends State<RecordCourse> {
                         borderRadius: BorderRadius.circular(8.0), // <-- Radius
                       ), // NEW
                     ),
-                    onPressed: () {
-                      log('upload');
+                    onPressed: () async {
+                      var courseController = context.read<CourseController>();
+                      String actionString =
+                          _convertActionHistoryToString(_actionHistory);
+                      var solvePadData = {
+                        'time': _timeHistory,
+                        'action': actionString
+                      };
+                      await writeToFile('solvepad.txt', solvePadData);
+                      List uploadUrl = await firebaseService.uploadMarketSolvepad(
+                          '${widget.course.id!}_${widget.lesson.lessonId.toString()}');
+                      String solvepadId = await firebaseService
+                          .writeSolvepadData(uploadUrl[0], uploadUrl[1]);
+                      widget.lesson.media = solvepadId;
+                      await Alert.showOverlay(
+                        asyncFunction: () async {
+                          await courseController
+                              .updateCourseDetails(courseController.courseData);
+                        },
+                        context: context,
+                        loadingWidget: Alert.getOverlayScreen(),
+                      );
+                      showSnackBar(context, 'อัพโหลดสำเร็จ');
                     },
                     child: Row(
                       children: [

@@ -138,26 +138,26 @@ class CourseModel {
 class Lessons {
   int? lessonId;
   String? lessonName;
-  String? videoFiles;
+  String? media;
   bool? isExpanded = false;
   Lessons({
     this.lessonId,
     this.lessonName,
-    this.videoFiles,
+    this.media,
     this.isExpanded,
   });
 
   Lessons.fromJson(Map<String, dynamic> json) {
     lessonId = json['lesson_id'] ?? '';
     lessonName = json['lesson_name'] ?? '';
-    videoFiles = json['video_files'] ?? '';
+    media = json['media'] ?? '';
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {};
     data['lesson_id'] = lessonId;
     data['lesson_name'] = lessonName;
-    data['video_files'] = videoFiles;
+    data['media'] = media;
 
     return data;
   }
