@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:solve_tutor/authentication/models/user_model.dart';
 import 'package:solve_tutor/authentication/models/wallet.model.dart';
+import 'package:solve_tutor/firebase/firestore.dart';
 
 class AuthProvider extends ChangeNotifier {
   final GoogleSignIn googleSignIn = GoogleSignIn();
@@ -50,6 +51,40 @@ class AuthProvider extends ChangeNotifier {
         notifyListeners();
       }
     });
+  }
+
+  Future<void> updateLiveDuration(
+      int duration,
+      ) async {
+    try {
+      uid = firebaseAuth.currentUser?.uid ?? "";
+      final users = FirestoreService('users');
+      Map<String, dynamic> body = {
+        "id": uid,
+        "tutor_id": uid,
+        "update_data": {"live_duration": duration}
+      };
+      await users.updateDocumentById(body['id'], body['update_data'], body['tutor_id']);
+    } catch (error) {
+      rethrow;
+    }
+  }
+
+  Future<void> updateWalletBalance(
+      int value, int duration,
+      ) async {
+    try {
+      uid = firebaseAuth.currentUser?.uid ?? "";
+      final wallet = FirestoreService('wallet');
+      Map<String, dynamic> body = {
+        "id": uid,
+        "tutor_id": uid,
+        "update_data": {"balance": value, 'live_duration': duration}
+      };
+      await wallet.updateDocumentById(body['id'], body['update_data'], body['tutor_id']);
+    } catch (error) {
+      rethrow;
+    }
   }
 
   Future<bool> userExists(User userIn) async {

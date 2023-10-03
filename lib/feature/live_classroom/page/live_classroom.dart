@@ -5,6 +5,8 @@ import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:solve_tutor/authentication/service/auth_provider.dart';
 
 import 'package:videosdk/videosdk.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -271,6 +273,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   final PageController _pageController = PageController();
   final List<TransformationController> _transformationController = [];
   var courseController = CourseLiveController();
+  late AuthProvider authProvider;
   late String courseName;
   bool isCourseLoaded = false;
 
@@ -280,6 +283,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   /// TODO: Get rid of all Mockup reference
   @override
   void initState() {
+    authProvider = Provider.of<AuthProvider>(context, listen: false);
     super.initState();
     SystemChrome.setPreferredOrientations(
         [DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
@@ -902,8 +906,37 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
 
     if (indexToUpdate != -1) {
       calendars[indexToUpdate].audioFile = recordList;
+      await courseController.updateCourseDetails(courseController.courseData);
     }
-    await courseController.updateCourseDetails(courseController.courseData);
+  }
+
+  Future<void> updateActualTime() async {
+    var now = DateTime.now();
+    int? duration;
+    var calendars = courseController.courseData?.calendars;
+    int indexToUpdate = calendars!.indexWhere((element) =>
+    element.start?.compareTo(
+        DateTime.fromMillisecondsSinceEpoch(widget.startTime)) ==
+        0);
+
+    if (indexToUpdate != -1) {
+          calendars[indexToUpdate].actualEnd = now;
+          duration = ((now.millisecondsSinceEpoch - calendars[indexToUpdate].actualStart!.millisecondsSinceEpoch) / 60000).ceil();
+          calendars[indexToUpdate].liveDuration = duration;
+          await courseController.updateCourseDetails(courseController.courseData);
+          int students = courseController.courseData!.studentIds!.length;
+          await updateBalanceAndLiveDuration(duration, students);
+    }
+  }
+
+  Future<void> updateBalanceAndLiveDuration(int duration, int student) async {
+    int cost = duration*student;
+    int value = authProvider.wallet!.balance! - cost;
+    int walletDuration = duration + (authProvider.wallet!.liveDuration ?? 0);
+    await authProvider.updateWalletBalance(value, walletDuration);
+    int userDuration = duration + (authProvider.user!.liveDuration ?? 0);
+    await authProvider.updateLiveDuration(userDuration);
+    authProvider.getSelfInfo();
   }
 
   Future<bool> _onWillPopScope() async {
@@ -1629,7 +1662,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                     if (isRecordingOn) {
                       showAlertRecordingDialog(context);
                     } else {
-                      showCloseDialog(context, () {
+                      showCloseDialog(context, () async {
                         sendMessage(
                           'EndMeeting',
                           stopwatch.elapsed.inMilliseconds,
@@ -1642,6 +1675,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                               .doc(widget.courseId)
                               .update({'currentMeetingCode': ''});
                         }
+                        await updateActualTime();
                         Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(
