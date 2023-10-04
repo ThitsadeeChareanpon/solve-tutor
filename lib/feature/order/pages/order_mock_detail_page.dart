@@ -1,13 +1,13 @@
 // import 'package:flutter/material.dart';
 // import 'package:provider/provider.dart';
-// import 'package:solve_tutor/featureauthentication/models/user_model.dart';
-// import 'package:solve_tutor/featureauthentication/service/auth_provider.dart';
-// import 'package:solve_tutor/featureconstants/color_constants.dart';
-// import 'package:solve_tutor/feature/chat2/models/chat_model.dart';
-// import 'package:solve_tutor/feature/chat2/pages/chat_room_page.dart';
-// import 'package:solve_tutor/feature/order_mock/model/order_mock_model.dart';
-// import 'package:solve_tutor/feature/order_mock/service/order_mock_provider.dart';
-// import 'package:solve_tutor/featurewidgets/sizer.dart';
+// import 'package:slove_tutor/featureauthentication/models/user_model.dart';
+// import 'package:slove_tutor/featureauthentication/service/auth_provider.dart';
+// import 'package:slove_tutor/featureconstants/color_constants.dart';
+// import 'package:slove_tutor/feature/chat2/models/chat_model.dart';
+// import 'package:slove_tutor/feature/chat2/pages/chat_room_page.dart';
+// import 'package:slove_tutor/feature/order_mock/model/order_mock_model.dart';
+// import 'package:slove_tutor/feature/order_mock/service/order_mock_provider.dart';
+// import 'package:slove_tutor/featurewidgets/sizer.dart';
 
 // class OrderMockDetailPage extends StatefulWidget {
 //   OrderMockDetailPage({

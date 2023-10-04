@@ -70,7 +70,7 @@ class _MessageCardState extends State<MessageCard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Builder(builder: (context) {
-                if (widget.message.type == Type.image) {
+                if (widget.message.type == MessageType.image) {
                   return Container(
                     constraints:
                         const BoxConstraints(maxWidth: 200, maxHeight: 200),
@@ -166,7 +166,7 @@ class _MessageCardState extends State<MessageCard> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Builder(builder: (context) {
-                if (widget.message.type == Type.image) {
+                if (widget.message.type == MessageType.image) {
                   return Container(
                     constraints:
                         const BoxConstraints(maxWidth: 200, maxHeight: 200),
@@ -266,7 +266,7 @@ class _MessageCardState extends State<MessageCard> {
               decoration: BoxDecoration(
                   color: Colors.grey, borderRadius: BorderRadius.circular(8)),
             ),
-            widget.message.type == Type.text
+            widget.message.type == MessageType.text
                 ? _OptionItem(
                     icon: const Icon(Icons.copy_all_rounded,
                         color: Colors.blue, size: 26),
@@ -306,7 +306,7 @@ class _MessageCardState extends State<MessageCard> {
                 endIndent: Sizer(context).w * .04,
                 indent: Sizer(context).w * .04,
               ),
-            if (widget.message.type == Type.text && isMe)
+            if (widget.message.type == MessageType.text && isMe)
               _OptionItem(
                   icon: const Icon(Icons.edit, color: Colors.blue, size: 26),
                   name: 'Edit Message',

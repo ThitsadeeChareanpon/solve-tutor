@@ -903,7 +903,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     if (indexToUpdate != -1) {
       calendars[indexToUpdate].audioFile = recordList;
     }
-    await courseController.updateCourseDetails(courseController.courseData);
+    await courseController.updateCourseDetails(
+        context, courseController.courseData);
   }
 
   Future<bool> _onWillPopScope() async {

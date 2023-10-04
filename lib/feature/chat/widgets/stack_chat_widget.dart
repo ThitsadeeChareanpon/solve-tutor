@@ -6,7 +6,7 @@ import 'package:solve_tutor/feature/order/model/order_class_model.dart';
 
 class StackChatWidget extends StatefulWidget {
   StackChatWidget({Key? key, required this.order}) : super(key: key);
-  final OrderClassModel order;
+  OrderClassModel order;
   @override
   State<StackChatWidget> createState() => _StackChatWidgetState();
 }
