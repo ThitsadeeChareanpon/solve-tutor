@@ -55,4 +55,5 @@ class CustomStrings {
   static const String deleteDocument = "ลบเอกสาร";
   static const String managerCourse = "จัดการคอร์สเรียน";
   static const String addStutdent = "เพิ่มนักเรียน";
+  static const String fund = "ซื้อเหรียญ";
 }

@@ -33,6 +33,7 @@ class WaitingJoinRoom extends StatefulWidget {
 class _WaitingJoinRoomState extends State<WaitingJoinRoom>
     with TickerProviderStateMixin {
   var documentController = DocumentController();
+  var courseController = CourseLiveController();
   static final _util = UtilityHelper();
   late AuthProvider authProvider;
   late AnimationController _controller;
@@ -47,14 +48,6 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
 
   @override
   void initState() {
-    // Timer(
-    //   const Duration(seconds: 3),
-    //   () {
-    //     setState(() {
-    //       isActive = true;
-    //     });
-    //   },
-    // );
     _controller = AnimationController(
       vsync: this,
       lowerBound: 0.5,
@@ -86,31 +79,63 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
   }
 
   Future<void> createAndJoinMeeting(displayName) async {
-    try {
-      var meetingID = await createMeeting(_token);
-      if (mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => TutorLiveClassroom(
-              token: _token,
-              userId: widget.course.tutorId!,
-              courseId: widget.course.courseId!,
-              startTime: widget.course.start!.millisecondsSinceEpoch,
-              meetingId: meetingID,
-              isHost: true,
-              displayName: displayName,
-              micEnabled: isMicOn,
-              camEnabled: false,
+    int totalMinuteLive = ((widget.course.end!.millisecondsSinceEpoch -
+                widget.course.start!.millisecondsSinceEpoch) /
+            60000)
+        .ceil();
+    int? students = widget.course.studentCount;
+    int? minPoint = totalMinuteLive * students!;
+    await authProvider.getWallet();
+    int? point = authProvider.wallet!.balance;
+    if (point! >= minPoint) {
+      await updateActualTime();
+      try {
+        var meetingID = await createMeeting(_token);
+        if (mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TutorLiveClassroom(
+                token: _token,
+                userId: widget.course.tutorId!,
+                courseId: widget.course.courseId!,
+                startTime: widget.course.start!.millisecondsSinceEpoch,
+                meetingId: meetingID,
+                isHost: true,
+                displayName: displayName,
+                micEnabled: isMicOn,
+                camEnabled: false,
+              ),
             ),
-          ),
-        );
+          );
+        }
+      } catch (error) {
+        showSnackBarMessage(
+            message: 'ERROR ON CREATE ROOM ${error.toString()}',
+            context: context);
       }
-    } catch (error) {
+    } else {
       showSnackBarMessage(
-          message: 'ERROR ON CREATE ROOM ${error.toString()}',
+          message:
+              'กรุณาทำการตรวจสอบ Solve Point ของท่าน!\nจำนวน Solve Point ขั้นต่ำ : $minPoint',
           context: context);
     }
+  }
+
+  Future<void> updateActualTime() async {
+    await courseController.getCourseById(widget.course.courseId!);
+    var now = DateTime.now();
+    var calendars = courseController.courseData?.calendars;
+    int indexToUpdate = calendars!.indexWhere((element) =>
+        element.start?.compareTo(DateTime.fromMillisecondsSinceEpoch(
+            widget.course.start!.millisecondsSinceEpoch)) ==
+        0);
+
+    if (indexToUpdate != -1) {
+      calendars[indexToUpdate].actualStart = now;
+    }
+    await courseController.updateCourseDetails(
+        context, courseController.courseData);
   }
 
   @override

@@ -170,6 +170,9 @@ class CalendarDate {
   String? courseId;
   String? reviewFile;
   List<dynamic>? audioFile;
+  DateTime? actualStart;
+  DateTime? actualEnd;
+  int? liveDuration;
 
   CalendarDate(
       {this.start, this.end, this.courseName, this.courseId, this.reviewFile});
@@ -186,6 +189,9 @@ class CalendarDate {
         audioFile?.add(v);
       });
     }
+    actualStart = DateTime.fromMillisecondsSinceEpoch(json['actual_start'] ?? 0);
+    actualEnd = DateTime.fromMillisecondsSinceEpoch(json['actual_end'] ?? 0);
+    liveDuration = json['live_duration'] ?? 0;
   }
 
   Map<String, dynamic> toJson() {
@@ -198,6 +204,9 @@ class CalendarDate {
     if (audioFile != null) {
       data['audio_file'] = audioFile!.map((v) => v).toList();
     }
+    data['actual_start'] = actualStart?.toUtc().millisecondsSinceEpoch;
+    data['actual_end'] = actualEnd?.toUtc().millisecondsSinceEpoch;
+    data['live_duration'] = liveDuration;
     return data;
   }
 }

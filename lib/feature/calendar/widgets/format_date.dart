@@ -36,4 +36,13 @@ class FormatDate {
       return d.toString();
     }
   }
+
+  static String dateTimeWithSecond(DateTime? dt) {
+    if (dt == null) {
+      return '';
+    } else {
+      var d = DateFormat('dd/MM/yyyy HH:mm:ss', 'th').format(dt);
+      return d.toString();
+    }
+  }
 }

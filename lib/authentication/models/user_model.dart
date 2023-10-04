@@ -12,6 +12,7 @@ class UserModel {
     this.role,
     this.classLevel,
     this.isDeleted,
+    this.liveDuration,
   });
   String? image;
   String? about;
@@ -25,6 +26,7 @@ class UserModel {
   String? role;
   String? classLevel;
   bool? isDeleted;
+  int? liveDuration;
 
   RoleType getRoleType() {
     RoleType? result = RoleType.tutor;
@@ -54,6 +56,7 @@ class UserModel {
     role = json['role'] ?? '';
     classLevel = json['class_level'] ?? '';
     isDeleted = json['is_deleted'] ?? false;
+    liveDuration = json['live_duration'] ?? 0;
   }
 
   Map<String, dynamic> toJson() {
@@ -70,6 +73,7 @@ class UserModel {
     data['role'] = role;
     data['class_level'] = classLevel;
     data['is_deleted'] = isDeleted;
+    data['live_duration'] = liveDuration;
     return data;
   }
 }
