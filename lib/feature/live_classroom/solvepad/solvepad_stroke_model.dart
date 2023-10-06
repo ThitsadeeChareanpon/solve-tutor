@@ -23,3 +23,10 @@ class SolvepadStroke {
     return 'SolvepadStroke(offset: $offset, color: $color, width: $width)';
   }
 }
+
+class StrokeStamp {
+  final Offset offset;
+  final int timestamp;
+
+  StrokeStamp(this.offset, this.timestamp);
+}

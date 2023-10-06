@@ -202,6 +202,11 @@ class _RecordCourseState extends State<RecordCourse> {
   bool _mRecorderIsInited = false;
   bool _mPlaybackReady = false;
 
+  // ---------- VARIABLE: new format
+  late Map<String, dynamic> _data;
+  late List<Map<String, dynamic>> _actions;
+  List<StrokeStamp> currentStroke = [];
+
   /// TODO: Get rid of all Mockup reference
   @override
   void initState() {
@@ -334,6 +339,11 @@ class _RecordCourseState extends State<RecordCourse> {
     if (isRecording) {
       _timeHistory.add([solveStopwatch.elapsed.inMilliseconds]);
       _actionHistory.add({'action': 'change_page', 'data': page});
+      _actions.add({
+        "time": solveStopwatch.elapsed.inMilliseconds,
+        "type": "change-page",
+        "data": {"page": page}
+      });
     }
   }
 
@@ -394,10 +404,29 @@ class _RecordCourseState extends State<RecordCourse> {
     });
   }
 
+  void initSolvepadData() {
+    _data = {
+      "version": "2.0.0",
+      "metadata": {
+        "courseId": widget.course.id,
+        "tutorId": widget.course.tutorId,
+        "duration": 0,
+      },
+      "actions": []
+    };
+    _actions = (_data['actions'] as List).cast<Map<String, dynamic>>();
+    _actions.add({
+      "time": solveStopwatch.elapsed.inMilliseconds,
+      "type": "start-recording",
+      "data": null
+    });
+  }
+
   void _initRecord() {
     solveStopwatch.reset();
     solveStopwatch.start();
     _startRecordTimer();
+    initSolvepadData();
     setState(() {
       isRecording = !isRecording;
       _timeHistory.add([solveStopwatch.elapsed.inMilliseconds]);
@@ -430,6 +459,12 @@ class _RecordCourseState extends State<RecordCourse> {
       _actionHistory
           .add({'action': 'start/stop-recording', 'data': _currentPage});
     });
+    _actions.add({
+      "time": solveStopwatch.elapsed.inMilliseconds,
+      "type": "stop-recording",
+      "data": null
+    });
+    _data['metadata']['duration'] = solveStopwatch.elapsed.inMilliseconds;
     solveStopwatch.reset();
     _stopRecordTimer();
   }
@@ -440,6 +475,25 @@ class _RecordCourseState extends State<RecordCourse> {
     _formattedElapsedTime = 'Record end';
     setState(() {
       isRecordEnd = true;
+    });
+  }
+
+  void addDrawing(List<StrokeStamp> strokeStamp) {
+    _actions.add({
+      "time": solveStopwatch.elapsed.inMilliseconds,
+      "type": "drawing",
+      "data": {
+        "tool": _mode.toString(),
+        "color": _strokeColors[_selectedIndexColors].value.toRadixString(16),
+        "strokeWidth": _strokeWidths[_selectedIndexLines],
+        "points": strokeStamp
+            .map((timedOffset) => {
+                  'x': double.parse(timedOffset.offset.dx.toStringAsFixed(2)),
+                  'y': double.parse(timedOffset.offset.dy.toStringAsFixed(2)),
+                  'time': timedOffset.timestamp,
+                })
+            .toList()
+      }
     });
   }
 
@@ -1319,6 +1373,9 @@ class _RecordCourseState extends State<RecordCourse> {
                               if (activePointerId != null) return;
                               if (!isRecording) return;
                               activePointerId = details.pointer;
+                              currentStroke.add(StrokeStamp(
+                                  details.localPosition,
+                                  solveStopwatch.elapsed.inMilliseconds));
                               switch (_mode) {
                                 case DrawingMode.pen:
                                   _penPoints[_currentPage].add(
@@ -1401,6 +1458,9 @@ class _RecordCourseState extends State<RecordCourse> {
                               if (activePointerId != details.pointer) return;
                               if (!isRecording) return;
                               activePointerId = details.pointer;
+                              currentStroke.add(StrokeStamp(
+                                  details.localPosition,
+                                  solveStopwatch.elapsed.inMilliseconds));
                               switch (_mode) {
                                 case DrawingMode.pen:
                                   setState(() {
@@ -1489,6 +1549,8 @@ class _RecordCourseState extends State<RecordCourse> {
                               if (activePointerId != details.pointer) return;
                               if (!isRecording) return;
                               activePointerId = null;
+                              addDrawing(currentStroke);
+                              currentStroke.clear();
                               switch (_mode) {
                                 case DrawingMode.pen:
                                   _penPoints[_currentPage].add(null);
@@ -1541,6 +1603,8 @@ class _RecordCourseState extends State<RecordCourse> {
                               if (activePointerId != details.pointer) return;
                               if (!isRecording) return;
                               activePointerId = null;
+                              addDrawing(currentStroke);
+                              currentStroke.clear();
                               switch (_mode) {
                                 case DrawingMode.pen:
                                   _penPoints[_currentPage].add(null);
@@ -1907,13 +1971,9 @@ class _RecordCourseState extends State<RecordCourse> {
                     ),
                     onPressed: () async {
                       var courseController = context.read<CourseController>();
-                      String actionString =
-                          _convertActionHistoryToString(_actionHistory);
-                      var solvePadData = {
-                        'time': _timeHistory,
-                        'action': actionString
-                      };
-                      await writeToFile('solvepad.txt', solvePadData);
+                      final jsonString = jsonEncode(_data);
+                      log(jsonString);
+                      await writeToFile('solvepad.txt', jsonString);
                       List uploadUrl = await firebaseService.uploadMarketSolvepad(
                           '${widget.course.id!}_${widget.lesson.lessonId.toString()}');
                       String solvepadId = await firebaseService
