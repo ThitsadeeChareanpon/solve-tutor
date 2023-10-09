@@ -1474,10 +1474,13 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                             onPointerUp: (details) {
                               if (activePointerId != details.pointer) return;
                               activePointerId = null;
-                              sendMessage(
-                                'null',
-                                stopwatch.elapsed.inMilliseconds,
-                              );
+                              int time = stopwatch.elapsed.inMilliseconds;
+                              for(int i=0;i<=2;i++) {
+                                sendMessage(
+                                  'null',
+                                  time,
+                                );
+                              }
                               switch (_mode) {
                                 case DrawingMode.pen:
                                   _penPoints[_currentPage].add(null);
@@ -1504,10 +1507,13 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                             onPointerCancel: (details) {
                               if (activePointerId != details.pointer) return;
                               activePointerId = null;
-                              sendMessage(
-                                'null',
-                                stopwatch.elapsed.inMilliseconds,
-                              );
+                              int time = stopwatch.elapsed.inMilliseconds;
+                              for(int i=0;i<=2;i++) {
+                                sendMessage(
+                                  'null',
+                                  time,
+                                );
+                              }
                               switch (_mode) {
                                 case DrawingMode.pen:
                                   _penPoints[_currentPage].add(null);
