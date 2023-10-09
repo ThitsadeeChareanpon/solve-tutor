@@ -199,8 +199,11 @@ class _RecordCourseState extends State<RecordCourse> {
   List<StrokeStamp> currentStroke = [];
   List<ScrollZoomStamp> currentScrollZoom = [];
   int currentReplayIndex = 0;
-  bool isLastActionRunning = false;
-  Timer? _replayTimer;
+  int currentReplayPointIndex = 0;
+  int currentReplayScrollIndex = 0;
+  double currentScale = 2.0;
+  double currentScrollX = 2.0;
+  double currentScrollY = 0;
 
   /// TODO: Get rid of all Mockup reference
   @override
@@ -289,7 +292,6 @@ class _RecordCourseState extends State<RecordCourse> {
     _mRecorder = null;
     _pageController.dispose();
     _recordTimer?.cancel();
-    _replayTimer?.cancel();
     _laserTimer?.cancel();
     super.dispose();
   }
@@ -415,7 +417,10 @@ class _RecordCourseState extends State<RecordCourse> {
     _actions.add({
       "time": solveStopwatch.elapsed.inMilliseconds,
       "type": "start-recording",
-      "data": _currentPage
+      "page": _currentPage,
+      "scrollX": currentScrollX,
+      "scrollY": currentScrollY,
+      "scale": currentScale,
     });
   }
 
@@ -481,10 +486,19 @@ class _RecordCourseState extends State<RecordCourse> {
   }
 
   void addScrollZoom(List<ScrollZoomStamp> scrollZoomStamp, int initTime) {
+    log('add scroll-zoom');
+    // log(scrollZoomStamp.toString());
     _actions.add({
       "time": initTime,
       "type": "scroll-zoom",
-      "data": scrollZoomStamp,
+      "data": scrollZoomStamp
+          .map((timedScroll) => {
+                'x': double.parse(timedScroll.x.toStringAsFixed(2)),
+                'y': double.parse(timedScroll.y.toStringAsFixed(2)),
+                'scale': double.parse(timedScroll.scale.toStringAsFixed(2)),
+                'time': timedScroll.timestamp,
+              })
+          .toList(),
     });
   }
 
@@ -509,45 +523,42 @@ class _RecordCourseState extends State<RecordCourse> {
     solveStopwatch.reset();
     solveStopwatch.start();
 
-    log(jsonEncode(_data));
-
-    _replayTimer = Timer.periodic(const Duration(milliseconds: 1), (timer) {
-      if (currentReplayIndex >= _data['actions'].length) {
-        isLastActionRunning = true;
-        return;
-      }
-
-      if (_data['actions'][currentReplayIndex]['time'] <=
-          solveStopwatch.elapsed.inMilliseconds) {
-        executeReplayAction(_data['actions'][currentReplayIndex]);
-        if (currentReplayIndex == _data['actions'].length - 1) {
-          isLastActionRunning = true;
+    while (currentReplayIndex < _data['actions'].length) {
+      await Future.delayed(const Duration(milliseconds: 1), () {
+        if (solveStopwatch.elapsed.inMilliseconds >=
+            _data['actions'][currentReplayIndex]['time']) {
+          executeReplayAction(_data['actions'][currentReplayIndex]);
+          currentReplayIndex++;
         }
-        currentReplayIndex++;
-      }
-    });
+      });
+    }
+
+    endReplay();
   }
 
   void endReplay() {
-    _replayTimer?.cancel();
+    setState(() {
+      isReplaying = false;
+    });
     solveStopwatch.stop();
-    isReplaying = false;
     currentReplayIndex = 0;
     log(' --------- end loop ----------');
   }
 
-  void executeReplayAction(Map<String, dynamic> action) {
+  void executeReplayAction(Map<String, dynamic> action) async {
     switch (action['type']) {
       case 'start-recording':
-        log('start-recording');
+        var page = action['page'];
         _pageController.animateToPage(
-          action['data'],
+          page,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
         );
+        _transformationController[page].value = Matrix4.identity()
+          ..translate(action['scrollX'], action['scrollY'])
+          ..scale(action['scale']);
         break;
       case 'change-page':
-        log('change-page');
         _pageController.animateToPage(
           action['data'],
           duration: const Duration(milliseconds: 300),
@@ -555,26 +566,39 @@ class _RecordCourseState extends State<RecordCourse> {
         );
         break;
       case 'stop-recording':
-        log('stop-recording');
         break;
       case 'scroll-zoom':
-        log('scroll-zoom');
-        // _transformationController[_currentPage].value = Matrix4.identity()
-        //   ..translate(scaleScrollX(scrollX), scaleScrollY(scrollY))
-        //   ..scale(zoom);
-        break;
-      case 'drawing':
-        log('drawing');
-        int lastPointTime = action['data']['points'].last['time'];
-        for (var point in action['data']['points']) {
-          Timer(Duration(milliseconds: point['time']), () {
-            drawReplayPoint(point, action['data']['tool'],
-                action['data']['color'], action['data']['strokeWidth']);
+        List<Map<String, dynamic>> scrollAction = action['data'];
+        while (currentReplayScrollIndex < scrollAction.length) {
+          await Future.delayed(const Duration(milliseconds: 1), () {
+            if (solveStopwatch.elapsed.inMilliseconds >=
+                scrollAction[currentReplayScrollIndex]['time']) {
+              _transformationController[_currentPage].value = Matrix4.identity()
+                ..translate(scrollAction[currentReplayScrollIndex]['x'],
+                    scrollAction[currentReplayScrollIndex]['y'])
+                ..scale(scrollAction[currentReplayScrollIndex]['scale']);
+              currentReplayScrollIndex++;
+            }
           });
         }
-        Timer(Duration(milliseconds: lastPointTime + 1), () {
-          drawReplayNull(action['data']['tool']);
-        });
+        break;
+      case 'drawing':
+        List<Map<String, dynamic>> points = action['data']['points'];
+        while (currentReplayPointIndex < points.length) {
+          await Future.delayed(const Duration(milliseconds: 1), () {
+            if (solveStopwatch.elapsed.inMilliseconds >=
+                points[currentReplayPointIndex]['time']) {
+              drawReplayPoint(
+                  points[currentReplayPointIndex],
+                  action['data']['tool'],
+                  action['data']['color'],
+                  action['data']['strokeWidth']);
+              currentReplayPointIndex++;
+            }
+          });
+        }
+        currentReplayPointIndex = 0;
+        drawReplayNull(action['data']['tool']);
         break;
     }
   }
@@ -599,15 +623,10 @@ class _RecordCourseState extends State<RecordCourse> {
   }
 
   void drawReplayNull(String tool) {
-    log('drawing null');
     if (tool == "DrawingMode.pen") {
       _penPoints[_currentPage].add(null);
     } else if (tool == "DrawingMode.highlighter") {
       _highlighterPoints[_currentPage].add(null);
-    }
-    if (isLastActionRunning) {
-      endReplay();
-      isLastActionRunning = false;
     }
   }
 
@@ -892,6 +911,7 @@ class _RecordCourseState extends State<RecordCourse> {
       child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
         double solvepadWidth = constraints.maxWidth;
+        currentScrollX = (-1 * solvepadWidth);
         return Stack(children: [
           PageView.builder(
             onPageChanged: _onPageViewChange,
@@ -912,21 +932,23 @@ class _RecordCourseState extends State<RecordCourse> {
                 minScale: 1.0,
                 maxScale: 4.0,
                 onInteractionUpdate: (ScaleUpdateDetails details) {
+                  var translation =
+                      _transformationController[index].value.getTranslation();
+                  double scale = _transformationController[index]
+                      .value
+                      .getMaxScaleOnAxis();
+                  double originalTranslationX = translation.x;
+                  double originalTranslationY = translation.y;
                   if (isRecording && _mode == DrawingMode.drag) {
-                    var translation =
-                        _transformationController[index].value.getTranslation();
-                    double scale = _transformationController[index]
-                        .value
-                        .getMaxScaleOnAxis();
-                    double originalTranslationX = translation.x;
-                    double originalTranslationY = translation.y;
                     currentScrollZoom.add(ScrollZoomStamp(
                         originalTranslationX,
                         originalTranslationY,
                         scale,
                         solveStopwatch.elapsed.inMilliseconds));
-                    // log('scroll-zooming');
-                    // log(currentScrollZoom.toString());
+                  } else {
+                    currentScale = scale;
+                    currentScrollX = originalTranslationX;
+                    currentScrollY = originalTranslationY;
                   }
                 },
                 child: Stack(
@@ -1448,22 +1470,25 @@ class _RecordCourseState extends State<RecordCourse> {
                       ), // NEW
                     ),
                     onPressed: () async {
-                      var courseController = context.read<CourseController>();
-                      jsonData = jsonEncode(_data);
-                      await writeToFile('solvepad.txt', jsonData);
-                      List uploadUrl = await firebaseService.uploadMarketSolvepad(
-                          '${widget.course.id!}_${widget.lesson.lessonId.toString()}');
-                      String solvepadId = await firebaseService
-                          .writeSolvepadData(uploadUrl[0], uploadUrl[1]);
-                      widget.lesson.media = solvepadId;
                       await Alert.showOverlay(
                         asyncFunction: () async {
+                          var courseController =
+                              context.read<CourseController>();
+                          jsonData = jsonEncode(_data);
+                          await writeToFile('solvepad.txt', jsonData);
+                          List uploadUrl =
+                              await firebaseService.uploadMarketSolvepad(
+                                  '${widget.course.id!}_${widget.lesson.lessonId.toString()}');
+                          String solvepadId = await firebaseService
+                              .writeSolvepadData(uploadUrl[0], uploadUrl[1]);
+                          widget.lesson.media = solvepadId;
                           await courseController
                               .updateCourseDetails(courseController.courseData);
                         },
                         context: context,
                         loadingWidget: Alert.getOverlayScreen(),
                       );
+                      if (mounted) return;
                       showSnackBar(context, 'อัพโหลดสำเร็จ');
                     },
                     child: Row(
