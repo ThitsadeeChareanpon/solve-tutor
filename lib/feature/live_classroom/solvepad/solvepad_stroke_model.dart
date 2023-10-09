@@ -30,3 +30,10 @@ class StrokeStamp {
 
   StrokeStamp(this.offset, this.timestamp);
 }
+
+class ScrollZoomStamp {
+  final double x, y, scale;
+  final int timestamp;
+
+  ScrollZoomStamp(this.x, this.y, this.scale, this.timestamp);
+}
