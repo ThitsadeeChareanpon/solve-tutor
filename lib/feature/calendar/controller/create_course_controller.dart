@@ -415,6 +415,9 @@ class CourseController extends ChangeNotifier {
       if (courseData.id?.isNotEmpty == true &&
           courseData.tutorId?.isNotEmpty == true) {
         await CourseService().updateCourseDetails(courseData);
+        if (courseData.publishing ?? false) {
+          await updateCoursePublishing(courseData, true);
+        }
       }
     } catch (error) {
       debugPrint(error.toString());
