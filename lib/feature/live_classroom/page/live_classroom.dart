@@ -1167,10 +1167,13 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                     _selectedIndexColors = index;
                                     openColors = !openColors;
                                   });
-                                  sendMessage(
-                                    'StrokeColor.$index',
-                                    stopwatch.elapsed.inMilliseconds,
-                                  );
+                                  int time = stopwatch.elapsed.inMilliseconds;
+                                  for(int i=0;i<=2;i++) {
+                                    sendMessage(
+                                      'StrokeColor.$index',
+                                      time,
+                                    );
+                                  }
                                 },
                                 child: Padding(
                                   padding: const EdgeInsets.all(3.0),
@@ -1218,10 +1221,13 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                     _selectedIndexLines = index;
                                     openLines = !openLines;
                                   });
-                                  sendMessage(
-                                    'StrokeWidth.$index',
-                                    stopwatch.elapsed.inMilliseconds,
-                                  );
+                                  int time = stopwatch.elapsed.inMilliseconds;
+                                  for(int i=0;i<=2;i++) {
+                                    sendMessage(
+                                      'StrokeWidth.$index',
+                                      time,
+                                    );
+                                  }
                                 });
                               },
                               child: Column(
@@ -1468,10 +1474,13 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                             onPointerUp: (details) {
                               if (activePointerId != details.pointer) return;
                               activePointerId = null;
-                              sendMessage(
-                                'null',
-                                stopwatch.elapsed.inMilliseconds,
-                              );
+                              int time = stopwatch.elapsed.inMilliseconds;
+                              for(int i=0;i<=2;i++) {
+                                sendMessage(
+                                  'null',
+                                  time,
+                                );
+                              }
                               switch (_mode) {
                                 case DrawingMode.pen:
                                   _penPoints[_currentPage].add(null);
@@ -1498,10 +1507,13 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                             onPointerCancel: (details) {
                               if (activePointerId != details.pointer) return;
                               activePointerId = null;
-                              sendMessage(
-                                'null',
-                                stopwatch.elapsed.inMilliseconds,
-                              );
+                              int time = stopwatch.elapsed.inMilliseconds;
+                              for(int i=0;i<=2;i++) {
+                                sendMessage(
+                                  'null',
+                                  time,
+                                );
+                              }
                               switch (_mode) {
                                 case DrawingMode.pen:
                                   _penPoints[_currentPage].add(null);
@@ -2685,39 +2697,54 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                             });
                                             if (index == 0) {
                                               _mode = DrawingMode.drag;
-                                              sendMessage(
-                                                'DrawingMode.drag',
-                                                stopwatch
-                                                    .elapsed.inMilliseconds,
-                                              );
+                                              int time = stopwatch
+                                                  .elapsed.inMilliseconds;
+                                              for(int i=0;i<=2;i++) {
+                                                sendMessage(
+                                                  'DrawingMode.drag',
+                                                  time,
+                                                );
+                                              }
                                             } else if (index == 1) {
                                               _mode = DrawingMode.pen;
-                                              sendMessage(
-                                                'DrawingMode.pen',
-                                                stopwatch
-                                                    .elapsed.inMilliseconds,
-                                              );
+                                              int time = stopwatch
+                                                  .elapsed.inMilliseconds;
+                                              for(int i=0;i<=2;i++) {
+                                                sendMessage(
+                                                  'DrawingMode.pen',
+                                                  time,
+                                                );
+                                              }
                                             } else if (index == 2) {
                                               _mode = DrawingMode.highlighter;
-                                              sendMessage(
-                                                'DrawingMode.highlighter',
-                                                stopwatch
-                                                    .elapsed.inMilliseconds,
-                                              );
+                                              int time = stopwatch
+                                                  .elapsed.inMilliseconds;
+                                              for(int i=0;i<=2;i++) {
+                                                sendMessage(
+                                                  'DrawingMode.highlighter',
+                                                  time,
+                                                );
+                                              }
                                             } else if (index == 3) {
                                               _mode = DrawingMode.eraser;
-                                              sendMessage(
-                                                'DrawingMode.eraser',
-                                                stopwatch
-                                                    .elapsed.inMilliseconds,
-                                              );
+                                              int time = stopwatch
+                                                  .elapsed.inMilliseconds;
+                                              for(int i=0;i<=2;i++) {
+                                                sendMessage(
+                                                  'DrawingMode.eraser',
+                                                  time,
+                                                );
+                                              }
                                             } else if (index == 4) {
                                               _mode = DrawingMode.laser;
-                                              sendMessage(
-                                                'DrawingMode.laser',
-                                                stopwatch
-                                                    .elapsed.inMilliseconds,
-                                              );
+                                              int time = stopwatch
+                                                  .elapsed.inMilliseconds;
+                                              for(int i=0;i<=2;i++) {
+                                                sendMessage(
+                                                  'DrawingMode.laser',
+                                                  time,
+                                                );
+                                              }
                                             }
                                           },
                                           child: Image.asset(
@@ -3030,34 +3057,54 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                         });
                                         if (index == 0) {
                                           _mode = DrawingMode.drag;
-                                          sendMessage(
-                                            'DrawingMode.drag',
-                                            stopwatch.elapsed.inMilliseconds,
-                                          );
+                                          int time = stopwatch
+                                              .elapsed.inMilliseconds;
+                                          for(int i=0;i<=2;i++) {
+                                            sendMessage(
+                                              'DrawingMode.drag',
+                                              time,
+                                            );
+                                          }
                                         } else if (index == 1) {
                                           _mode = DrawingMode.pen;
-                                          sendMessage(
-                                            'DrawingMode.pen',
-                                            stopwatch.elapsed.inMilliseconds,
-                                          );
+                                          int time = stopwatch
+                                              .elapsed.inMilliseconds;
+                                          for(int i=0;i<=2;i++) {
+                                            sendMessage(
+                                              'DrawingMode.pen',
+                                              time,
+                                            );
+                                          }
                                         } else if (index == 2) {
                                           _mode = DrawingMode.highlighter;
-                                          sendMessage(
-                                            'DrawingMode.highlighter',
-                                            stopwatch.elapsed.inMilliseconds,
-                                          );
+                                          int time = stopwatch
+                                              .elapsed.inMilliseconds;
+                                          for(int i=0;i<=2;i++) {
+                                            sendMessage(
+                                              'DrawingMode.highlighter',
+                                              time,
+                                            );
+                                          }
                                         } else if (index == 3) {
                                           _mode = DrawingMode.eraser;
-                                          sendMessage(
-                                            'DrawingMode.eraser',
-                                            stopwatch.elapsed.inMilliseconds,
-                                          );
+                                          int time = stopwatch
+                                              .elapsed.inMilliseconds;
+                                          for(int i=0;i<=2;i++) {
+                                            sendMessage(
+                                              'DrawingMode.eraser',
+                                              time,
+                                            );
+                                          }
                                         } else if (index == 4) {
                                           _mode = DrawingMode.laser;
-                                          sendMessage(
-                                            'DrawingMode.laser',
-                                            stopwatch.elapsed.inMilliseconds,
-                                          );
+                                          int time = stopwatch
+                                              .elapsed.inMilliseconds;
+                                          for(int i=0;i<=2;i++) {
+                                            sendMessage(
+                                              'DrawingMode.laser',
+                                              time,
+                                            );
+                                          }
                                         }
                                       },
                                       child: Image.asset(
