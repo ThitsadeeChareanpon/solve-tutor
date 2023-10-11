@@ -1168,7 +1168,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                     openColors = !openColors;
                                   });
                                   int time = stopwatch.elapsed.inMilliseconds;
-                                  for(int i=0;i<=2;i++) {
+                                  for (int i = 0; i <= 2; i++) {
                                     sendMessage(
                                       'StrokeColor.$index',
                                       time,
@@ -1222,7 +1222,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                     openLines = !openLines;
                                   });
                                   int time = stopwatch.elapsed.inMilliseconds;
-                                  for(int i=0;i<=2;i++) {
+                                  for (int i = 0; i <= 2; i++) {
                                     sendMessage(
                                       'StrokeWidth.$index',
                                       time,
@@ -1475,7 +1475,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                               if (activePointerId != details.pointer) return;
                               activePointerId = null;
                               int time = stopwatch.elapsed.inMilliseconds;
-                              for(int i=0;i<=2;i++) {
+                              for (int i = 0; i <= 2; i++) {
                                 sendMessage(
                                   'null',
                                   time,
@@ -1508,7 +1508,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                               if (activePointerId != details.pointer) return;
                               activePointerId = null;
                               int time = stopwatch.elapsed.inMilliseconds;
-                              for(int i=0;i<=2;i++) {
+                              for (int i = 0; i <= 2; i++) {
                                 sendMessage(
                                   'null',
                                   time,
@@ -2699,7 +2699,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                               _mode = DrawingMode.drag;
                                               int time = stopwatch
                                                   .elapsed.inMilliseconds;
-                                              for(int i=0;i<=2;i++) {
+                                              for (int i = 0; i <= 2; i++) {
                                                 sendMessage(
                                                   'DrawingMode.drag',
                                                   time,
@@ -2709,7 +2709,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                               _mode = DrawingMode.pen;
                                               int time = stopwatch
                                                   .elapsed.inMilliseconds;
-                                              for(int i=0;i<=2;i++) {
+                                              for (int i = 0; i <= 2; i++) {
                                                 sendMessage(
                                                   'DrawingMode.pen',
                                                   time,
@@ -2719,7 +2719,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                               _mode = DrawingMode.highlighter;
                                               int time = stopwatch
                                                   .elapsed.inMilliseconds;
-                                              for(int i=0;i<=2;i++) {
+                                              for (int i = 0; i <= 2; i++) {
                                                 sendMessage(
                                                   'DrawingMode.highlighter',
                                                   time,
@@ -2729,7 +2729,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                               _mode = DrawingMode.eraser;
                                               int time = stopwatch
                                                   .elapsed.inMilliseconds;
-                                              for(int i=0;i<=2;i++) {
+                                              for (int i = 0; i <= 2; i++) {
                                                 sendMessage(
                                                   'DrawingMode.eraser',
                                                   time,
@@ -2739,7 +2739,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                               _mode = DrawingMode.laser;
                                               int time = stopwatch
                                                   .elapsed.inMilliseconds;
-                                              for(int i=0;i<=2;i++) {
+                                              for (int i = 0; i <= 2; i++) {
                                                 sendMessage(
                                                   'DrawingMode.laser',
                                                   time,
@@ -2975,7 +2975,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             child: AnimatedContainer(
               duration: const Duration(seconds: 1),
               curve: Curves.fastOutSlowIn,
-              height: selectedTools ? 270 : MediaQuery.of(context).size.height,
+              height: selectedTools ? 270 : 440,
               width: 120,
               decoration: BoxDecoration(
                 border: Border.all(
@@ -3057,9 +3057,9 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                         });
                                         if (index == 0) {
                                           _mode = DrawingMode.drag;
-                                          int time = stopwatch
-                                              .elapsed.inMilliseconds;
-                                          for(int i=0;i<=2;i++) {
+                                          int time =
+                                              stopwatch.elapsed.inMilliseconds;
+                                          for (int i = 0; i <= 2; i++) {
                                             sendMessage(
                                               'DrawingMode.drag',
                                               time,
@@ -3067,9 +3067,9 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                           }
                                         } else if (index == 1) {
                                           _mode = DrawingMode.pen;
-                                          int time = stopwatch
-                                              .elapsed.inMilliseconds;
-                                          for(int i=0;i<=2;i++) {
+                                          int time =
+                                              stopwatch.elapsed.inMilliseconds;
+                                          for (int i = 0; i <= 2; i++) {
                                             sendMessage(
                                               'DrawingMode.pen',
                                               time,
@@ -3077,9 +3077,9 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                           }
                                         } else if (index == 2) {
                                           _mode = DrawingMode.highlighter;
-                                          int time = stopwatch
-                                              .elapsed.inMilliseconds;
-                                          for(int i=0;i<=2;i++) {
+                                          int time =
+                                              stopwatch.elapsed.inMilliseconds;
+                                          for (int i = 0; i <= 2; i++) {
                                             sendMessage(
                                               'DrawingMode.highlighter',
                                               time,
@@ -3087,9 +3087,9 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                           }
                                         } else if (index == 3) {
                                           _mode = DrawingMode.eraser;
-                                          int time = stopwatch
-                                              .elapsed.inMilliseconds;
-                                          for(int i=0;i<=2;i++) {
+                                          int time =
+                                              stopwatch.elapsed.inMilliseconds;
+                                          for (int i = 0; i <= 2; i++) {
                                             sendMessage(
                                               'DrawingMode.eraser',
                                               time,
@@ -3097,9 +3097,9 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                           }
                                         } else if (index == 4) {
                                           _mode = DrawingMode.laser;
-                                          int time = stopwatch
-                                              .elapsed.inMilliseconds;
-                                          for(int i=0;i<=2;i++) {
+                                          int time =
+                                              stopwatch.elapsed.inMilliseconds;
+                                          for (int i = 0; i <= 2; i++) {
                                             sendMessage(
                                               'DrawingMode.laser',
                                               time,
