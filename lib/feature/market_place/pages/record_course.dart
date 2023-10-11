@@ -520,8 +520,8 @@ class _RecordCourseState extends State<RecordCourse> {
       for (var action in eraserStroke) {
         if (action[0] is Offset) {
           moveActions.add({
-            'x': action[0].dx,
-            'y': action[0].dy,
+            'x': double.parse(action[0].dx.toStringAsFixed(2)),
+            'y': double.parse(action[0].dy.toStringAsFixed(2)),
             'time': action[1],
           });
         } else if (action[0] is DrawingMode) {
