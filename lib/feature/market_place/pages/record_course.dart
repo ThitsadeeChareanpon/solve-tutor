@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_xlider/flutter_xlider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:solve_tutor/feature/calendar/controller/create_course_controller.dart';
@@ -182,6 +183,7 @@ class _RecordCourseState extends State<RecordCourse> {
   bool isRecording = false;
   bool isRecordEnd = false;
   bool isReplaying = false;
+  bool isReplayEnd = true;
 
   // ---------- VARIABLE: recorder
   Codec _codec = Codec.aacMP4;
@@ -204,6 +206,9 @@ class _RecordCourseState extends State<RecordCourse> {
   double currentScale = 2.0;
   double currentScrollX = 2.0;
   double currentScrollY = 0;
+  Timer? _sliderTimer;
+  double replayProgress = 0;
+  int replayDuration = 100;
 
   /// TODO: Get rid of all Mockup reference
   @override
@@ -292,6 +297,7 @@ class _RecordCourseState extends State<RecordCourse> {
     _mRecorder = null;
     _pageController.dispose();
     _recordTimer?.cancel();
+    _sliderTimer?.cancel();
     _laserTimer?.cancel();
     super.dispose();
   }
@@ -341,7 +347,7 @@ class _RecordCourseState extends State<RecordCourse> {
       _actions.add({
         "time": solveStopwatch.elapsed.inMilliseconds,
         "type": "change-page",
-        "data": {"page": page}
+        "data": page,
       });
     }
   }
@@ -352,6 +358,19 @@ class _RecordCourseState extends State<RecordCourse> {
     String minutes = twoDigits(duration.inMinutes.remainder(60));
     String seconds = twoDigits(duration.inSeconds.remainder(60));
     return 'Recording $hours:$minutes:$seconds';
+  }
+
+  String _formatReplayElapsedTime(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    String hours = twoDigits(duration.inHours);
+    String minutes = twoDigits(duration.inMinutes.remainder(60));
+    String seconds = twoDigits(duration.inSeconds.remainder(60));
+
+    if (duration.inHours > 0) {
+      return '$hours:$minutes:$seconds';
+    } else {
+      return '$minutes:$seconds';
+    }
   }
 
   // ---------- FUNCTION: solve pad feature
@@ -443,6 +462,8 @@ class _RecordCourseState extends State<RecordCourse> {
   }
 
   void _stopSolvePadRecord() {
+    isRecording = false;
+    _mode = DrawingMode.drag;
     if (currentScrollZoom.isNotEmpty) {
       addScrollZoom(currentScrollZoom, currentScrollZoom[0].timestamp);
       currentScrollZoom.clear();
@@ -452,9 +473,11 @@ class _RecordCourseState extends State<RecordCourse> {
       "type": "stop-recording",
       "data": null
     });
-    _data['metadata']['duration'] = solveStopwatch.elapsed.inMilliseconds;
+    replayDuration = solveStopwatch.elapsed.inMilliseconds;
+    _data['metadata']['duration'] = replayDuration;
     solveStopwatch.reset();
     _stopRecordTimer();
+    setState(() {});
   }
 
   void _stopRecordTimer() {
@@ -467,45 +490,69 @@ class _RecordCourseState extends State<RecordCourse> {
   }
 
   void addDrawing(List<StrokeStamp> strokeStamp, int initTime) {
-    _actions.add({
-      "time": initTime,
-      "type": "drawing",
-      "data": {
-        "tool": _mode.toString(),
-        "color": _strokeColors[_selectedIndexColors].value.toRadixString(16),
-        "strokeWidth": _strokeWidths[_selectedIndexLines],
-        "points": strokeStamp
-            .map((timedOffset) => {
-                  'x': double.parse(timedOffset.offset.dx.toStringAsFixed(2)),
-                  'y': double.parse(timedOffset.offset.dy.toStringAsFixed(2)),
-                  'time': timedOffset.timestamp,
-                })
-            .toList()
-      }
-    });
+    if (isRecording) {
+      _actions.add({
+        "time": initTime,
+        "type": "drawing",
+        "data": {
+          "tool": _mode.toString(),
+          "color": _strokeColors[_selectedIndexColors].value.toRadixString(16),
+          "strokeWidth": _strokeWidths[_selectedIndexLines],
+          "points": strokeStamp
+              .map((timedOffset) => {
+                    'x': double.parse(timedOffset.offset.dx.toStringAsFixed(2)),
+                    'y': double.parse(timedOffset.offset.dy.toStringAsFixed(2)),
+                    'time': timedOffset.timestamp,
+                  })
+              .toList()
+        }
+      });
+    }
   }
 
   void addScrollZoom(List<ScrollZoomStamp> scrollZoomStamp, int initTime) {
     log('add scroll-zoom');
     // log(scrollZoomStamp.toString());
-    _actions.add({
-      "time": initTime,
-      "type": "scroll-zoom",
-      "data": scrollZoomStamp
-          .map((timedScroll) => {
-                'x': double.parse(timedScroll.x.toStringAsFixed(2)),
-                'y': double.parse(timedScroll.y.toStringAsFixed(2)),
-                'scale': double.parse(timedScroll.scale.toStringAsFixed(2)),
-                'time': timedScroll.timestamp,
-              })
-          .toList(),
-    });
+    if (isRecording) {
+      _actions.add({
+        "time": initTime,
+        "type": "scroll-zoom",
+        "data": scrollZoomStamp
+            .map((timedScroll) => {
+                  'x': double.parse(timedScroll.x.toStringAsFixed(2)),
+                  'y': double.parse(timedScroll.y.toStringAsFixed(2)),
+                  'scale': double.parse(timedScroll.scale.toStringAsFixed(2)),
+                  'time': timedScroll.timestamp,
+                })
+            .toList(),
+      });
+    }
   }
 
   // ---------- FUNCTION: solve pad core
-  void _initReplay() {
+  void pauseReplay() {
+    log('pause replay');
+    setState(() {
+      isReplaying = false;
+    });
+    pauseAudioPlayer();
+    solveStopwatch.stop();
+  }
+
+  void resumeReplay() {
+    log('resume replay');
     setState(() {
       isReplaying = true;
+    });
+    resumeAudioPlayer();
+    solveStopwatch.start();
+  }
+
+  void _initReplay() {
+    log('init replay');
+    setState(() {
+      isReplaying = true;
+      isReplayEnd = false;
       for (var point in _penPoints) {
         point.clear();
       }
@@ -516,18 +563,28 @@ class _RecordCourseState extends State<RecordCourse> {
         point.clear();
       }
       _replay();
+      playAudioPlayer();
     });
   }
 
   Future<void> _replay() async {
-    solveStopwatch.reset();
+    log('_replay()');
     solveStopwatch.start();
+    _sliderTimer = Timer.periodic(const Duration(milliseconds: 10), (timer) {
+      setState(() {
+        replayProgress = solveStopwatch.elapsed.inMilliseconds.toDouble();
+        if (replayProgress >= replayDuration.toDouble()) {
+          replayProgress = replayDuration.toDouble();
+          timer.cancel();
+        }
+      });
+    });
 
     while (currentReplayIndex < _data['actions'].length) {
-      await Future.delayed(const Duration(milliseconds: 1), () {
+      await Future.delayed(const Duration(milliseconds: 0), () async {
         if (solveStopwatch.elapsed.inMilliseconds >=
             _data['actions'][currentReplayIndex]['time']) {
-          executeReplayAction(_data['actions'][currentReplayIndex]);
+          await executeReplayAction(_data['actions'][currentReplayIndex]);
           currentReplayIndex++;
         }
       });
@@ -539,13 +596,16 @@ class _RecordCourseState extends State<RecordCourse> {
   void endReplay() {
     setState(() {
       isReplaying = false;
+      isReplayEnd = true;
     });
-    solveStopwatch.stop();
+    stopAudioPlayer();
+    _sliderTimer?.cancel();
+    solveStopwatch.reset();
     currentReplayIndex = 0;
     log(' --------- end loop ----------');
   }
 
-  void executeReplayAction(Map<String, dynamic> action) async {
+  Future<void> executeReplayAction(Map<String, dynamic> action) async {
     switch (action['type']) {
       case 'start-recording':
         var page = action['page'];
@@ -555,7 +615,7 @@ class _RecordCourseState extends State<RecordCourse> {
           curve: Curves.easeInOut,
         );
         _transformationController[page].value = Matrix4.identity()
-          ..translate(action['scrollX'], action['scrollY'])
+          ..translate(action['scrollX'] / 2, action['scrollY'])
           ..scale(action['scale']);
         break;
       case 'change-page':
@@ -570,7 +630,7 @@ class _RecordCourseState extends State<RecordCourse> {
       case 'scroll-zoom':
         List<Map<String, dynamic>> scrollAction = action['data'];
         while (currentReplayScrollIndex < scrollAction.length) {
-          await Future.delayed(const Duration(milliseconds: 1), () {
+          await Future.delayed(const Duration(milliseconds: 0), () {
             if (solveStopwatch.elapsed.inMilliseconds >=
                 scrollAction[currentReplayScrollIndex]['time']) {
               _transformationController[_currentPage].value = Matrix4.identity()
@@ -581,11 +641,12 @@ class _RecordCourseState extends State<RecordCourse> {
             }
           });
         }
+        currentReplayScrollIndex = 0;
         break;
       case 'drawing':
         List<Map<String, dynamic>> points = action['data']['points'];
         while (currentReplayPointIndex < points.length) {
-          await Future.delayed(const Duration(milliseconds: 1), () {
+          await Future.delayed(const Duration(milliseconds: 0), () {
             if (solveStopwatch.elapsed.inMilliseconds >=
                 points[currentReplayPointIndex]['time']) {
               drawReplayPoint(
@@ -627,6 +688,81 @@ class _RecordCourseState extends State<RecordCourse> {
       _penPoints[_currentPage].add(null);
     } else if (tool == "DrawingMode.highlighter") {
       _highlighterPoints[_currentPage].add(null);
+    }
+  }
+
+  Future<void> backwardInstantReplay(Duration seekPosition) async {
+    pauseReplay();
+    log('backward is called');
+    for (var point in _penPoints) {
+      point.clear();
+    }
+    for (var point in _replayPoints) {
+      point.clear();
+    }
+    for (var point in _highlighterPoints) {
+      point.clear();
+    }
+    for (int i = 0; i < _data['actions'].length; i++) {
+      if (_data['actions'][i]['time'] <= seekPosition.inMilliseconds) {
+        await executeBackwardInstantAction(_data['actions'][i]);
+      } else {
+        currentReplayIndex = i;
+        break;
+      }
+    }
+    solveStopwatch.jumpTo(seekPosition);
+    _mPlayer!.seekToPlayer(seekPosition);
+    resumeReplay();
+    _replay();
+  }
+
+  Future<void> executeBackwardInstantAction(Map<String, dynamic> action) async {
+    switch (action['type']) {
+      case 'start-recording':
+        var page = action['page'];
+        _pageController.animateToPage(
+          page,
+          duration: const Duration(milliseconds: 0),
+          curve: Curves.easeInOut,
+        );
+        _transformationController[page].value = Matrix4.identity()
+          ..translate(action['scrollX'] / 2, action['scrollY'])
+          ..scale(action['scale']);
+        break;
+      case 'change-page':
+        _pageController.animateToPage(
+          action['data'],
+          duration: const Duration(milliseconds: 0),
+          curve: Curves.easeInOut,
+        );
+        break;
+      case 'stop-recording':
+        break;
+      case 'scroll-zoom':
+        List<Map<String, dynamic>> scrollAction = action['data'];
+        for (var drag in scrollAction) {
+          _transformationController[_currentPage].value = Matrix4.identity()
+            ..translate(drag['x'], drag['y'])
+            ..scale(drag['scale']);
+        }
+        break;
+      case 'drawing':
+        List<Map<String, dynamic>> points = action['data']['points'];
+        for (var point in points) {
+          if (point['time'] <= action['time']) {
+            drawReplayPoint(
+              point,
+              action['data']['tool'],
+              action['data']['color'],
+              action['data']['strokeWidth'],
+            );
+          } else {
+            break;
+          }
+        }
+        drawReplayNull(action['data']['tool']);
+        break;
     }
   }
 
@@ -698,26 +834,24 @@ class _RecordCourseState extends State<RecordCourse> {
     });
   }
 
-  void playPlayer() {
+  void playAudioPlayer() {
     assert(_mPlayerIsInited &&
         _mPlaybackReady &&
         _mRecorder!.isStopped &&
         _mPlayer!.isStopped);
-    _mPlayer!
-        .startPlayer(
-            fromURI: _mPath,
-            whenFinished: () {
-              setState(() {});
-            })
-        .then((value) {
-      setState(() {});
-    });
+    _mPlayer!.startPlayer(fromURI: _mPath);
   }
 
-  void stopPlayer() {
-    _mPlayer!.stopPlayer().then((value) {
-      setState(() {});
-    });
+  void stopAudioPlayer() {
+    _mPlayer!.stopPlayer();
+  }
+
+  void pauseAudioPlayer() {
+    _mPlayer!.pausePlayer();
+  }
+
+  void resumeAudioPlayer() {
+    _mPlayer!.resumePlayer();
   }
 
   void getRecorderFn() {
@@ -729,17 +863,6 @@ class _RecordCourseState extends State<RecordCourse> {
       record();
     } else {
       stopRecorder();
-    }
-  }
-
-  void getPlaybackFn() {
-    if (!_mPlayerIsInited || !_mPlaybackReady || !_mRecorder!.isStopped) {
-      return;
-    }
-    if (_mPlayer!.isStopped) {
-      playPlayer();
-    } else {
-      stopPlayer();
     }
   }
 
@@ -781,6 +904,7 @@ class _RecordCourseState extends State<RecordCourse> {
               ),
             ],
           ),
+          slider(),
           if (openColors)
             Positioned(
               left: 150,
@@ -902,6 +1026,80 @@ class _RecordCourseState extends State<RecordCourse> {
           if (!selectedTools) toolsMobile(),
           if (selectedTools) toolsActiveMobile(),
         ],
+      ),
+    );
+  }
+
+  Widget slider() {
+    return Positioned(
+      left: 170,
+      top: 180,
+      child: SizedBox(
+        width: 60,
+        height: 480,
+        child: Stack(children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: FlutterSlider(
+              axis: Axis.vertical,
+              values: [replayProgress],
+              max: replayDuration.toDouble(),
+              min: 0,
+              handlerAnimation: const FlutterSliderHandlerAnimation(scale: 1.2),
+              tooltip: FlutterSliderTooltip(
+                alwaysShowTooltip: true,
+                direction: FlutterSliderTooltipDirection.left,
+                positionOffset: FlutterSliderTooltipPositionOffset(left: -30),
+                boxStyle: FlutterSliderTooltipBox(
+                    decoration:
+                        BoxDecoration(color: Colors.white.withOpacity(0))),
+                format: (value) {
+                  return _formatReplayElapsedTime(
+                      Duration(milliseconds: double.parse(value).round()));
+                },
+              ),
+              trackBar: FlutterSliderTrackBar(
+                activeTrackBarHeight: 5,
+                inactiveTrackBar: BoxDecoration(
+                  color: const Color(0xff20B153).withOpacity(0.3),
+                ),
+                activeTrackBar: const BoxDecoration(
+                  color: Color(0xff20B153),
+                ),
+              ),
+              onDragging: (handlerIndex, lowerValue, upperValue) {
+                var seekPosition = Duration(milliseconds: lowerValue.round());
+                if (lowerValue > replayProgress) {
+                  solveStopwatch.jumpTo(seekPosition);
+                  _mPlayer!.seekToPlayer(seekPosition);
+                  setState(() {});
+                }
+              },
+              onDragCompleted: (handlerIndex, lowerValue, upperValue) {
+                // var seekPosition = Duration(milliseconds: lowerValue.round());
+                // if (lowerValue < replayProgress) {
+                //   backwardInstantReplay(seekPosition);
+                //   solveStopwatch.jumpTo(seekPosition);
+                //   // _mPlayer!.seekToPlayer(seekPosition);
+                //   setState(() {});
+                // }
+              },
+            ),
+          ),
+          Positioned(
+            top: 0,
+            left: 12,
+            child: Text('00:00', style: CustomStyles.med12GreenPrimary),
+          ),
+          Positioned(
+            bottom: 0,
+            left: 12,
+            child: Text(
+                _formatReplayElapsedTime(
+                    Duration(milliseconds: replayDuration)),
+                style: CustomStyles.med12GreenPrimary),
+          ),
+        ]),
       ),
     );
   }
@@ -1223,15 +1421,15 @@ class _RecordCourseState extends State<RecordCourse> {
         child: GestureDetector(
           onTap: () {
             if (!isReplaying) {
-              _initReplay();
+              if (isReplayEnd) {
+                _initReplay();
+              } else {
+                resumeReplay();
+              }
             } // before replay
             else {
-              log('pause replay');
-              setState(() {
-                isReplaying = false;
-              });
+              pauseReplay();
             }
-            getPlaybackFn();
           },
           child: Container(
             margin: const EdgeInsets.symmetric(vertical: 14.0),
