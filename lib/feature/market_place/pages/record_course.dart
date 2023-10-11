@@ -530,6 +530,18 @@ class _RecordCourseState extends State<RecordCourse> {
   }
 
   // ---------- FUNCTION: solve pad core
+  void clearReplayPoint() {
+    for (var point in _penPoints) {
+      point.clear();
+    }
+    for (var point in _replayPoints) {
+      point.clear();
+    }
+    for (var point in _highlighterPoints) {
+      point.clear();
+    }
+  }
+
   void pauseReplay() {
     log('pause replay');
     setState(() {
@@ -553,18 +565,10 @@ class _RecordCourseState extends State<RecordCourse> {
     setState(() {
       isReplaying = true;
       isReplayEnd = false;
-      for (var point in _penPoints) {
-        point.clear();
-      }
-      for (var point in _replayPoints) {
-        point.clear();
-      }
-      for (var point in _highlighterPoints) {
-        point.clear();
-      }
-      _replay();
-      playAudioPlayer();
+      clearReplayPoint();
     });
+    _replay();
+    playAudioPlayer();
   }
 
   Future<void> _replay() async {
@@ -691,81 +695,6 @@ class _RecordCourseState extends State<RecordCourse> {
     }
   }
 
-  Future<void> backwardInstantReplay(Duration seekPosition) async {
-    pauseReplay();
-    log('backward is called');
-    for (var point in _penPoints) {
-      point.clear();
-    }
-    for (var point in _replayPoints) {
-      point.clear();
-    }
-    for (var point in _highlighterPoints) {
-      point.clear();
-    }
-    for (int i = 0; i < _data['actions'].length; i++) {
-      if (_data['actions'][i]['time'] <= seekPosition.inMilliseconds) {
-        await executeBackwardInstantAction(_data['actions'][i]);
-      } else {
-        currentReplayIndex = i;
-        break;
-      }
-    }
-    solveStopwatch.jumpTo(seekPosition);
-    _mPlayer!.seekToPlayer(seekPosition);
-    resumeReplay();
-    _replay();
-  }
-
-  Future<void> executeBackwardInstantAction(Map<String, dynamic> action) async {
-    switch (action['type']) {
-      case 'start-recording':
-        var page = action['page'];
-        _pageController.animateToPage(
-          page,
-          duration: const Duration(milliseconds: 0),
-          curve: Curves.easeInOut,
-        );
-        _transformationController[page].value = Matrix4.identity()
-          ..translate(action['scrollX'] / 2, action['scrollY'])
-          ..scale(action['scale']);
-        break;
-      case 'change-page':
-        _pageController.animateToPage(
-          action['data'],
-          duration: const Duration(milliseconds: 0),
-          curve: Curves.easeInOut,
-        );
-        break;
-      case 'stop-recording':
-        break;
-      case 'scroll-zoom':
-        List<Map<String, dynamic>> scrollAction = action['data'];
-        for (var drag in scrollAction) {
-          _transformationController[_currentPage].value = Matrix4.identity()
-            ..translate(drag['x'], drag['y'])
-            ..scale(drag['scale']);
-        }
-        break;
-      case 'drawing':
-        List<Map<String, dynamic>> points = action['data']['points'];
-        for (var point in points) {
-          if (point['time'] <= action['time']) {
-            drawReplayPoint(
-              point,
-              action['data']['tool'],
-              action['data']['color'],
-              action['data']['strokeWidth'],
-            );
-          } else {
-            break;
-          }
-        }
-        drawReplayNull(action['data']['tool']);
-        break;
-    }
-  }
-
   Future<void> writeToFile(String fileName, dynamic data) async {
     Directory tempDir = await getTemporaryDirectory();
     String tempPath = tempDir.path;
@@ -887,8 +816,6 @@ class _RecordCourseState extends State<RecordCourse> {
         children: [
           Column(
             children: [
-              headerLayer1(),
-              const DividerLine(),
               headerLayer2(),
               const DividerLine(),
 
@@ -1032,14 +959,14 @@ class _RecordCourseState extends State<RecordCourse> {
 
   Widget slider() {
     return Positioned(
-      left: 170,
-      top: 180,
+      left: 140,
+      top: 160,
       child: SizedBox(
         width: 60,
-        height: 480,
+        height: 490,
         child: Stack(children: [
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20),
+            padding: const EdgeInsets.symmetric(vertical: 25),
             child: FlutterSlider(
               axis: Axis.vertical,
               values: [replayProgress],
@@ -1048,8 +975,9 @@ class _RecordCourseState extends State<RecordCourse> {
               handlerAnimation: const FlutterSliderHandlerAnimation(scale: 1.2),
               tooltip: FlutterSliderTooltip(
                 alwaysShowTooltip: true,
-                direction: FlutterSliderTooltipDirection.left,
-                positionOffset: FlutterSliderTooltipPositionOffset(left: -30),
+                direction: FlutterSliderTooltipDirection.top,
+                positionOffset:
+                    FlutterSliderTooltipPositionOffset(top: -5, left: -40),
                 boxStyle: FlutterSliderTooltipBox(
                     decoration:
                         BoxDecoration(color: Colors.white.withOpacity(0))),
@@ -1075,15 +1003,7 @@ class _RecordCourseState extends State<RecordCourse> {
                   setState(() {});
                 }
               },
-              onDragCompleted: (handlerIndex, lowerValue, upperValue) {
-                // var seekPosition = Duration(milliseconds: lowerValue.round());
-                // if (lowerValue < replayProgress) {
-                //   backwardInstantReplay(seekPosition);
-                //   solveStopwatch.jumpTo(seekPosition);
-                //   // _mPlayer!.seekToPlayer(seekPosition);
-                //   setState(() {});
-                // }
-              },
+              // onDragCompleted: (handlerIndex, lowerValue, upperValue) {},
             ),
           ),
           Positioned(
@@ -1526,18 +1446,22 @@ class _RecordCourseState extends State<RecordCourse> {
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Image.asset(
-                      ImageAssets.allPages,
-                      height: 30,
-                      width: 32,
+                    S.w(8),
+                    InkWell(
+                      onTap: () => headerLayer1Mobile(),
+                      child: Image.asset(
+                        ImageAssets.iconInfoPage,
+                        height: 24,
+                        width: 24,
+                      ),
                     ),
-                    S.w(defaultPadding),
+                    S.w(8),
                     Container(
                       width: 1,
                       height: 24,
                       color: CustomColors.grayCFCFCF,
                     ),
-                    S.w(defaultPadding),
+                    S.w(6),
                     Material(
                       child: InkWell(
                         onTap: () {
@@ -1563,7 +1487,7 @@ class _RecordCourseState extends State<RecordCourse> {
                         ),
                       ),
                     ),
-                    S.w(defaultPadding),
+                    S.w(6),
                     Container(
                       decoration: BoxDecoration(
                         border: Border.all(
@@ -1587,7 +1511,7 @@ class _RecordCourseState extends State<RecordCourse> {
                     S.w(8.0),
                     Text("/ ${_pages.length}",
                         style: CustomStyles.med14Gray878787),
-                    S.w(8),
+                    S.w(6),
                     Material(
                       child: InkWell(
                         // splashColor: Colors.lightGreen,
@@ -1617,7 +1541,7 @@ class _RecordCourseState extends State<RecordCourse> {
                         ),
                       ),
                     ),
-                    S.w(6.0),
+                    S.w(6),
                   ],
                 ),
               ),
@@ -1662,32 +1586,35 @@ class _RecordCourseState extends State<RecordCourse> {
                   height: 40,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: CustomColors.greenPrimary,
+                      backgroundColor: isRecordEnd
+                          ? CustomColors.greenPrimary
+                          : CustomColors.inactivePagingBtn,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8.0), // <-- Radius
                       ), // NEW
                     ),
                     onPressed: () async {
-                      await Alert.showOverlay(
-                        asyncFunction: () async {
-                          var courseController =
-                              context.read<CourseController>();
-                          jsonData = jsonEncode(_data);
-                          await writeToFile('solvepad.txt', jsonData);
-                          List uploadUrl =
-                              await firebaseService.uploadMarketSolvepad(
-                                  '${widget.course.id!}_${widget.lesson.lessonId.toString()}');
-                          String solvepadId = await firebaseService
-                              .writeSolvepadData(uploadUrl[0], uploadUrl[1]);
-                          widget.lesson.media = solvepadId;
-                          await courseController
-                              .updateCourseDetails(courseController.courseData);
-                        },
-                        context: context,
-                        loadingWidget: Alert.getOverlayScreen(),
-                      );
-                      if (mounted) return;
-                      showSnackBar(context, 'อัพโหลดสำเร็จ');
+                      if (isRecordEnd) {
+                        await Alert.showOverlay(
+                          asyncFunction: () async {
+                            var courseController =
+                                context.read<CourseController>();
+                            await writeToFile('solvepad.txt', _data);
+                            List uploadUrl =
+                                await firebaseService.uploadMarketSolvepad(
+                                    '${widget.course.id!}_${widget.lesson.lessonId.toString()}');
+                            String solvepadId = await firebaseService
+                                .writeSolvepadData(uploadUrl[0], uploadUrl[1]);
+                            widget.lesson.media = solvepadId;
+                            await courseController.updateCourseDetails(
+                                courseController.courseData);
+                          },
+                          context: context,
+                          loadingWidget: Alert.getOverlayScreen(),
+                        );
+                        if (!mounted) return;
+                        showSnackBar(context, 'อัพโหลดสำเร็จ');
+                      }
                     },
                     child: Row(
                       children: [
@@ -1738,30 +1665,30 @@ class _RecordCourseState extends State<RecordCourse> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           S.w(defaultPadding),
-                          if (Responsive.isMobile(context))
-                            Expanded(
-                                flex: 4,
-                                child: Row(
-                                  children: [
-                                    GestureDetector(
-                                      onTap: () => Navigator.of(context).pop(),
-                                      child: const Icon(
-                                        Icons.close,
-                                        color: CustomColors.gray878787,
-                                        size: 18,
-                                      ),
-                                    ),
-                                    S.w(8),
-                                    Flexible(
-                                      child: Text(
-                                        courseName,
-                                        style: CustomStyles
-                                            .bold16Black363636Overflow,
-                                        maxLines: 1,
-                                      ),
-                                    ),
-                                  ],
-                                )),
+                          Expanded(
+                            flex: 4,
+                            child: Row(
+                              children: [
+                                GestureDetector(
+                                  onTap: () => Navigator.of(context).pop(),
+                                  child: const Icon(
+                                    Icons.close,
+                                    color: CustomColors.gray878787,
+                                    size: 18,
+                                  ),
+                                ),
+                                S.w(8),
+                                Flexible(
+                                  child: Text(
+                                    courseName,
+                                    style:
+                                        CustomStyles.bold16Black363636Overflow,
+                                    maxLines: 1,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                           Expanded(
                             flex: 2,
                             child: Row(
@@ -1773,9 +1700,7 @@ class _RecordCourseState extends State<RecordCourse> {
                                   width: 11,
                                   decoration: BoxDecoration(
                                       color: CustomColors.redF44336,
-                                      borderRadius: BorderRadius.circular(100)
-                                      //more than 50% of width makes circle
-                                      ),
+                                      borderRadius: BorderRadius.circular(100)),
                                 ),
                                 S.w(defaultPadding),
                               ],
