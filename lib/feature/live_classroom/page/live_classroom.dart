@@ -587,11 +587,13 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   void handleMessageChangePage(String data) {
     var parts = data.split(':');
     var pageNumber = int.parse(parts.last);
-    _pageController.animateToPage(
-      pageNumber,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
+    if(_currentPage != pageNumber) {
+      _pageController.animateToPage(
+        pageNumber,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   void handleMessageInstantArt(String data) {
@@ -1784,10 +1786,14 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                         onTap: () {
                           if (_pageController.hasClients &&
                               _pageController.page!.toInt() != 0) {
-                            sendMessage(
-                              'ChangePage:${_currentPage - 1}',
-                              stopwatch.elapsed.inMilliseconds,
-                            );
+                            int page = _currentPage - 1;
+                            int time = stopwatch.elapsed.inMilliseconds;
+                            for(int i=0;i<=2;i++) {
+                              sendMessage(
+                                'ChangePage:$page',
+                                time,
+                              );
+                            }
                             _pageController.animateToPage(
                               _pageController.page!.toInt() - 1,
                               duration: const Duration(milliseconds: 300),
@@ -1841,10 +1847,14 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                             if (_pageController.hasClients &&
                                 _pageController.page!.toInt() !=
                                     _pages.length - 1) {
-                              sendMessage(
-                                'ChangePage:${_currentPage + 1}',
-                                stopwatch.elapsed.inMilliseconds,
-                              );
+                              int page = _currentPage + 1;
+                              int time = stopwatch.elapsed.inMilliseconds;
+                              for(int i=0;i<=2;i++) {
+                                sendMessage(
+                                  'ChangePage:$page',
+                                  time,
+                                );
+                              }
                               _pageController.animateToPage(
                                 _pageController.page!.toInt() + 1,
                                 duration: const Duration(milliseconds: 300),
@@ -2261,10 +2271,14 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                     onTap: () {
                       if (_pageController.hasClients &&
                           _pageController.page!.toInt() != 0) {
-                        sendMessage(
-                          'ChangePage:${_currentPage - 1}',
-                          stopwatch.elapsed.inMilliseconds,
-                        );
+                        int page = _currentPage - 1;
+                        int time = stopwatch.elapsed.inMilliseconds;
+                        for(int i=0;i<=2;i++) {
+                          sendMessage(
+                            'ChangePage:$page',
+                            time,
+                          );
+                        }
                         _pageController.animateToPage(
                           _pageController.page!.toInt() - 1,
                           duration: const Duration(milliseconds: 300),
@@ -2315,10 +2329,14 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                         if (_pageController.hasClients &&
                             _pageController.page!.toInt() !=
                                 _pages.length - 1) {
-                          sendMessage(
-                            'ChangePage:${_currentPage + 1}',
-                            stopwatch.elapsed.inMilliseconds,
-                          );
+                          int page = _currentPage + 1;
+                          int time = stopwatch.elapsed.inMilliseconds;
+                          for(int i=0;i<=2;i++) {
+                            sendMessage(
+                              'ChangePage:$page',
+                              time,
+                            );
+                          }
                           _pageController.animateToPage(
                             _pageController.page!.toInt() + 1,
                             duration: const Duration(milliseconds: 300),
