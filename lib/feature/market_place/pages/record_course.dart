@@ -199,6 +199,7 @@ class _RecordCourseState extends State<RecordCourse> {
   String jsonData = '';
   late List<Map<String, dynamic>> _actions;
   List<StrokeStamp> currentStroke = [];
+  List<dynamic> currentEraserStroke = [];
   List<ScrollZoomStamp> currentScrollZoom = [];
   int currentReplayIndex = 0;
   int currentReplayPointIndex = 0;
@@ -379,19 +380,14 @@ class _RecordCourseState extends State<RecordCourse> {
       square(p1.dx - p2.dx) + square(p1.dy - p2.dy);
 
   void doErase(int index, DrawingMode mode) {
-    List<SolvepadStroke?> pointStack;
-    if (mode == DrawingMode.pen) {
-      pointStack = _penPoints[_currentPage];
-      removePointStack(pointStack, index);
-    } else if (mode == DrawingMode.highlighter) {
-      pointStack = _highlighterPoints[_currentPage];
-      removePointStack(pointStack, index);
-    }
-  }
-
-  void removePointStack(List<SolvepadStroke?> pointStack, int index) {
     int prevNullIndex = -1;
     int nextNullIndex = -1;
+    List<SolvepadStroke?> pointStack;
+    if (mode == DrawingMode.highlighter) {
+      pointStack = _highlighterPoints[_currentPage];
+    } else {
+      pointStack = _penPoints[_currentPage];
+    }
     for (int i = index; i >= 0; i--) {
       if (pointStack[i]?.offset == null) {
         prevNullIndex = i;
@@ -409,6 +405,12 @@ class _RecordCourseState extends State<RecordCourse> {
       setState(() {
         pointStack.removeRange(prevNullIndex, nextNullIndex);
       });
+      currentEraserStroke.add([
+        mode,
+        prevNullIndex,
+        nextNullIndex,
+        solveStopwatch.elapsed.inMilliseconds
+      ]);
     }
   }
 
@@ -506,6 +508,52 @@ class _RecordCourseState extends State<RecordCourse> {
                   })
               .toList()
         }
+      });
+    }
+  }
+
+  void addErasing(List<dynamic> eraserStroke) {
+    if (isRecording && eraserStroke.isNotEmpty) {
+      List<Map<String, dynamic>> formattedActions = [];
+      List<Map<String, dynamic>> moveActions = [];
+
+      for (var action in eraserStroke) {
+        if (action[0] is Offset) {
+          moveActions.add({
+            'x': action[0].dx,
+            'y': action[0].dy,
+            'time': action[1],
+          });
+        } else if (action[0] is DrawingMode) {
+          if (moveActions.isNotEmpty) {
+            formattedActions.add({
+              'action': 'moves',
+              'points': moveActions,
+            });
+            moveActions = [];
+          }
+
+          formattedActions.add({
+            'action': 'erase',
+            'mode': action[0].toString(),
+            'prev': action[1],
+            'next': action[2],
+            'time': action[3],
+          });
+        }
+      }
+
+      if (moveActions.isNotEmpty) {
+        formattedActions.add({
+          'action': 'moves',
+          'points': moveActions,
+        });
+      }
+
+      _actions.add({
+        "time": eraserStroke[0][1],
+        "type": "erasing",
+        "data": formattedActions,
       });
     }
   }
@@ -664,6 +712,44 @@ class _RecordCourseState extends State<RecordCourse> {
         }
         currentReplayPointIndex = 0;
         drawReplayNull(action['data']['tool']);
+        break;
+      case 'erasing':
+        for (var eraseAction in action['data']) {
+          if (eraseAction['action'] == 'moves') {
+            int movingIndex = 0;
+            while (movingIndex < eraseAction['points'].length) {
+              await Future.delayed(const Duration(milliseconds: 0), () {
+                if (solveStopwatch.elapsed.inMilliseconds >=
+                    eraseAction['points'][movingIndex]['time']) {
+                  setState(() {
+                    _eraserPoints[_currentPage] = Offset(
+                        eraseAction['points'][movingIndex]['x'],
+                        eraseAction['points'][movingIndex]['y']);
+                  });
+                  movingIndex++;
+                }
+              });
+            }
+          } // move
+          else if (eraseAction['action'] == 'erase') {
+            while (
+                solveStopwatch.elapsed.inMilliseconds < eraseAction['time']) {
+              await Future.delayed(const Duration(milliseconds: 0), () {});
+            }
+            List<SolvepadStroke?> pointStack = _penPoints[_currentPage];
+            if (eraseAction['mode'] == "DrawingMode.pen") {
+              pointStack = _penPoints[_currentPage];
+            } else if (eraseAction['mode'] == "DrawingMode.highlighter") {
+              pointStack = _highlighterPoints[_currentPage];
+            }
+            setState(() {
+              pointStack.removeRange(eraseAction['prev'], eraseAction['next']);
+            });
+          } // erase
+        }
+        setState(() {
+          _eraserPoints[_currentPage] = const Offset(-100, -100);
+        });
         break;
     }
   }
@@ -1087,11 +1173,11 @@ class _RecordCourseState extends State<RecordCourse> {
                               if (activePointerId != null) return;
                               if (!isRecording) return;
                               activePointerId = details.pointer;
-                              currentStroke.add(StrokeStamp(
-                                  details.localPosition,
-                                  solveStopwatch.elapsed.inMilliseconds));
                               switch (_mode) {
                                 case DrawingMode.pen:
+                                  currentStroke.add(StrokeStamp(
+                                      details.localPosition,
+                                      solveStopwatch.elapsed.inMilliseconds));
                                   _penPoints[_currentPage].add(
                                     SolvepadStroke(
                                         details.localPosition,
@@ -1109,6 +1195,9 @@ class _RecordCourseState extends State<RecordCourse> {
                                   _laserDrawing();
                                   break;
                                 case DrawingMode.highlighter:
+                                  currentStroke.add(StrokeStamp(
+                                      details.localPosition,
+                                      solveStopwatch.elapsed.inMilliseconds));
                                   _highlighterPoints[_currentPage].add(
                                     SolvepadStroke(
                                         details.localPosition,
@@ -1117,6 +1206,10 @@ class _RecordCourseState extends State<RecordCourse> {
                                   );
                                   break;
                                 case DrawingMode.eraser:
+                                  currentEraserStroke.add([
+                                    details.localPosition,
+                                    solveStopwatch.elapsed.inMilliseconds
+                                  ]);
                                   _eraserPoints[_currentPage] =
                                       details.localPosition;
                                   int penHit = _penPoints[_currentPage]
@@ -1148,11 +1241,11 @@ class _RecordCourseState extends State<RecordCourse> {
                               if (activePointerId != details.pointer) return;
                               if (!isRecording) return;
                               activePointerId = details.pointer;
-                              currentStroke.add(StrokeStamp(
-                                  details.localPosition,
-                                  solveStopwatch.elapsed.inMilliseconds));
                               switch (_mode) {
                                 case DrawingMode.pen:
+                                  currentStroke.add(StrokeStamp(
+                                      details.localPosition,
+                                      solveStopwatch.elapsed.inMilliseconds));
                                   setState(() {
                                     _penPoints[_currentPage].add(SolvepadStroke(
                                         details.localPosition,
@@ -1172,6 +1265,9 @@ class _RecordCourseState extends State<RecordCourse> {
                                   _laserDrawing();
                                   break;
                                 case DrawingMode.highlighter:
+                                  currentStroke.add(StrokeStamp(
+                                      details.localPosition,
+                                      solveStopwatch.elapsed.inMilliseconds));
                                   setState(() {
                                     _highlighterPoints[_currentPage].add(
                                       SolvepadStroke(
@@ -1182,6 +1278,10 @@ class _RecordCourseState extends State<RecordCourse> {
                                   });
                                   break;
                                 case DrawingMode.eraser:
+                                  currentEraserStroke.add([
+                                    details.localPosition,
+                                    solveStopwatch.elapsed.inMilliseconds
+                                  ]);
                                   setState(() {
                                     _eraserPoints[_currentPage] =
                                         details.localPosition;
@@ -1215,11 +1315,11 @@ class _RecordCourseState extends State<RecordCourse> {
                               if (activePointerId != details.pointer) return;
                               if (!isRecording) return;
                               activePointerId = null;
-                              addDrawing(
-                                  currentStroke, currentStroke[0].timestamp);
-                              currentStroke.clear();
                               switch (_mode) {
                                 case DrawingMode.pen:
+                                  addDrawing(currentStroke,
+                                      currentStroke[0].timestamp);
+                                  currentStroke.clear();
                                   _penPoints[_currentPage].add(null);
                                   break;
                                 case DrawingMode.laser:
@@ -1229,9 +1329,14 @@ class _RecordCourseState extends State<RecordCourse> {
                                       _stopLaserDrawing);
                                   break;
                                 case DrawingMode.highlighter:
+                                  addDrawing(currentStroke,
+                                      currentStroke[0].timestamp);
+                                  currentStroke.clear();
                                   _highlighterPoints[_currentPage].add(null);
                                   break;
                                 case DrawingMode.eraser:
+                                  addErasing(currentEraserStroke);
+                                  currentEraserStroke.clear();
                                   setState(() {
                                     _eraserPoints[_currentPage] =
                                         const Offset(-100, -100);
@@ -1245,11 +1350,11 @@ class _RecordCourseState extends State<RecordCourse> {
                               if (activePointerId != details.pointer) return;
                               if (!isRecording) return;
                               activePointerId = null;
-                              addDrawing(
-                                  currentStroke, currentStroke[0].timestamp);
                               currentStroke.clear();
                               switch (_mode) {
                                 case DrawingMode.pen:
+                                  addDrawing(currentStroke,
+                                      currentStroke[0].timestamp);
                                   _penPoints[_currentPage].add(null);
                                   break;
                                 case DrawingMode.laser:
@@ -1259,9 +1364,13 @@ class _RecordCourseState extends State<RecordCourse> {
                                       _stopLaserDrawing);
                                   break;
                                 case DrawingMode.highlighter:
+                                  addDrawing(currentStroke,
+                                      currentStroke[0].timestamp);
+                                  currentEraserStroke.clear();
                                   _highlighterPoints[_currentPage].add(null);
                                   break;
                                 case DrawingMode.eraser:
+                                  addErasing(currentEraserStroke);
                                   setState(() {
                                     _eraserPoints[_currentPage] =
                                         const Offset(-100, -100);
@@ -1340,6 +1449,7 @@ class _RecordCourseState extends State<RecordCourse> {
         height: 100,
         child: GestureDetector(
           onTap: () {
+            log(jsonEncode(_data));
             if (!isReplaying) {
               if (isReplayEnd) {
                 _initReplay();
