@@ -65,20 +65,36 @@ class _ManageLiveCoursePageState extends State<ManageLiveCoursePage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    "ตารางสอน / เข้าห้องเรียน",
-                                    style: TextStyle(
-                                      color: appTextPrimaryColor,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          "ตารางสอน / เข้าห้องเรียน",
+                                          style: TextStyle(
+                                            color: appTextPrimaryColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  Text(
-                                    "ดูตารางสอนของคุณ และกดเข้าห้องเรียน",
-                                    style: TextStyle(
-                                      color: appTextSecondaryColor,
-                                      fontSize: 14,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          "ดูตารางสอนของคุณ และกดเข้าห้องเรียน",
+                                          style: TextStyle(
+                                            color: appTextSecondaryColor,
+                                            fontSize: 14,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -121,20 +137,36 @@ class _ManageLiveCoursePageState extends State<ManageLiveCoursePage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    "การใช้งาน",
-                                    style: TextStyle(
-                                      color: appTextPrimaryColor,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          "การใช้งาน",
+                                          style: TextStyle(
+                                            color: appTextPrimaryColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  Text(
-                                    "ดูรายการค่าใช้จ่ายคอร์สสอนสด",
-                                    style: TextStyle(
-                                      color: appTextSecondaryColor,
-                                      fontSize: 14,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          "ดูรายการค่าใช้จ่ายคอร์สสอนสด",
+                                          style: TextStyle(
+                                            color: appTextSecondaryColor,
+                                            fontSize: 14,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -287,20 +319,36 @@ class _ManageLiveCoursePageState extends State<ManageLiveCoursePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: appTextPrimaryColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: const TextStyle(
+                            color: appTextPrimaryColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
-                  Text(
-                    content ?? "",
-                    style: const TextStyle(
-                      color: appTextSecondaryColor,
-                      fontSize: 14,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          content ?? "",
+                          style: const TextStyle(
+                            color: appTextSecondaryColor,
+                            fontSize: 14,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
