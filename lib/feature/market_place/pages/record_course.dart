@@ -1542,7 +1542,12 @@ class _RecordCourseState extends State<RecordCourse> {
       ]),
       child: Row(
         children: [
-          S.w(Responsive.isTablet(context) ? 5 : 24),
+          S.w(8),
+          IconButton(
+            icon: const Icon(Icons.arrow_back, color: CustomColors.gray878787),
+            onPressed: () => Navigator.pop(context),
+          ),
+          S.w(Responsive.isTablet(context) ? 5 : 12),
           Expanded(
             child: Align(
               alignment: Alignment.centerLeft,
