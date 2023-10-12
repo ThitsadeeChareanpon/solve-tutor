@@ -587,7 +587,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   void handleMessageChangePage(String data) {
     var parts = data.split(':');
     var pageNumber = int.parse(parts.last);
-    if(_currentPage != pageNumber) {
+    if (_currentPage != pageNumber) {
       _pageController.animateToPage(
         pageNumber,
         duration: const Duration(milliseconds: 300),
@@ -1788,7 +1788,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                               _pageController.page!.toInt() != 0) {
                             int page = _currentPage - 1;
                             int time = stopwatch.elapsed.inMilliseconds;
-                            for(int i=0;i<=2;i++) {
+                            for (int i = 0; i <= 2; i++) {
                               sendMessage(
                                 'ChangePage:$page',
                                 time,
@@ -1849,7 +1849,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                     _pages.length - 1) {
                               int page = _currentPage + 1;
                               int time = stopwatch.elapsed.inMilliseconds;
-                              for(int i=0;i<=2;i++) {
+                              for (int i = 0; i <= 2; i++) {
                                 sendMessage(
                                   'ChangePage:$page',
                                   time,
@@ -2273,7 +2273,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                           _pageController.page!.toInt() != 0) {
                         int page = _currentPage - 1;
                         int time = stopwatch.elapsed.inMilliseconds;
-                        for(int i=0;i<=2;i++) {
+                        for (int i = 0; i <= 2; i++) {
                           sendMessage(
                             'ChangePage:$page',
                             time,
@@ -2331,7 +2331,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                 _pages.length - 1) {
                           int page = _currentPage + 1;
                           int time = stopwatch.elapsed.inMilliseconds;
-                          for(int i=0;i<=2;i++) {
+                          for (int i = 0; i <= 2; i++) {
                             sendMessage(
                               'ChangePage:$page',
                               time,

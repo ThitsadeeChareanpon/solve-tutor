@@ -427,6 +427,8 @@ class _RecordCourseState extends State<RecordCourse> {
   void initSolvepadData() {
     _data = {
       "version": "2.0.0",
+      "solvepadWidth": mySolvepadSize.width,
+      "solvepadHeight": mySolvepadSize.height,
       "metadata": {
         "courseId": widget.course.id,
         "tutorId": widget.course.tutorId,
@@ -1115,7 +1117,11 @@ class _RecordCourseState extends State<RecordCourse> {
       child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
         double solvepadWidth = constraints.maxWidth;
+        double solvepadHeight = constraints.maxHeight;
         currentScrollX = (-1 * solvepadWidth);
+        if (mySolvepadSize.width != solvepadWidth) {
+          mySolvepadSize = Size(solvepadWidth, solvepadHeight);
+        }
         return Stack(children: [
           PageView.builder(
             onPageChanged: _onPageViewChange,
