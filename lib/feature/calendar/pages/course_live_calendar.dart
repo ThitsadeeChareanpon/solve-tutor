@@ -145,7 +145,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
         ),
         actions: [
           if (_util.isTablet()) ...[
-            _buildButtonSearch(),
+            // _buildButtonSearch(),
             _buildButtonAddCourse()
           ]
         ],
@@ -188,7 +188,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                 children: [
                   _historyText(),
                   Expanded(child: Container()),
-                  _buildButtonSearch(),
+                  // _buildButtonSearch(),
                   S.w(10),
                   _buildButtonAddCourse(),
                 ],
