@@ -919,7 +919,7 @@ class _RecordCourseState extends State<RecordCourse> {
               ),
             ],
           ),
-          slider(),
+          if (isRecordEnd) slider(),
           if (openColors)
             Positioned(
               left: 150,
@@ -1455,7 +1455,6 @@ class _RecordCourseState extends State<RecordCourse> {
         height: 100,
         child: GestureDetector(
           onTap: () {
-            log(jsonEncode(_data));
             if (!isReplaying) {
               if (isReplayEnd) {
                 _initReplay();

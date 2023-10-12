@@ -3662,7 +3662,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                     ),
                                   ),
                                 );
-                                log(selectedIndex);
+                                log(selectedIndex.toString());
                                 setState(() {
                                   focusedStudentId =
                                       students[selectedIndex!]['id'];
