@@ -419,8 +419,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       // if (_requestScreenShare) {
       setState(() {
         var decodedMessage = json.decode(message);
-        print('json message');
-        print(decodedMessage);
+        log('json message');
+        log(decodedMessage);
 
         var item = decodedMessage[0];
         var data = item['data'];
@@ -455,12 +455,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
           if (students.isEmpty) return;
           var studentIndex = getStudentIndex(uid);
           if (studentIndex == -1) {
-            print('ID not found');
-            print(students.length);
-            print(students[0]);
-            print(students[1]);
-            print(students[2]);
-            print(students[3]);
+            log('ID not found');
+            log('${students.length}');
           } else {
             setState(() {
               students[studentIndex]['attend'] = true;
@@ -738,7 +734,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
           json.encode({'uid': widget.userId, 'data': data, 'time': time});
       channel?.sink.add(message);
     } catch (e) {
-      print('Error sending message: $e');
+      log('Error sending message: $e');
     }
   }
 
@@ -768,21 +764,21 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     );
 
     _meeting.on(Events.participantJoined, (Participant participant) {
-      print('Student Join');
-      print(participant.displayName);
-      print(participant.id);
+      log('Student Join');
+      log(participant.displayName);
+      log(participant.id);
     });
 
     _meeting.on(Events.participantLeft, (Participant participant) {
-      print('Student Left');
-      print(participant.displayName);
-      print(participant.id);
+      log('Student Left');
+      log(participant.displayName);
+      log(participant.id);
     });
 
     // Called when meeting is ended
     _meeting.on(Events.roomLeft, (String? errorMsg) {
       if (errorMsg != null) {
-        print("Meeting left due to $errorMsg !!");
+        log("Meeting left due to $errorMsg !!");
       }
       Navigator.pop(context);
       // Navigator.pushAndRemoveUntil(
@@ -793,8 +789,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
 
     // Called when recording is started
     _meeting.on(Events.recordingStateChanged, (String status) async {
-      print('Conference Recording Changed');
-      print(status);
+      log('Conference Recording Changed');
+      log(status);
       setState(() {
         recordingState = status;
       });
@@ -804,7 +800,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             isRecordingLoading = false;
             isRecordingOn = !isRecordingOn;
           });
-          print('RECORDING_STOPPED:$recordIndex');
+          log('RECORDING_STOPPED:$recordIndex');
           sendMessage('RECORDING_STOPPED:$recordIndex',
               stopwatch.elapsed.inMilliseconds);
           await fetchRecording(widget.meetingId);
@@ -824,7 +820,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             isRecordingLoading = false;
             isRecordingOn = !isRecordingOn;
           });
-          print('RECORDING_STARTED:$recordIndex');
+          log('RECORDING_STARTED:$recordIndex');
           sendMessage('RECORDING_STARTED:$recordIndex',
               stopwatch.elapsed.inMilliseconds);
           break;
@@ -873,9 +869,9 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     _meeting.on(
         Events.error,
         (error) => {
-              print('meeting function error'),
-              print(error['name'].toString()),
-              print(error['message'].toString())
+              log('meeting function error'),
+              log(error['name'].toString()),
+              log(error['message'].toString())
             });
   }
 
@@ -883,19 +879,16 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     try {
       List recordList = [];
       var record = await fetchRecordings(widget.token, meetingID);
-      // print('record url');
-      // print(record);
       recordIndex += 1;
       record.forEach((r) {
         if (r['file'] != null) {
-          // print(r['file']['fileUrl']);
           recordList.add(r['file']['fileUrl']);
         }
       });
-      print(recordList);
+      log(recordList.toString());
       await updateAudioFile(recordList);
     } catch (error) {
-      print('fetchRecording error: $error');
+      log('fetchRecording error: $error');
     }
   }
 
@@ -1629,7 +1622,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                 //   ),
                 //   child: InkWell(
                 //     onTap: () async {
-                //       print('test tapped');
+                //       log('test tapped');
                 //       await meeting.stopRecording();
                 //       await fetchRecording(widget.meetingId);
                 //     },
@@ -2049,7 +2042,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
           //       alignment: Alignment.centerRight,
           //       child: InkWell(
           //         onTap: () {
-          //           print('Go to Statistics');
+          //           log('Go to Statistics');
           //           showLeader(context);
           //         },
           //         child: Container(
@@ -2443,7 +2436,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
           //       alignment: Alignment.centerRight,
           //       child: InkWell(
           //         onTap: () {
-          //           print('Go to Statistics');
+          //           log('Go to Statistics');
           //           showLeader(context);
           //         },
           //         child: Container(
@@ -2594,9 +2587,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                     // Close popup
                                     openColors = !openColors;
                                   });
-                                  print('Tap : index $index');
-                                  print(
-                                      'Tap : _selectIndex $_selectedIndexColors');
+                                  log('Tap : index $index');
+                                  log('Tap : _selectIndex $_selectedIndexColors');
                                 },
                                 child: Image.asset(_listColors[index]['color'],
                                     width: 48),
@@ -2796,7 +2788,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                               S.w(defaultPadding),
                               InkWell(
                                 onTap: () {
-                                  print("Pick Line");
+                                  log("Pick Line");
 
                                   setState(() {
                                     if (openColors || openMore == true) {
@@ -2814,7 +2806,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                               S.w(4),
                               // InkWell(
                               //   onTap: () {
-                              //     print("Clear");
+                              //     log("Clear");
                               //   },
                               //   child: Image.asset(
                               //     ImageAssets.bin,
@@ -3019,7 +3011,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                   //       children: [
                   //         InkWell(
                   //           onTap: () {
-                  //             print("Undo");
+                  //             log("Undo");
                   //           },
                   //           child: Image.asset(
                   //             ImageAssets.undo,
@@ -3028,7 +3020,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                   //         ),
                   //         InkWell(
                   //           onTap: () {
-                  //             print("Redo");
+                  //             log("Redo");
                   //           },
                   //           child: Image.asset(
                   //             ImageAssets.redo,
@@ -3199,7 +3191,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                   //     children: [
                                   //       InkWell(
                                   //         onTap: () {
-                                  //           print("Clear");
+                                  //           log("Clear");
                                   //         },
                                   //         child: Image.asset(
                                   //           ImageAssets.bin,
@@ -3208,7 +3200,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                   //       ),
                                   //       InkWell(
                                   //         onTap: () {
-                                  //           print("More");
+                                  //           log("More");
                                   //
                                   //           setState(() {
                                   //             if (openColors ||
@@ -3670,7 +3662,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                     ),
                                   ),
                                 );
-                                print(selectedIndex);
+                                log(selectedIndex);
                                 setState(() {
                                   focusedStudentId =
                                       students[selectedIndex!]['id'];
@@ -4075,7 +4067,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                                   value: quizList[index]
                                                       .isSelected,
                                                   onChanged: (bool? value) {
-                                                    print('checkbox tapped');
+                                                    log('checkbox tapped');
                                                     setState(() {
                                                       quizList[index]
                                                               .isSelected =
@@ -4568,7 +4560,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                               alignment: Alignment.centerRight,
                               child: InkWell(
                                 onTap: () {
-                                  print('Go to Statistics');
+                                  log('Go to Statistics');
                                   showLeader(context);
                                 },
                                 child: Container(
