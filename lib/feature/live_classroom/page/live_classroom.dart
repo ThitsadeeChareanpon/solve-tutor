@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -260,9 +261,10 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   double scaleY = 0;
 
   // ---------- VARIABLE: Solve Pad features
+  int? activePointerId;
   bool _isPrevBtnActive = false;
   bool _isNextBtnActive = true;
-  int? activePointerId;
+  bool _isStylusActive = false;
 
   // ---------- VARIABLE: page control
   String _formattedElapsedTime = ' 00 : 00 : 00 ';
@@ -1109,8 +1111,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
               ),
             ],
           ),
-
-          /// Status ShareScreen
           Positioned(
             top: 145,
             right: 60,
@@ -1128,7 +1128,12 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                       "หน้าจอ: $focusedStudentName", ImageAssets.avatarWomen),
               ],
             ),
-          ),
+          ), // Share screen pill
+          // Positioned(
+          //   top: 145,
+          //   left: 15,
+          //   child: statusTouchMode(),
+          // ), // Touch mode pill
           showListStudents(),
           if (openColors)
             Positioned(
@@ -1341,6 +1346,13 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                             onPointerDown: (details) {
                               if (activePointerId != null) return;
                               activePointerId = details.pointer;
+                              if (details.kind == PointerDeviceKind.stylus) {
+                                _isStylusActive = true;
+                              }
+                              if (_isStylusActive &&
+                                  details.kind == PointerDeviceKind.touch) {
+                                return;
+                              }
                               sendMessage(
                                 details.localPosition.toString(),
                                 stopwatch.elapsed.inMilliseconds,
@@ -1402,6 +1414,13 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                             onPointerMove: (details) {
                               if (activePointerId != details.pointer) return;
                               activePointerId = details.pointer;
+                              if (details.kind == PointerDeviceKind.stylus) {
+                                _isStylusActive = true;
+                              }
+                              if (_isStylusActive &&
+                                  details.kind == PointerDeviceKind.touch) {
+                                return;
+                              }
                               sendMessage(
                                 details.localPosition.toString(),
                                 stopwatch.elapsed.inMilliseconds,
@@ -1469,6 +1488,10 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                             onPointerUp: (details) {
                               if (activePointerId != details.pointer) return;
                               activePointerId = null;
+                              if (_isStylusActive &&
+                                  details.kind == PointerDeviceKind.touch) {
+                                return;
+                              }
                               int time = stopwatch.elapsed.inMilliseconds;
                               for (int i = 0; i <= 2; i++) {
                                 sendMessage(
@@ -1502,6 +1525,10 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                             onPointerCancel: (details) {
                               if (activePointerId != details.pointer) return;
                               activePointerId = null;
+                              if (_isStylusActive &&
+                                  details.kind == PointerDeviceKind.touch) {
+                                return;
+                              }
                               int time = stopwatch.elapsed.inMilliseconds;
                               for (int i = 0; i <= 2; i++) {
                                 sendMessage(
@@ -1688,8 +1715,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                               .collection('course_live')
                               .doc(widget.courseId)
                               .update({'currentMeetingCode': ''});
+                          await updateActualTime();
                         }
-                        await updateActualTime();
                         Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(
@@ -1745,134 +1772,141 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
           S.w(Responsive.isTablet(context) ? 5 : 24),
           Expanded(
             flex: 2,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: CustomColors.grayCFCFCF,
-                    style: BorderStyle.solid,
-                    width: 1.0,
-                  ),
-                  borderRadius: BorderRadius.circular(8),
-                  color: CustomColors.whitePrimary,
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 8),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Image.asset(
-                      ImageAssets.allPages,
-                      height: 30,
-                      width: 32,
-                    ),
-                    S.w(defaultPadding),
-                    Container(
-                      width: 1,
-                      height: 24,
-                      color: CustomColors.grayCFCFCF,
-                    ),
-                    S.w(defaultPadding),
-                    Material(
-                      child: InkWell(
-                        onTap: () {
-                          if (_pageController.hasClients &&
-                              _pageController.page!.toInt() != 0) {
-                            int page = _currentPage - 1;
-                            int time = stopwatch.elapsed.inMilliseconds;
-                            for (int i = 0; i <= 2; i++) {
-                              sendMessage(
-                                'ChangePage:$page',
-                                time,
-                              );
-                            }
-                            _pageController.animateToPage(
-                              _pageController.page!.toInt() - 1,
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                            );
-                          }
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Image.asset(
-                            ImageAssets.backDis,
-                            height: 16,
-                            width: 17,
-                            color: _isPrevBtnActive
-                                ? CustomColors.activePagingBtn
-                                : CustomColors.inactivePagingBtn,
-                          ),
-                        ),
+            child: Row(
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: CustomColors.grayCFCFCF,
+                        style: BorderStyle.solid,
+                        width: 1.0,
                       ),
+                      borderRadius: BorderRadius.circular(8),
+                      color: CustomColors.whitePrimary,
                     ),
-                    S.w(defaultPadding),
-                    Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 1, vertical: 8),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Image.asset(
+                          ImageAssets.allPages,
+                          height: 30,
+                          width: 32,
+                        ),
+                        S.w(defaultPadding),
+                        Container(
+                          width: 1,
+                          height: 24,
                           color: CustomColors.grayCFCFCF,
-                          style: BorderStyle.solid,
-                          width: 1.0,
                         ),
-                        borderRadius: BorderRadius.circular(4),
-                        color: CustomColors.whitePrimary,
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Text("Page ${_currentPage + 1}",
-                              style: CustomStyles.bold14greenPrimary),
-                        ],
-                      ),
-                    ),
-                    S.w(8.0),
-                    Text("/ ${_pages.length}",
-                        style: CustomStyles.med14Gray878787),
-                    S.w(8),
-                    Material(
-                      child: InkWell(
-                        // splashColor: Colors.lightGreen,
-                        onTap: () {
-                          if (_pages.length > 1) {
-                            if (_pageController.hasClients &&
-                                _pageController.page!.toInt() !=
-                                    _pages.length - 1) {
-                              int page = _currentPage + 1;
-                              int time = stopwatch.elapsed.inMilliseconds;
-                              for (int i = 0; i <= 2; i++) {
-                                sendMessage(
-                                  'ChangePage:$page',
-                                  time,
+                        S.w(defaultPadding),
+                        Material(
+                          child: InkWell(
+                            onTap: () {
+                              if (_pageController.hasClients &&
+                                  _pageController.page!.toInt() != 0) {
+                                int page = _currentPage - 1;
+                                int time = stopwatch.elapsed.inMilliseconds;
+                                for (int i = 0; i <= 2; i++) {
+                                  sendMessage(
+                                    'ChangePage:$page',
+                                    time,
+                                  );
+                                }
+                                _pageController.animateToPage(
+                                  _pageController.page!.toInt() - 1,
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
                                 );
                               }
-                              _pageController.animateToPage(
-                                _pageController.page!.toInt() + 1,
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeInOut,
-                              );
-                            }
-                          }
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Image.asset(
-                            ImageAssets.forward,
-                            height: 16,
-                            width: 17,
-                            color: _isNextBtnActive
-                                ? CustomColors.activePagingBtn
-                                : CustomColors.inactivePagingBtn,
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Image.asset(
+                                ImageAssets.backDis,
+                                height: 16,
+                                width: 17,
+                                color: _isPrevBtnActive
+                                    ? CustomColors.activePagingBtn
+                                    : CustomColors.inactivePagingBtn,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                        S.w(defaultPadding),
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: CustomColors.grayCFCFCF,
+                              style: BorderStyle.solid,
+                              width: 1.0,
+                            ),
+                            borderRadius: BorderRadius.circular(4),
+                            color: CustomColors.whitePrimary,
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              Text("Page ${_currentPage + 1}",
+                                  style: CustomStyles.bold14greenPrimary),
+                            ],
+                          ),
+                        ),
+                        S.w(8.0),
+                        Text("/ ${_pages.length}",
+                            style: CustomStyles.med14Gray878787),
+                        S.w(8),
+                        Material(
+                          child: InkWell(
+                            // splashColor: Colors.lightGreen,
+                            onTap: () {
+                              if (_pages.length > 1) {
+                                if (_pageController.hasClients &&
+                                    _pageController.page!.toInt() !=
+                                        _pages.length - 1) {
+                                  int page = _currentPage + 1;
+                                  int time = stopwatch.elapsed.inMilliseconds;
+                                  for (int i = 0; i <= 2; i++) {
+                                    sendMessage(
+                                      'ChangePage:$page',
+                                      time,
+                                    );
+                                  }
+                                  _pageController.animateToPage(
+                                    _pageController.page!.toInt() + 1,
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeInOut,
+                                  );
+                                }
+                              }
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Image.asset(
+                                ImageAssets.forward,
+                                height: 16,
+                                width: 17,
+                                color: _isNextBtnActive
+                                    ? CustomColors.activePagingBtn
+                                    : CustomColors.inactivePagingBtn,
+                              ),
+                            ),
+                          ),
+                        ),
+                        S.w(6.0),
+                      ],
                     ),
-                    S.w(6.0),
-                  ],
+                  ),
                 ),
-              ),
+                S.w(8),
+                statusTouchMode(),
+              ],
             ),
           ),
           Expanded(
@@ -1892,15 +1926,37 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                         }
                       }
                     },
-                    child: Image.asset(
-                      isRecordingLoading
-                          ? ImageAssets.loading
-                          : isRecordingOn
-                              ? ImageAssets.recordDis
-                              : ImageAssets.recordEnable,
-                      height: 44,
-                      width: 44,
-                    ),
+                    // child: Image.asset(
+                    //   isRecordingLoading
+                    //       ? ImageAssets.loading
+                    //       : isRecordingOn
+                    //           ? ImageAssets.recordDis
+                    //           : ImageAssets.recordEnable,
+                    //   height: 44,
+                    //   width: 44,
+                    // ),
+                    child: isRecordingLoading
+                        ? Image.asset(
+                            ImageAssets.loading,
+                            height: 44,
+                            width: 44,
+                          )
+                        : Container(
+                            // margin: const EdgeInsets.symmetric(vertical: 14.0),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                                color: isRecordingOn
+                                    ? CustomColors.gray363636
+                                    : CustomColors.redFF4201,
+                                shape: BoxShape.circle),
+                            child: Icon(
+                              isRecordingOn
+                                  ? Icons.stop
+                                  : Icons.radio_button_checked_rounded,
+                              size: 20,
+                              color: Colors.white,
+                            ),
+                          ),
                   ),
                 ),
                 S.w(defaultPadding),
@@ -3839,6 +3895,48 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             statusStudentShareScreen(
                 "หน้าจอ: $focusedStudentName", ImageAssets.avatarWomen),
         ],
+      ),
+    );
+  }
+
+  Widget statusTouchMode() {
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _isStylusActive = !_isStylusActive;
+        });
+      },
+      child: Container(
+        height: 36,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(32),
+          color: CustomColors.greenPrimary,
+        ),
+        child: InkWell(
+          onTap: () {
+            setState(() {
+              _isStylusActive = !_isStylusActive;
+            });
+          },
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              S.w(16),
+              Image.asset(
+                _isStylusActive
+                    ? 'assets/images/pencil-dis.png'
+                    : 'assets/images/hand-dis.png',
+                width: 22,
+              ),
+              S.w(12),
+              Text(
+                _isStylusActive ? 'Stylus mode' : 'Touch mode',
+                style: CustomStyles.bold14White,
+              ),
+              S.w(16),
+            ],
+          ),
+        ),
       ),
     );
   }
