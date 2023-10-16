@@ -107,7 +107,7 @@ class _ManageCoursePageState extends State<ManageCoursePage>
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      "คอร์สบันทึกวิดีโอ",
+                                      "คอร์สบันทึกย้อนหลัง",
                                       textAlign: TextAlign.center,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -157,8 +157,8 @@ class _ManageCoursePageState extends State<ManageCoursePage>
                   child: TabBarView(
                     controller: _tabController,
                     children: const [
-                      ManageLiveCoursePage(),
                       ManageMarketCoursePage(),
+                      ManageLiveCoursePage(),
                     ],
                   ),
                 ),

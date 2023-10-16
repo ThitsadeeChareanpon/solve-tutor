@@ -198,9 +198,8 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                         );
                       },
                       image: 'assets/images/menu_my_course.png',
-                      title: "สอนคอร์สบันทึกวีดีโอ",
-                      content:
-                          "สร้างคอร์สสอนพิเศษของคุณ เพื่อลงขายใน Market Place ของเรา",
+                      title: "สร้างคอร์สด้วย SOLVE Pad",
+                      content: "สร้างคอร์สเพื่อลงขายใน Marketplace",
                     ),
                     gridCard(
                       context,
@@ -214,8 +213,7 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                       },
                       image: 'assets/images/menu_create_sheet.png',
                       title: "สร้างชีท",
-                      content:
-                          "สร้างคลังเอกสารประกอบการเรียน เพื่อให้คุณสามารถแชร์เอกสารกับคอร์สอื่นๆได้",
+                      content: "อัปโหลดเอกสารประกอบการสอน",
                     ),
                     gridCard(
                       context,
@@ -223,7 +221,7 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                       image: 'assets/images/menu_qa.png',
                       title: "ตอบคำถามนักเรียน",
                       content:
-                          "คำถามระหว่างเรียนของนักเรียนของคุณ ที่ต้องการให้คุณช่วยตอบ",
+                          "อธิบายนักเรียนด้วยนวัตกรรม virtual one-on-one tutoring",
                     ),
                   ],
                 ),
