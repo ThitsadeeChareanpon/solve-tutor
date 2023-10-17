@@ -36,9 +36,11 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                   children: [
                     Expanded(
                       child: Container(
-                        height: 230,
+                        height: Responsive.isMobile(context) ? 200 : 230,
                         margin: const EdgeInsets.fromLTRB(30, 30, 15, 0),
-                        padding: const EdgeInsets.all(30),
+                        padding: Responsive.isMobile(context)
+                            ? const EdgeInsets.all(15)
+                            : const EdgeInsets.all(30),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(10),
@@ -73,7 +75,7 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                                 ),
                               ),
                               const SizedBox(height: 20),
-                              const Expanded(
+                              Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -85,7 +87,10 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                                             style: TextStyle(
                                               color: appTextPrimaryColor,
                                               fontWeight: FontWeight.bold,
-                                              fontSize: 16,
+                                              fontSize:
+                                                  Responsive.isMobile(context)
+                                                      ? 14
+                                                      : 16,
                                             ),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
@@ -100,7 +105,10 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                                             "ดูคอร์สขายดี, รายได้ของคุณ, จำนวนนักเรียนในคอร์ส, รีวิว, และคะแนนของคุณ",
                                             style: TextStyle(
                                               color: appTextSecondaryColor,
-                                              fontSize: 14,
+                                              fontSize:
+                                                  Responsive.isMobile(context)
+                                                      ? 13
+                                                      : 14,
                                             ),
                                             maxLines: 2,
                                             overflow: TextOverflow.ellipsis,
@@ -118,9 +126,11 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                     ),
                     Expanded(
                       child: Container(
-                        height: 230,
+                        height: Responsive.isMobile(context) ? 200 : 230,
                         margin: const EdgeInsets.fromLTRB(15, 30, 30, 0),
-                        padding: const EdgeInsets.all(30),
+                        padding: Responsive.isMobile(context)
+                            ? const EdgeInsets.all(15)
+                            : const EdgeInsets.all(30),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(10),
@@ -155,7 +165,7 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                                 ),
                               ),
                               const SizedBox(height: 20),
-                              const Expanded(
+                              Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -167,7 +177,10 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                                             style: TextStyle(
                                               color: appTextPrimaryColor,
                                               fontWeight: FontWeight.bold,
-                                              fontSize: 16,
+                                              fontSize:
+                                                  Responsive.isMobile(context)
+                                                      ? 14
+                                                      : 16,
                                             ),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
@@ -182,7 +195,10 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                                             "จัดการ Credits รายได้และยอดเงินเตรียมโอนของคุณ",
                                             style: TextStyle(
                                               color: appTextSecondaryColor,
-                                              fontSize: 14,
+                                              fontSize:
+                                                  Responsive.isMobile(context)
+                                                      ? 13
+                                                      : 16,
                                             ),
                                             maxLines: 2,
                                             overflow: TextOverflow.ellipsis,
@@ -261,9 +277,11 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                     children: [
                       Expanded(
                         child: Container(
-                          height: 230,
+                          height: Responsive.isMobile(context) ? 200 : 230,
                           margin: const EdgeInsets.fromLTRB(30, 30, 15, 0),
-                          padding: const EdgeInsets.all(30),
+                          padding: Responsive.isMobile(context)
+                              ? const EdgeInsets.all(15)
+                              : const EdgeInsets.all(30),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(10),
@@ -300,7 +318,7 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                                   ),
                                 ),
                                 const SizedBox(height: 20),
-                                const Expanded(
+                                Expanded(
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
@@ -313,7 +331,10 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                                               style: TextStyle(
                                                 color: appTextPrimaryColor,
                                                 fontWeight: FontWeight.bold,
-                                                fontSize: 16,
+                                                fontSize:
+                                                    Responsive.isMobile(context)
+                                                        ? 14
+                                                        : 16,
                                               ),
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
@@ -328,7 +349,10 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                                               "สร้างคอร์สเพื่อลงขายใน Marketplace",
                                               style: TextStyle(
                                                 color: appTextSecondaryColor,
-                                                fontSize: 14,
+                                                fontSize:
+                                                    Responsive.isMobile(context)
+                                                        ? 13
+                                                        : 16,
                                               ),
                                               maxLines: 2,
                                               overflow: TextOverflow.ellipsis,
@@ -346,9 +370,11 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                       ),
                       Expanded(
                         child: Container(
-                          height: 230,
+                          height: Responsive.isMobile(context) ? 200 : 230,
                           margin: const EdgeInsets.fromLTRB(15, 30, 30, 0),
-                          padding: const EdgeInsets.all(30),
+                          padding: Responsive.isMobile(context)
+                              ? const EdgeInsets.all(15)
+                              : const EdgeInsets.all(30),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(10),
@@ -383,7 +409,7 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                                   ),
                                 ),
                                 const SizedBox(height: 20),
-                                const Expanded(
+                                Expanded(
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
@@ -396,7 +422,10 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                                               style: TextStyle(
                                                 color: appTextPrimaryColor,
                                                 fontWeight: FontWeight.bold,
-                                                fontSize: 16,
+                                                fontSize:
+                                                    Responsive.isMobile(context)
+                                                        ? 14
+                                                        : 16,
                                               ),
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
@@ -411,7 +440,10 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                                               "อัปโหลดเอกสารประกอบการสอน",
                                               style: TextStyle(
                                                 color: appTextSecondaryColor,
-                                                fontSize: 14,
+                                                fontSize:
+                                                    Responsive.isMobile(context)
+                                                        ? 13
+                                                        : 16,
                                               ),
                                               maxLines: 2,
                                               overflow: TextOverflow.ellipsis,
@@ -434,9 +466,11 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                     children: [
                       Expanded(
                         child: Container(
-                          height: 230,
+                          height: Responsive.isMobile(context) ? 200 : 230,
                           margin: const EdgeInsets.fromLTRB(30, 30, 15, 0),
-                          padding: const EdgeInsets.all(30),
+                          padding: Responsive.isMobile(context)
+                              ? const EdgeInsets.all(15)
+                              : const EdgeInsets.all(30),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(10),
@@ -471,7 +505,7 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                                   ),
                                 ),
                                 const SizedBox(height: 20),
-                                const Expanded(
+                                Expanded(
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
@@ -484,7 +518,10 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                                               style: TextStyle(
                                                 color: appTextPrimaryColor,
                                                 fontWeight: FontWeight.bold,
-                                                fontSize: 16,
+                                                fontSize:
+                                                    Responsive.isMobile(context)
+                                                        ? 14
+                                                        : 16,
                                               ),
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
@@ -499,7 +536,10 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                                               "อธิบายนักเรียนด้วยนวัตกรรม virtual one-on-one tutoring",
                                               style: TextStyle(
                                                 color: appTextSecondaryColor,
-                                                fontSize: 14,
+                                                fontSize:
+                                                    Responsive.isMobile(context)
+                                                        ? 13
+                                                        : 16,
                                               ),
                                               maxLines: 2,
                                               overflow: TextOverflow.ellipsis,

@@ -34,170 +34,10 @@ class _ManageLiveCoursePageState extends State<ManageLiveCoursePage> {
               children: [
                 Row(
                   children: [
-                    Expanded(
-                      child: Container(
-                        height: 230,
-                        margin: const EdgeInsets.fromLTRB(30, 30, 15, 0),
-                        padding: const EdgeInsets.all(30),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.2),
-                              spreadRadius: 3,
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const MaintenancePage(),
-                              ),
-                            );
-                          },
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: SizedBox(
-                                  child: Image.asset(
-                                    "assets/images/calendar.png",
-                                    fit: BoxFit.contain,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              const Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            "Hybrid Solution",
-                                            style: TextStyle(
-                                              color: appTextPrimaryColor,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16,
-                                            ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            "สร้างคอร์ส Hybrid ของคุณ",
-                                            style: TextStyle(
-                                              color: appTextSecondaryColor,
-                                              fontSize: 14,
-                                            ),
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Container(
-                        height: 230,
-                        margin: const EdgeInsets.fromLTRB(15, 30, 30, 0),
-                        padding: const EdgeInsets.all(30),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.2),
-                              spreadRadius: 3,
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const MaintenancePage(),
-                              ),
-                            );
-                          },
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: SizedBox(
-                                  child: Image.asset(
-                                    "assets/images/graph.png",
-                                    fit: BoxFit.contain,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              const Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            "การใช้งาน",
-                                            style: TextStyle(
-                                              color: appTextPrimaryColor,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16,
-                                            ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            "ดูรายการค่าใช้จ่ายคอร์สสอนสด",
-                                            style: TextStyle(
-                                              color: appTextSecondaryColor,
-                                              fontSize: 14,
-                                            ),
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
+                    mobileCard('assets/images/calendar.png', 'Hybrid Solution',
+                        'สร้างคอร์ส Hybrid ของคุณ', true),
+                    mobileCard('assets/images/graph.png', 'การใช้งาน',
+                        'ดูรายการค่าใช้จ่ายคอร์สสอนสด', false),
                   ],
                 ),
                 if (!Responsive.isMobile(context))
@@ -296,265 +136,117 @@ class _ManageLiveCoursePageState extends State<ManageLiveCoursePage> {
                 if (Responsive.isMobile(context))
                   Row(
                     children: [
-                      Expanded(
-                        child: Container(
-                          height: 230,
-                          margin: const EdgeInsets.fromLTRB(30, 30, 15, 0),
-                          padding: const EdgeInsets.all(30),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.2),
-                                spreadRadius: 3,
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => MyCourseLivePage(
-                                    tutorId: auth?.uid ?? "",
-                                  ),
-                                ),
-                              );
-                            },
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: SizedBox(
-                                    child: Image.asset(
-                                      "assets/images/menu_my_course.png",
-                                      fit: BoxFit.contain,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 20),
-                                const Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              "สร้างคอร์สสอนสด",
-                                              style: TextStyle(
-                                                color: appTextPrimaryColor,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16,
-                                              ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              "เพิ่มชีท เพิ่มนักเรียน จัดตารางสอน และรอสอนได้เลย",
-                                              style: TextStyle(
-                                                color: appTextSecondaryColor,
-                                                fontSize: 14,
-                                              ),
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Container(
-                          height: 230,
-                          margin: const EdgeInsets.fromLTRB(15, 30, 30, 0),
-                          padding: const EdgeInsets.all(30),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.2),
-                                spreadRadius: 3,
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: InkWell(
-                            onTap: () {
-                              var route = MaterialPageRoute(
-                                builder: (context) => MyDocumentPage(
-                                  tutorId: auth?.uid ?? "",
-                                ),
-                              );
-                              Navigator.push(context, route);
-                            },
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: SizedBox(
-                                    child: Image.asset(
-                                      "assets/images/menu_create_sheet.png",
-                                      fit: BoxFit.contain,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 20),
-                                const Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              "สร้างชีท",
-                                              style: TextStyle(
-                                                color: appTextPrimaryColor,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16,
-                                              ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              "อัปโหลดเอกสารประกอบการสอน",
-                                              style: TextStyle(
-                                                color: appTextSecondaryColor,
-                                                fontSize: 14,
-                                              ),
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
+                      mobileCard(
+                          'assets/images/menu_my_course.png',
+                          'สร้างคอร์สสอนสด',
+                          'เพิ่มชีท เพิ่มนักเรียน จัดตารางสอน และรอสอนได้เลย',
+                          true),
+                      mobileCard('assets/images/menu_create_sheet.png',
+                          'สร้างชีท', 'อัปโหลดเอกสารประกอบการสอน', false),
                     ],
                   ),
                 if (Responsive.isMobile(context))
                   Row(
                     children: [
-                      Expanded(
-                        child: Container(
-                          height: 230,
-                          margin: const EdgeInsets.fromLTRB(15, 30, 30, 0),
-                          padding: const EdgeInsets.all(30),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.2),
-                                spreadRadius: 3,
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: InkWell(
-                            onTap: () {
-                              var route = MaterialPageRoute(
-                                builder: (context) => const MaintenancePage(),
-                              );
-                              Navigator.push(context, route);
-                            },
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: SizedBox(
-                                    child: Image.asset(
-                                      "assets/images/menu_qa.png",
-                                      fit: BoxFit.contain,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 20),
-                                const Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              "ตอบคำถามนักเรียน",
-                                              style: TextStyle(
-                                                color: appTextPrimaryColor,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16,
-                                              ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              "อธิบายนักเรียนด้วยนวัตกรรม virtual one-on-one tutoring",
-                                              style: TextStyle(
-                                                color: appTextSecondaryColor,
-                                                fontSize: 14,
-                                              ),
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
+                      mobileCard(
+                          'assets/images/menu_qa.png',
+                          'ตอบคำถามนักเรียน',
+                          'อธิบายนักเรียนด้วยนวัตกรรม virtual one-on-one tutoring',
+                          true),
                     ],
                   ),
                 const SizedBox(height: 70),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget mobileCard(String img, String title, String desc, bool left) {
+    return Expanded(
+      child: Container(
+        height: Responsive.isMobile(context) ? 200 : 230,
+        margin: left
+            ? const EdgeInsets.fromLTRB(30, 30, 15, 0)
+            : const EdgeInsets.fromLTRB(15, 30, 30, 0),
+        padding: Responsive.isMobile(context)
+            ? const EdgeInsets.all(15)
+            : const EdgeInsets.all(30),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 3,
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const MaintenancePage(),
+              ),
+            );
+          },
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: SizedBox(
+                  child: Image.asset(
+                    img,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: TextStyle(
+                              color: appTextPrimaryColor,
+                              fontWeight: FontWeight.bold,
+                              fontSize: Responsive.isMobile(context) ? 14 : 16,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            desc,
+                            style: TextStyle(
+                              color: appTextSecondaryColor,
+                              fontSize: Responsive.isMobile(context) ? 13 : 16,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
