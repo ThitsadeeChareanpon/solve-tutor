@@ -274,37 +274,37 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  GestureDetector(
-                    onTap: () async {
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SolveFundPage(),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.fromLTRB(20, 15, 20, 5),
-                      child: const Row(
-                        children: [
-                          SizedBox(width: 20),
-                          Expanded(
-                            child: Text(
-                              'ซื้อเหรียญ',
-                              style: TextStyle(
-                                fontSize: 16,
-                              ),
-                            ),
-                          ),
-                          Icon(
-                            Icons.chevron_right,
-                            color: primaryColor,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const Divider(thickness: 2),
+                  // GestureDetector(
+                  //   onTap: () async {
+                  //     await Navigator.push(
+                  //       context,
+                  //       MaterialPageRoute(
+                  //         builder: (context) => const SolveFundPage(),
+                  //       ),
+                  //     );
+                  //   },
+                  //   child: Container(
+                  //     padding: const EdgeInsets.fromLTRB(20, 15, 20, 5),
+                  //     child: const Row(
+                  //       children: [
+                  //         SizedBox(width: 20),
+                  //         Expanded(
+                  //           child: Text(
+                  //             'ซื้อเหรียญ',
+                  //             style: TextStyle(
+                  //               fontSize: 16,
+                  //             ),
+                  //           ),
+                  //         ),
+                  //         Icon(
+                  //           Icons.chevron_right,
+                  //           color: primaryColor,
+                  //         ),
+                  //       ],
+                  //     ),
+                  //   ),
+                  // ),
+                  // const Divider(thickness: 2),
                   settingCard(
                       title: 'เงื่อนไขข้อตกลงการใช้บริการ',
                       url: 'https://solve.in.th/terms-of-service/'),

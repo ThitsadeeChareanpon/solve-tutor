@@ -16,6 +16,7 @@ import 'package:solve_tutor/feature/calendar/helper/utility_helper.dart';
 import 'package:solve_tutor/feature/calendar/model/show_course.dart';
 import 'package:solve_tutor/feature/calendar/widgets/format_date.dart';
 import 'package:solve_tutor/feature/calendar/widgets/sizebox.dart';
+import 'package:solve_tutor/feature/live_classroom/components/close_dialog.dart';
 import 'package:solve_tutor/widgets/sizer.dart';
 
 import '../../live_classroom/page/live_classroom.dart';
@@ -115,10 +116,12 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
             context: context);
       }
     } else {
-      showSnackBarMessage(
-          message:
-              'กรุณาทำการตรวจสอบ Solve Point ของท่าน!\nจำนวน Solve Point ขั้นต่ำ : $minPoint',
-          context: context);
+      showAlertRecordingDialog(
+        context,
+        title: 'Solve Coin ไม่เพียงพอ',
+        detail: '\t\t\tSolve Coin ของคุณไม่เพียงพอสำหรับใช้เข้าสอนในคลาสนี้\nกรุณาติดต่อทีมงานดูแลลูกค้าได้ในเวลา 11.00-22.00 น.',
+        confirm: 'ตกลง',
+      );
     }
   }
 
