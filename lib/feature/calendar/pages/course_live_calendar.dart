@@ -301,7 +301,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
             child: ElevatedButton.icon(
               icon: const Icon(Icons.add),
               label: Text(
-                'เพิ่มคอร์สเรียน',
+                'สร้างคอร์สสอนสด',
                 style: CustomStyles.med14White.copyWith(
                   color: CustomColors.white,
                 ),
@@ -1044,7 +1044,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                                 height: 48,
                                 width: 85,
                                 child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
+                                  padding: const EdgeInsets.all(3.0),
                                   child: Image.asset(
                                     'assets/images/img_not_available.jpeg',
                                     height: 160,
@@ -1094,10 +1094,10 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                       Expanded(
                         child: Row(
                           children: [
-                            Image.asset(
-                              'assets/images/tutor_icon.png',
-                              scale: 4,
-                            ),
+                            // Image.asset(
+                            //   'assets/images/tutor_icon.png',
+                            //   scale: 4,
+                            // ),
                             S.w(10),
                             Text(
                               auth?.user?.name ?? '',

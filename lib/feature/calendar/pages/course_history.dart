@@ -250,11 +250,11 @@ class _CourseHistoryState extends State<CourseHistory>
                                       height: 48,
                                       width: 85,
                                       child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
+                                        padding: const EdgeInsets.all(3.0),
                                         child: Image.asset(
-                                          ImageAssets.emptyCourse,
+                                          'assets/images/img_not_available.jpeg',
                                           width: double.infinity,
-                                          fit: BoxFit.fitHeight,
+                                          fit: BoxFit.cover,
                                         ),
                                       ),
                                     ),

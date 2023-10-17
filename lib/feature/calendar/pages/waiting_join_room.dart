@@ -119,7 +119,8 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
       showAlertRecordingDialog(
         context,
         title: 'Solve Coin ไม่เพียงพอ',
-        detail: '\t\t\tSolve Coin ของคุณไม่เพียงพอสำหรับใช้เข้าสอนในคลาสนี้\nกรุณาติดต่อทีมงานดูแลลูกค้าได้ในเวลา 11.00-22.00 น.',
+        detail:
+            '\t\t\tSolve Coin ของคุณไม่เพียงพอสำหรับใช้เข้าสอนในคลาสนี้\nกรุณาติดต่อทีมงานดูแลลูกค้าได้ในเวลา 11.00-22.00 น.',
         confirm: 'ตกลง',
       );
     }
@@ -214,8 +215,6 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
                 S.h(10),
                 _tutorTitle(),
                 S.h(30),
-
-                /// TODO: make Countdown widget change active status
                 isActive
                     ? S.h(30)
                     : Countdown(
@@ -498,7 +497,6 @@ class _CountdownState extends State<Countdown> {
   void _getTime() {
     final timeUntilStart = widget.courseStart.difference(DateTime.now());
 
-    // Check if the time until start is less than or equal to 5 minutes
     if (timeUntilStart <= const Duration(minutes: 5)) {
       widget.onActiveChanged(true); // Notify the parent widget
       _timer.cancel(); // Optionally, stop the timer

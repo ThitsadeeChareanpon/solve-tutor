@@ -104,67 +104,98 @@ class _MyCourseVDOPageState extends State<MyCourseVDOPage> {
                         child: _textFieldFilter(),
                       ),
                       S.w(10.0),
-                      PopupMenuButton(
-                        child: Container(
-                          decoration: const BoxDecoration(
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(10),
+                      // PopupMenuButton(
+                      //   child: Container(
+                      //     decoration: const BoxDecoration(
+                      //       borderRadius: BorderRadius.all(
+                      //         Radius.circular(10),
+                      //       ),
+                      //       color: CustomColors.green20B153,
+                      //     ),
+                      //     padding: const EdgeInsets.all(10.0),
+                      //     child: Row(
+                      //       children: [
+                      //         S.w(10),
+                      //         const Icon(
+                      //           Icons.add,
+                      //           color: Colors.white,
+                      //         ),
+                      //         S.w(10),
+                      //         Text(
+                      //           "สร้างคอร์สออนไลน์",
+                      //           style: CustomStyles.bold14White,
+                      //         ),
+                      //         S.w(10),
+                      //       ],
+                      //     ),
+                      //   ),
+                      //   itemBuilder: (context) {
+                      //     return [
+                      //       PopupMenuItem(
+                      //           value: '0',
+                      //           child: Row(
+                      //             children: [
+                      //               Image.asset(
+                      //                 'assets/images/icon_select_pdf.png',
+                      //                 scale: 2,
+                      //               ),
+                      //               S.w(10),
+                      //               Text(
+                      //                 'SOLVEPAD',
+                      //                 style: CustomStyles.med16Green,
+                      //               ),
+                      //             ],
+                      //           )),
+                      //       PopupMenuItem(
+                      //           value: '1',
+                      //           child: Row(
+                      //             children: [
+                      //               Image.asset(
+                      //                 'assets/images/ph_video.png',
+                      //                 scale: 2,
+                      //               ),
+                      //               S.w(10),
+                      //               Text(
+                      //                 'อัพโหลดวิดิโอ',
+                      //                 style: CustomStyles.med16Green,
+                      //               ),
+                      //             ],
+                      //           ))
+                      //     ];
+                      //   },
+                      //   onSelected: (String value) async {
+                      //     if (value == '0') {
+                      //       await Navigator.push(
+                      //         context,
+                      //         MaterialPageRoute(
+                      //           builder: (context) => CreateCoursePage(
+                      //               tutorId: widget.tutorId,
+                      //               courseType: CourseType.pad),
+                      //         ),
+                      //       );
+                      //     } else if (value == '1') {
+                      //       await Navigator.push(
+                      //         context,
+                      //         MaterialPageRoute(
+                      //           builder: (context) => CreateCoursePage(
+                      //               tutorId: widget.tutorId,
+                      //               courseType: CourseType.vdo),
+                      //         ),
+                      //       );
+                      //     }
+                      //   },
+                      // ),
+                      Container(
+                        margin: const EdgeInsets.all(6),
+                        child: ElevatedButton.icon(
+                          icon: const Icon(Icons.add),
+                          label: Text(
+                            'สร้างคอร์สออนไลน์',
+                            style: CustomStyles.med14White.copyWith(
+                              color: CustomColors.white,
                             ),
-                            color: CustomColors.green20B153,
                           ),
-                          padding: const EdgeInsets.all(10.0),
-                          child: Row(
-                            children: [
-                              S.w(10),
-                              const Icon(
-                                Icons.add,
-                                color: Colors.white,
-                              ),
-                              S.w(10),
-                              Text(
-                                "สร้างคอร์สออนไลน์",
-                                style: CustomStyles.bold14White,
-                              ),
-                              S.w(10),
-                            ],
-                          ),
-                        ),
-                        itemBuilder: (context) {
-                          return [
-                            PopupMenuItem(
-                                value: '0',
-                                child: Row(
-                                  children: [
-                                    Image.asset(
-                                      'assets/images/icon_select_pdf.png',
-                                      scale: 2,
-                                    ),
-                                    S.w(10),
-                                    Text(
-                                      'SOLVEPAD',
-                                      style: CustomStyles.med16Green,
-                                    ),
-                                  ],
-                                )),
-                            PopupMenuItem(
-                                value: '1',
-                                child: Row(
-                                  children: [
-                                    Image.asset(
-                                      'assets/images/ph_video.png',
-                                      scale: 2,
-                                    ),
-                                    S.w(10),
-                                    Text(
-                                      'อัพโหลดวิดิโอ',
-                                      style: CustomStyles.med16Green,
-                                    ),
-                                  ],
-                                ))
-                          ];
-                        },
-                        onSelected: (String value) async {
-                          if (value == '0') {
+                          onPressed: () async {
                             await Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -173,17 +204,13 @@ class _MyCourseVDOPageState extends State<MyCourseVDOPage> {
                                     courseType: CourseType.pad),
                               ),
                             );
-                          } else if (value == '1') {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => CreateCoursePage(
-                                    tutorId: widget.tutorId,
-                                    courseType: CourseType.vdo),
-                              ),
-                            );
-                          }
-                        },
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: CustomColors.greenPrimary,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0)),
+                          ),
+                        ),
                       ),
                     ],
                   ),
