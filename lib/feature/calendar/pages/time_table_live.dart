@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
@@ -566,7 +568,14 @@ class _TimeTableLiveState extends State<TimeTableLive> {
           calendarBuilders: CalendarBuilders(
             todayBuilder: (context, day, focusedDay) {
               return TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  _clearTime();
+                  courseController.haveErrorText = '';
+                  showDialog(
+                    context: context,
+                    builder: (context) => _addClassTime(day),
+                  );
+                },
                 child: Container(
                   alignment: Alignment.topLeft,
                   child: Text(
@@ -579,17 +588,18 @@ class _TimeTableLiveState extends State<TimeTableLive> {
             },
             outsideBuilder: (context, day, event) {
               return Container(
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.rectangle,
-                    color: CustomColors.grayF3F3F3,
-                  ),
-                  alignment: Alignment.topCenter,
-                  child: Text(
-                    day.day.toString(),
-                    style: CustomStyles.med16Black363636.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: CustomColors.gray878787),
-                  ));
+                decoration: const BoxDecoration(
+                  shape: BoxShape.rectangle,
+                  color: CustomColors.grayF3F3F3,
+                ),
+                alignment: Alignment.topCenter,
+                child: Text(
+                  day.day.toString(),
+                  style: CustomStyles.med16Black363636.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: CustomColors.gray878787),
+                ),
+              );
             },
             disabledBuilder: (context, day, focusedDay) {
               return TextButton(

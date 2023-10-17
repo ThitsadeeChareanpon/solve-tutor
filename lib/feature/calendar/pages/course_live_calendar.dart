@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -184,13 +186,13 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
             if (_util.isTablet() == false) ...[
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  _historyText(),
-                  Expanded(child: Container()),
+                  // Expanded(child: Container()),
                   // _buildButtonSearch(),
-                  S.w(10),
-                  _buildButtonAddCourse(),
+                  // S.w(10),
+                  // _buildButtonAddCourse(),
+                  _historyText(),
                 ],
               )
             ],
@@ -618,10 +620,10 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                 ),
               ] else ...[
                 Image.asset(
-                  ImageAssets.emptyCourse,
+                  'assets/images/img_not_available.jpeg',
                   height: 90,
                   width: double.infinity,
-                  fit: BoxFit.fitHeight,
+                  fit: BoxFit.cover,
                 ),
               ],
               S.h(8),
@@ -634,7 +636,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                     Text(
                       showCourseTutor.courseName ?? '',
                       maxLines: 1,
-                      style: CustomStyles.bold16Black363636,
+                      style: CustomStyles.bold14Black363636,
                     ),
                     Text(
                       showCourseTutor.detailsText ?? '',
@@ -877,10 +879,10 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                         ),
                         errorWidget: (context, url, error) {
                           return Image.asset(
-                            ImageAssets.emptyCourse,
+                            'assets/images/img_not_available.jpeg',
                             height: 90,
                             width: double.infinity,
-                            fit: BoxFit.fitHeight,
+                            fit: BoxFit.cover,
                           );
                         },
                         imageUrl: listCalendarTab[index].thumbnailUrl ?? '',
@@ -1442,16 +1444,17 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
   }
 
   Widget tableCalendarMobile() {
-    var now = DateTime.now();
+    DateTime today =
+        DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
     return TableCalendar<Event>(
       availableGestures: AvailableGestures.horizontalSwipe,
       locale: 'en_US',
-      firstDay: now,
+      firstDay: today,
       lastDay: courseController.kEvents?.isNotEmpty == true
           ? courseController.kEvents?.keys.last ??
-              DateTime(now.year, now.month + 1, now.day)
-          : DateTime(now.year, now.month + 1, now.day),
-      focusedDay: now,
+              DateTime(today.year, today.month + 1, today.day)
+          : DateTime(today.year, today.month + 1, today.day),
+      focusedDay: today,
       calendarFormat: _calendarFormat,
       availableCalendarFormats: const {
         CalendarFormat.month: 'Month',
@@ -1500,11 +1503,16 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
           ),
         ),
         todayBuilder: (context, day, focusedDay) => SizedBox(
-          child: Center(
-            child: Text(
-              day.day.toString(),
-              style: CustomStyles.med16Black363636.copyWith(
-                  fontWeight: FontWeight.bold, color: CustomColors.gray878787),
+          child: Container(
+            color: const Color(0xffB9E7C9),
+            margin: const EdgeInsets.all(4),
+            child: Center(
+              child: Text(
+                day.day.toString(),
+                style: CustomStyles.med16Black363636.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: CustomColors.gray878787),
+              ),
             ),
           ),
         ),
@@ -1518,7 +1526,8 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
           ),
         ),
         markerBuilder: (context, day, event) {
-          if (event.isNotEmpty && day.isAfter(DateTime.now())) {
+          if (event.isNotEmpty && day.isAfter(DateTime.now()) ||
+              day.day == today.day) {
             return InkWell(
               onTap: () async {
                 await showDialog(
@@ -1533,15 +1542,16 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: List.generate(
-                            event.length,
-                            (index) => Container(
-                                  height: 7,
-                                  width: 7,
-                                  decoration: const BoxDecoration(
-                                    color: CustomColors.greenPrimary,
-                                    shape: BoxShape.circle,
-                                  ),
-                                )),
+                          event.length,
+                          (index) => Container(
+                            height: 7,
+                            width: 7,
+                            decoration: const BoxDecoration(
+                              color: CustomColors.greenPrimary,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -1697,7 +1707,7 @@ class _CourseLiveCalendarState extends State<CourseLiveCalendar>
       child: Text(
         tag,
         style: CustomStyles.med12gray878787.copyWith(
-            color: Colors.black, fontSize: _util.isTablet() ? 14 : 13),
+            color: Colors.black, fontSize: _util.isTablet() ? 14 : 11),
       ),
     );
   }
