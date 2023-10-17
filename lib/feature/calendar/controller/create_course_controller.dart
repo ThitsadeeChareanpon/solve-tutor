@@ -22,6 +22,7 @@ class CourseController extends ChangeNotifier {
   var courseNameTextEditing = TextEditingController();
   var courseDetailTextEditing = TextEditingController();
   var courseRecommendTextEditing = TextEditingController();
+  var coursePriceTextEditing = TextEditingController();
   final ImagePicker _picker = ImagePicker();
   final levels = <SelectOptionItem>[];
   final subjects = <SelectOptionItem>[];
@@ -164,7 +165,7 @@ class CourseController extends ChangeNotifier {
     courseNameTextEditing.text = courseData?.courseName ?? '';
     courseDetailTextEditing.text = courseData?.detailsText ?? '';
     courseRecommendTextEditing.text = courseData?.recommendText ?? '';
-    courseRecommendTextEditing.text = courseData?.recommendText ?? '';
+    coursePriceTextEditing.text = courseData?.recommendText ?? '';
     startDateController.text = FormatDate.dayOnlyNumber(courseData?.firstDay);
     endDateController.text = FormatDate.dayOnlyNumber(courseData?.lastDay);
     notifyListeners();
@@ -180,8 +181,8 @@ class CourseController extends ChangeNotifier {
     if (courseRecommendTextEditing.text.isNotEmpty) {
       courseRecommendTextEditing.text = '';
     }
-    if (courseRecommendTextEditing.text.isNotEmpty) {
-      courseRecommendTextEditing.text = '';
+    if (coursePriceTextEditing.text.isNotEmpty) {
+      coursePriceTextEditing.text = '';
     }
     if (selectedLevel.isNotEmpty) {
       selectedLevel = '';

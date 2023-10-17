@@ -177,6 +177,22 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                       style: CustomStyles.med16Black363636,
                     ),
                     S.h(16.0),
+                    RichText(
+                      text: TextSpan(
+                        children: <TextSpan>[
+                          TextSpan(
+                            text: 'ราคา: ',
+                            style: CustomStyles.bold18Black363636,
+                          ),
+                          TextSpan(
+                            text: widget.courseData.price?.toInt().toString(),
+                            style: CustomStyles.med16Green
+                                .copyWith(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ),
+                    S.h(16.0),
                     Text(
                       'ภาพรวมคอร์สเรียน:',
                       style: CustomStyles.bold18Black363636,

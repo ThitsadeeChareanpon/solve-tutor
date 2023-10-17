@@ -23,6 +23,7 @@ class CourseModel {
   DateTime? lastDay;
   bool? publishing;
   String? courseType;
+  double? price;
 
   CourseModel({
     this.courseName,
@@ -44,6 +45,7 @@ class CourseModel {
     this.lastDay,
     this.publishing,
     this.courseType,
+    this.price,
   });
 
   CourseModel.fromJson(Map<String, dynamic> json) {
@@ -103,6 +105,7 @@ class CourseModel {
     }
     publishing = data['publishing'] ?? false;
     courseType = data['course_type'] ?? '';
+    price = data['price'] ?? 0;
   }
 
   Map<String, dynamic> toJson() {
@@ -131,6 +134,7 @@ class CourseModel {
     data['last_day'] = lastDay?.toUtc().millisecondsSinceEpoch;
     data['publishing'] = false;
     data['course_type'] = courseType;
+    data['price'] = price;
     return data;
   }
 }
@@ -189,7 +193,8 @@ class CalendarDate {
         audioFile?.add(v);
       });
     }
-    actualStart = DateTime.fromMillisecondsSinceEpoch(json['actual_start'] ?? 0);
+    actualStart =
+        DateTime.fromMillisecondsSinceEpoch(json['actual_start'] ?? 0);
     actualEnd = DateTime.fromMillisecondsSinceEpoch(json['actual_end'] ?? 0);
     liveDuration = json['live_duration'] ?? 0;
   }

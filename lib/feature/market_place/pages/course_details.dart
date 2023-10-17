@@ -1,5 +1,6 @@
 // import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -222,17 +223,18 @@ class _CourseDetailsState extends State<CourseDetails> {
                         );
                       }),
                       S.h(20),
-                      _textAera(courseController.courseRecommendTextEditing,
+                      _textArea(courseController.courseRecommendTextEditing,
                           title: "แนะนำคอร์สเรียน*",
                           // labelText: 'คำอธิบายคอร์ส',
                           hintText: 'รายละเอียด...'),
                       S.h(20),
-                      _textAera(courseController.courseDetailTextEditing,
+                      _textArea(courseController.courseDetailTextEditing,
                           title: "รายละเอียดคอร์ส*", hintText: 'รายละเอียด...'),
                       S.h(20),
                       // if (widgcourseControlleret.courseActionType ==
                       //     CourseActionType.update) ...[
                       // _managementStudent(),
+                      _pricingArea(),
                       S.h(20),
                       _deleteCourse(),
                       // ],
@@ -263,7 +265,7 @@ class _CourseDetailsState extends State<CourseDetails> {
     );
   }
 
-  Widget _textAera(TextEditingController controller,
+  Widget _textArea(TextEditingController controller,
       {String? title, String? labelText, String? hintText}) {
     return Column(
       children: [
@@ -298,6 +300,43 @@ class _CourseDetailsState extends State<CourseDetails> {
                 border: const OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(4.0)),
                 )),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _pricingArea() {
+    return Column(
+      children: [
+        _topicText('ราคา'),
+        SizedBox(
+          child: TextFormField(
+            keyboardType: TextInputType.number,
+            style: CustomStyles.med14Black363636,
+            maxLines: 1,
+            maxLength: 10,
+            onChanged: (value) {
+              courseController.courseData?.price = double.parse(value);
+            },
+            inputFormatters: <TextInputFormatter>[
+              FilteringTextInputFormatter.digitsOnly
+            ],
+            textAlignVertical: TextAlignVertical.top,
+            decoration: InputDecoration(
+              hintText: 'หน่วยเป็นบาท',
+              hintStyle:
+                  CustomStyles.med16Black363636.copyWith(color: Colors.grey),
+              alignLabelWithHint: true,
+              enabledBorder: const OutlineInputBorder(
+                // width: 0.0 produces a thin "hairline" border
+                borderSide:
+                    BorderSide(color: CustomColors.grayE5E6E9, width: 1),
+              ),
+              border: const OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(4.0)),
+              ),
+            ),
           ),
         ),
       ],
