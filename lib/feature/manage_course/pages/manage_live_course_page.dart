@@ -65,20 +65,36 @@ class _ManageLiveCoursePageState extends State<ManageLiveCoursePage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    "ตารางสอน / เข้าห้องเรียน",
-                                    style: TextStyle(
-                                      color: appTextPrimaryColor,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          "ตารางสอน / เข้าห้องเรียน",
+                                          style: TextStyle(
+                                            color: appTextPrimaryColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  Text(
-                                    "ดูตารางสอนของคุณ และกดเข้าห้องเรียน",
-                                    style: TextStyle(
-                                      color: appTextSecondaryColor,
-                                      fontSize: 14,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          "ดูตารางสอนของคุณ และกดเข้าห้องเรียน",
+                                          style: TextStyle(
+                                            color: appTextSecondaryColor,
+                                            fontSize: 14,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -121,20 +137,36 @@ class _ManageLiveCoursePageState extends State<ManageLiveCoursePage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    "การใช้งาน",
-                                    style: TextStyle(
-                                      color: appTextPrimaryColor,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          "การใช้งาน",
+                                          style: TextStyle(
+                                            color: appTextPrimaryColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  Text(
-                                    "ดูรายการค่าใช้จ่ายคอร์สสอนสด",
-                                    style: TextStyle(
-                                      color: appTextSecondaryColor,
-                                      fontSize: 14,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          "ดูรายการค่าใช้จ่ายคอร์สสอนสด",
+                                          style: TextStyle(
+                                            color: appTextSecondaryColor,
+                                            fontSize: 14,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -191,16 +223,16 @@ class _ManageLiveCoursePageState extends State<ManageLiveCoursePage> {
                       image: 'assets/images/menu_my_course.png',
                       title: "สร้างคอร์สสอนสด",
                       content:
-                          "สร้างคอร์สสอนพิเศษของคุณ เพื่อลงขายใน Market Place ของเรา",
+                          "เพิ่มชีท เพิ่มนักเรียน จัดตารางสอน และรอสอนได้เลย",
                     ),
-                    gridCard(
-                      context,
-                      onTap: () {},
-                      image: 'assets/images/student1.png',
-                      title: "จัดการนักเรียน",
-                      content:
-                          "แชร์คอร์ส จัดการรายชื่อ นักเรียนที่ลงทะเบียนในคอร์สของคุณ",
-                    ),
+                    // gridCard(
+                    //   context,
+                    //   onTap: () {},
+                    //   image: 'assets/images/student1.png',
+                    //   title: "จัดการนักเรียน",
+                    //   content:
+                    //       "แชร์คอร์ส จัดการรายชื่อ นักเรียนที่ลงทะเบียนในคอร์สของคุณ",
+                    // ),
 
                     gridCard(
                       context,
@@ -214,8 +246,7 @@ class _ManageLiveCoursePageState extends State<ManageLiveCoursePage> {
                       },
                       image: 'assets/images/menu_create_sheet.png',
                       title: "สร้างชีท",
-                      content:
-                          "สร้างคลังเอกสารประกอบการเรียน เพื่อให้คุณสามารถแชร์เอกสารกับคอร์สอื่นๆได้",
+                      content: "อัปโหลดเอกสารประกอบการสอน",
                     ),
                     gridCard(
                       context,
@@ -223,20 +254,20 @@ class _ManageLiveCoursePageState extends State<ManageLiveCoursePage> {
                       image: 'assets/images/menu_qa.png',
                       title: "ตอบคำถามนักเรียน",
                       content:
-                          "คำถามระหว่างเรียนของนักเรียนของคุณ ที่ต้องการให้คุณช่วยตอบ",
+                          "อธิบายนักเรียนด้วยนวัตกรรม virtual one-on-one tutoring",
                     ),
-                    gridCard(
-                      context,
-                      onTap: () {
-                        var route = MaterialPageRoute(
-                            builder: (context) => const ClassListPage());
-                        Navigator.push(context, route);
-                      },
-                      image: 'assets/images/menu_find_job.png',
-                      title: "ค้นหางานสอน",
-                      content:
-                          "ประกาศของนักเรียนที่กำลังมองหาติวเตอร์ คุณสามารถเข้า ไปเสนอราคาเพื่อรับงานได้",
-                    ),
+                    // gridCard(
+                    //   context,
+                    //   onTap: () {
+                    //     var route = MaterialPageRoute(
+                    //         builder: (context) => const ClassListPage());
+                    //     Navigator.push(context, route);
+                    //   },
+                    //   image: 'assets/images/menu_find_job.png',
+                    //   title: "ค้นหางานสอน",
+                    //   content:
+                    //       "ประกาศของนักเรียนที่กำลังมองหาติวเตอร์ คุณสามารถเข้า ไปเสนอราคาเพื่อรับงานได้",
+                    // ),
                   ],
                 ),
                 const SizedBox(height: 70),
@@ -287,20 +318,36 @@ class _ManageLiveCoursePageState extends State<ManageLiveCoursePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: appTextPrimaryColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: const TextStyle(
+                            color: appTextPrimaryColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
-                  Text(
-                    content ?? "",
-                    style: const TextStyle(
-                      color: appTextSecondaryColor,
-                      fontSize: 14,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          content ?? "",
+                          style: const TextStyle(
+                            color: appTextSecondaryColor,
+                            fontSize: 14,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

@@ -65,20 +65,36 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    "ภาพรวม",
-                                    style: TextStyle(
-                                      color: appTextPrimaryColor,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          "ภาพรวม",
+                                          style: TextStyle(
+                                            color: appTextPrimaryColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  Text(
-                                    "ดูคอร์สขายดี, รายได้ของคุณ, จำนวนนักเรียนในคอร์ส, รีวิว, และคะแนนของคุณ",
-                                    style: TextStyle(
-                                      color: appTextSecondaryColor,
-                                      fontSize: 14,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          "ดูคอร์สขายดี, รายได้ของคุณ, จำนวนนักเรียนในคอร์ส, รีวิว, และคะแนนของคุณ",
+                                          style: TextStyle(
+                                            color: appTextSecondaryColor,
+                                            fontSize: 14,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -121,20 +137,36 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    "ถอนเงิน",
-                                    style: TextStyle(
-                                      color: appTextPrimaryColor,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          "ถอนเงิน",
+                                          style: TextStyle(
+                                            color: appTextPrimaryColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  Text(
-                                    "จัดการ Credits รายได้และยอดเงินเตรียมโอนของคุณ",
-                                    style: TextStyle(
-                                      color: appTextSecondaryColor,
-                                      fontSize: 14,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          "จัดการ Credits รายได้และยอดเงินเตรียมโอนของคุณ",
+                                          style: TextStyle(
+                                            color: appTextSecondaryColor,
+                                            fontSize: 14,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -166,9 +198,8 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                         );
                       },
                       image: 'assets/images/menu_my_course.png',
-                      title: "สอนคอร์สบันทึกวีดีโอ",
-                      content:
-                          "สร้างคอร์สสอนพิเศษของคุณ เพื่อลงขายใน Market Place ของเรา",
+                      title: "สร้างคอร์สด้วย SOLVE Pad",
+                      content: "สร้างคอร์สเพื่อลงขายใน Marketplace",
                     ),
                     gridCard(
                       context,
@@ -182,8 +213,7 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                       },
                       image: 'assets/images/menu_create_sheet.png',
                       title: "สร้างชีท",
-                      content:
-                          "สร้างคลังเอกสารประกอบการเรียน เพื่อให้คุณสามารถแชร์เอกสารกับคอร์สอื่นๆได้",
+                      content: "อัปโหลดเอกสารประกอบการสอน",
                     ),
                     gridCard(
                       context,
@@ -191,7 +221,7 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                       image: 'assets/images/menu_qa.png',
                       title: "ตอบคำถามนักเรียน",
                       content:
-                          "คำถามระหว่างเรียนของนักเรียนของคุณ ที่ต้องการให้คุณช่วยตอบ",
+                          "อธิบายนักเรียนด้วยนวัตกรรม virtual one-on-one tutoring",
                     ),
                   ],
                 ),
@@ -243,20 +273,36 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: appTextPrimaryColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: const TextStyle(
+                            color: appTextPrimaryColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
-                  Text(
-                    content ?? "",
-                    style: const TextStyle(
-                      color: appTextSecondaryColor,
-                      fontSize: 14,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          content ?? "",
+                          style: const TextStyle(
+                            color: appTextSecondaryColor,
+                            fontSize: 14,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

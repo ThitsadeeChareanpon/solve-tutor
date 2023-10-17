@@ -107,7 +107,7 @@ class _ManageCoursePageState extends State<ManageCoursePage>
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      "คอร์สบันทึกวิดีโอ",
+                                      "คอร์สบันทึกย้อนหลัง",
                                       textAlign: TextAlign.center,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -157,8 +157,8 @@ class _ManageCoursePageState extends State<ManageCoursePage>
                   child: TabBarView(
                     controller: _tabController,
                     children: const [
-                      ManageLiveCoursePage(),
                       ManageMarketCoursePage(),
+                      ManageLiveCoursePage(),
                     ],
                   ),
                 ),
@@ -170,7 +170,7 @@ class _ManageCoursePageState extends State<ManageCoursePage>
         floatingActionButton: Container(
           width: Sizer(context).w,
           height: 80,
-          padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
           alignment: Alignment.center,
           decoration: const BoxDecoration(
             color: primaryColor,
@@ -187,33 +187,49 @@ class _ManageCoursePageState extends State<ManageCoursePage>
                 ),
                 child: Image.asset("assets/images/share.png"),
               ),
-              const SizedBox(width: 20),
+              const SizedBox(width: 10),
               const Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      "แนะนำเพื่อนรับเงินคืน",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            "แนะนำเพื่อนรับเงินคืน",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
-                    Text(
-                      "ส่ง Link แนะนำเเพื่อนให้มาใช้บริการแอป SLOVE วันนี้ ได้รับเงินคืนทันทีเมื่อเพื่อนใช้บริการครั้งแรก",
-                      style: TextStyle(
-                        color: Colors.white,
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            "ส่ง Link แนะนำเเพื่อนให้มาใช้บริการแอป SLOVE วันนี้ ได้รับเงินคืนทันทีเมื่อเพื่อนใช้บริการครั้งแรก",
+                            style: TextStyle(
+                              color: Colors.white,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 20),
+              const SizedBox(width: 10),
               Container(
                 width: 100,
-                height: 50,
+                height: 45,
                 alignment: Alignment.center,
                 padding: const EdgeInsets.all(5),
                 decoration: BoxDecoration(
