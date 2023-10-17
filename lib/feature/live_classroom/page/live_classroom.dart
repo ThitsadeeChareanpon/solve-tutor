@@ -414,7 +414,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   void initWss() {
     channel = WebSocketChannel.connect(
       Uri.parse(
-          'ws://35.240.169.164:3000/${widget.courseId}/${widget.startTime}'),
+          'ws://34.143.240.238:3000/${widget.courseId}/${widget.startTime}'),
     );
 
     channel?.stream.listen((message) {
