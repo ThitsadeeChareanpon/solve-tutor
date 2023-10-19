@@ -34,10 +34,18 @@ class _ManageLiveCoursePageState extends State<ManageLiveCoursePage> {
               children: [
                 Row(
                   children: [
-                    mobileCard('assets/images/calendar.png', 'Hybrid Solution',
-                        'สร้างคอร์ส Hybrid ของคุณ', true),
-                    mobileCard('assets/images/graph.png', 'การใช้งาน',
-                        'ดูรายการค่าใช้จ่ายคอร์สสอนสด', false),
+                    mobileCard(
+                        'assets/images/calendar.png',
+                        'Hybrid Solution',
+                        'สร้างคอร์ส Hybrid ของคุณ',
+                        true,
+                        const MaintenancePage()),
+                    mobileCard(
+                        'assets/images/graph.png',
+                        'การใช้งาน',
+                        'ดูรายการค่าใช้จ่ายคอร์สสอนสด',
+                        false,
+                        const MaintenancePage()),
                   ],
                 ),
                 if (!Responsive.isMobile(context))
@@ -113,7 +121,14 @@ class _ManageLiveCoursePageState extends State<ManageLiveCoursePage> {
                       ),
                       gridCard(
                         context,
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const MaintenancePage(),
+                            ),
+                          );
+                        },
                         image: 'assets/images/menu_qa.png',
                         title: "ตอบคำถามนักเรียน",
                         content:
@@ -137,12 +152,23 @@ class _ManageLiveCoursePageState extends State<ManageLiveCoursePage> {
                   Row(
                     children: [
                       mobileCard(
-                          'assets/images/menu_my_course.png',
-                          'สร้างคอร์สสอนสด',
-                          'เพิ่มชีท เพิ่มนักเรียน จัดตารางสอน และรอสอนได้เลย',
-                          true),
-                      mobileCard('assets/images/menu_create_sheet.png',
-                          'สร้างชีท', 'อัปโหลดเอกสารประกอบการสอน', false),
+                        'assets/images/menu_my_course.png',
+                        'สร้างคอร์สสอนสด',
+                        'เพิ่มชีท เพิ่มนักเรียน จัดตารางสอน และรอสอนได้เลย',
+                        true,
+                        MyCourseLivePage(
+                          tutorId: auth?.uid ?? "",
+                        ),
+                      ),
+                      mobileCard(
+                        'assets/images/menu_create_sheet.png',
+                        'สร้างชีท',
+                        'อัปโหลดเอกสารประกอบการสอน',
+                        false,
+                        MyDocumentPage(
+                          tutorId: auth?.uid ?? "",
+                        ),
+                      ),
                     ],
                   ),
                 if (Responsive.isMobile(context))
@@ -152,7 +178,8 @@ class _ManageLiveCoursePageState extends State<ManageLiveCoursePage> {
                           'assets/images/menu_qa.png',
                           'ตอบคำถามนักเรียน',
                           'อธิบายนักเรียนด้วยนวัตกรรม virtual one-on-one tutoring',
-                          true),
+                          true,
+                          const MaintenancePage()),
                     ],
                   ),
                 const SizedBox(height: 70),
@@ -164,7 +191,8 @@ class _ManageLiveCoursePageState extends State<ManageLiveCoursePage> {
     );
   }
 
-  Widget mobileCard(String img, String title, String desc, bool left) {
+  Widget mobileCard(
+      String img, String title, String desc, bool left, Widget link) {
     return Expanded(
       child: Container(
         height: Responsive.isMobile(context) ? 200 : 230,
@@ -191,7 +219,7 @@ class _ManageLiveCoursePageState extends State<ManageLiveCoursePage> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const MaintenancePage(),
+                builder: (context) => link,
               ),
             );
           },
