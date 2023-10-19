@@ -419,10 +419,11 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
 
     channel?.stream.listen((message) {
       // if (_requestScreenShare) {
+      if (!mounted) return;
       setState(() {
         var decodedMessage = json.decode(message);
         log('json message');
-        log(decodedMessage);
+        log(decodedMessage.toString());
 
         var item = decodedMessage[0];
         var data = item['data'];
