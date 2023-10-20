@@ -266,7 +266,9 @@ class _UpdateCourseTabState extends State<UpdateCourseTab>
           scale: 2.5,
         ),
         label: Text(
-          "เผยแพร่",
+          courseController.courseData?.publishing == true
+              ? 'ยกเลิก'
+              : 'เผยแพร่',
           style: CustomStyles.med14White.copyWith(
             color: CustomColors.white,
           ),
@@ -294,12 +296,18 @@ class _UpdateCourseTabState extends State<UpdateCourseTab>
             );
           }
           // ignore: use_build_context_synchronously
-          showSnackBar(context, 'อัพเดทสำเร็จ');
+          showSnackBar(
+            context,
+            courseController.courseData?.publishing == true
+                ? 'เผยแพร่สำเร็จ'
+                : 'ยกเลิกเผยแพร่คอร์สนี้แล้ว',
+            courseController.courseData?.publishing == true ? 'green' : 'red',
+          );
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: courseController.courseData?.publishing == true
-              ? CustomColors.yellowFF9800
-              : CustomColors.grayCFCFCF,
+              ? CustomColors.redB71C1C
+              : CustomColors.yellowFF9800,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
         ),
