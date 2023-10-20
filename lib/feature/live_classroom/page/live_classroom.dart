@@ -294,7 +294,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   List<dynamic> currentEraserStroke = [];
   List<ScrollZoomStamp> currentScrollZoom = [];
   double currentScale = 2.0;
-  double currentScrollX = 2.0;
+  double currentScrollX = 0;
   double currentScrollY = 0;
   bool isLoading = false;
 

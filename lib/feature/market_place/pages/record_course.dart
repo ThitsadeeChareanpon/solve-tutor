@@ -205,7 +205,7 @@ class _RecordCourseState extends State<RecordCourse> {
   int currentReplayPointIndex = 0;
   int currentReplayScrollIndex = 0;
   double currentScale = 2.0;
-  double currentScrollX = 2.0;
+  double currentScrollX = 0;
   double currentScrollY = 0;
   Timer? _sliderTimer;
   double replayProgress = 0;

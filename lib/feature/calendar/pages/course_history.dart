@@ -191,6 +191,8 @@ class _CourseHistoryState extends State<CourseHistory>
                           tutorId: authProvider!.user!.id!,
                           userId: authProvider!.user!.id!,
                           docId: reviewList[index].documentId!,
+                          start: reviewList[index].start!,
+                          end: reviewList[index].end!,
                         ),
                       ),
                     );
