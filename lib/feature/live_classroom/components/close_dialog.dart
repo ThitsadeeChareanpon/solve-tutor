@@ -55,10 +55,10 @@ Future<void> showCloseDialog(
                           ), // NEW
                         ),
                         onPressed: () {
-                          SystemChrome.setPreferredOrientations([
-                            DeviceOrientation.portraitUp,
-                            DeviceOrientation.portraitDown,
-                          ]);
+                          // SystemChrome.setPreferredOrientations([
+                          //   DeviceOrientation.portraitUp,
+                          //   DeviceOrientation.portraitDown,
+                          // ]);
                           Navigator.of(context).pop();
                           onConfirm(); // Execute the confirmation function
                         },
@@ -98,12 +98,11 @@ Future<void> showCloseDialog(
   );
 }
 
-Future<void> showAlertRecordingDialog(
-    BuildContext context, {
-      String title = 'ระบบกำลังทำการบันทึกเสียง',
-      String detail = 'ท่านไม่สามารถปิดห้องเรียนระหว่างบันทึกเสียงได้ กรุณาสิ้นสุดการบันทึกเสียง',
-      String confirm = 'ตกลง'
-    }) {
+Future<void> showAlertRecordingDialog(BuildContext context,
+    {String title = 'ระบบกำลังทำการบันทึกเสียง',
+    String detail =
+        'ท่านไม่สามารถปิดห้องเรียนระหว่างบันทึกเสียงได้ กรุณาสิ้นสุดการบันทึกเสียง',
+    String confirm = 'ตกลง'}) {
   return showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -141,7 +140,7 @@ Future<void> showAlertRecordingDialog(
                           backgroundColor: CustomColors.redF44336,
                           shape: RoundedRectangleBorder(
                             borderRadius:
-                            BorderRadius.circular(8.0), // <-- Radius
+                                BorderRadius.circular(8.0), // <-- Radius
                           ), // NEW
                         ),
                         onPressed: () {

@@ -38,11 +38,11 @@ class FirebaseService {
     final storageRef = FirebaseStorage.instance.ref();
     final tempDirectory = await getTemporaryDirectory();
 
-    final solvepadRef = storageRef.child("flutter/$fileName.txt");
+    final solvepadRef = storageRef.child("marketplace/$fileName.txt");
     String localSolvepadPath = '${tempDirectory.path}/solvepad.txt';
     File solvepadFile = File(localSolvepadPath);
 
-    final voiceRef = storageRef.child("flutter/$fileName.mp4");
+    final voiceRef = storageRef.child("marketplace/$fileName.mp4");
     String localVoicePath = '${tempDirectory.path}/tau_file.mp4';
     File voiceFile = File(localVoicePath);
 
@@ -64,5 +64,19 @@ class FirebaseService {
     final String voiceUrl = await voiceSnapshot.ref.getDownloadURL();
 
     return [solvepadUrl, voiceUrl];
+  }
+
+  Future<String> uploadLiveSolvepad(String fileName) async {
+    final storageRef = FirebaseStorage.instance.ref();
+    final tempDirectory = await getTemporaryDirectory();
+
+    final solvepadRef = storageRef.child("solve_live/$fileName.txt");
+    String localSolvepadPath = '${tempDirectory.path}/solvepad.txt';
+    File solvepadFile = File(localSolvepadPath);
+
+    TaskSnapshot solvepadSnapshot = await solvepadRef.putFile(solvepadFile);
+    final String solvepadUrl = await solvepadSnapshot.ref.getDownloadURL();
+
+    return solvepadUrl;
   }
 }

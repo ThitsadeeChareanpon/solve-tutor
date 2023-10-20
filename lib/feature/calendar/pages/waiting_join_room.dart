@@ -375,7 +375,6 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
       Material(
         child: InkWell(
           onTap: () async {
-            print('tap join');
             createAndJoinMeeting(authProvider.user?.name ?? '');
           },
           child: Container(

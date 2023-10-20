@@ -194,7 +194,7 @@ class _RecordCourseState extends State<RecordCourse> {
   bool _mRecorderIsInited = false;
   bool _mPlaybackReady = false;
 
-  // ---------- VARIABLE: new format
+  // ---------- VARIABLE: data collection
   late Map<String, dynamic> _data;
   String jsonData = '';
   late List<Map<String, dynamic>> _actions;
@@ -1356,11 +1356,11 @@ class _RecordCourseState extends State<RecordCourse> {
                               if (activePointerId != details.pointer) return;
                               if (!isRecording) return;
                               activePointerId = null;
-                              currentStroke.clear();
                               switch (_mode) {
                                 case DrawingMode.pen:
                                   addDrawing(currentStroke,
                                       currentStroke[0].timestamp);
+                                  currentStroke.clear();
                                   _penPoints[_currentPage].add(null);
                                   break;
                                 case DrawingMode.laser:
@@ -1372,11 +1372,12 @@ class _RecordCourseState extends State<RecordCourse> {
                                 case DrawingMode.highlighter:
                                   addDrawing(currentStroke,
                                       currentStroke[0].timestamp);
-                                  currentEraserStroke.clear();
+                                  currentStroke.clear();
                                   _highlighterPoints[_currentPage].add(null);
                                   break;
                                 case DrawingMode.eraser:
                                   addErasing(currentEraserStroke);
+                                  currentEraserStroke.clear();
                                   setState(() {
                                     _eraserPoints[_currentPage] =
                                         const Offset(-100, -100);

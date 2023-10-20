@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:solve_tutor/authentication/service/auth_provider.dart';
 
@@ -14,6 +16,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:sizer/sizer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../../firebase/database.dart';
 import '../../../nav.dart';
 import '../../calendar/constants/custom_styles.dart';
 import '../../calendar/controller/create_course_live_controller.dart';
@@ -248,7 +251,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   final List<List<Offset?>> _replayPoints = [[]];
   DrawingMode _mode = DrawingMode.drag;
   DrawingMode _studentMode = DrawingMode.drag;
-  final SolveStopwatch stopwatch = SolveStopwatch();
+  final SolveStopwatch solveStopwatch = SolveStopwatch();
   Size studentSolvepadSize = const Size(1059.0, 547.0);
   Size mySolvepadSize = const Size(1059.0, 547.0);
   double sheetImageRatio = 0.708;
@@ -282,6 +285,19 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   // ---------- VARIABLE: message control
   late Map<String, Function(String)> handlers;
 
+  // ---------- VARIABLE: data collection
+  FirebaseService firebaseService = FirebaseService();
+  late Map<String, dynamic> _data;
+  String jsonData = '';
+  late List<Map<String, dynamic>> _actions;
+  List<StrokeStamp> currentStroke = [];
+  List<dynamic> currentEraserStroke = [];
+  List<ScrollZoomStamp> currentScrollZoom = [];
+  double currentScale = 2.0;
+  double currentScrollX = 2.0;
+  double currentScrollY = 0;
+  bool isLoading = false;
+
   /// TODO: Get rid of all Mockup reference
   @override
   void initState() {
@@ -304,6 +320,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       initPagesData();
       initMessageHandler();
       initConference();
+      initSolvepadData();
     } else {
       _joined = true;
       mockInitPageData();
@@ -359,10 +376,10 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   }
 
   void initTimer() {
-    stopwatch.start();
+    solveStopwatch.start();
     _meetingTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
-        _formattedElapsedTime = _formatElapsedTime(stopwatch.elapsed);
+        _formattedElapsedTime = _formatElapsedTime(solveStopwatch.elapsed);
       });
     });
   }
@@ -453,7 +470,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
         else if (data.startsWith('RequestSolvepadSize')) {
           sendMessage(
             'SetSolvepad:${mySolvepadSize.width}:${mySolvepadSize.height}',
-            stopwatch.elapsed.inMilliseconds,
+            solveStopwatch.elapsed.inMilliseconds,
           );
           if (students.isEmpty) return;
           var studentIndex = getStudentIndex(uid);
@@ -475,6 +492,29 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
         }
       });
       // }
+    });
+  }
+
+  void initSolvepadData() {
+    _data = {
+      "version": "2.0.0",
+      "solvepadWidth": mySolvepadSize.width,
+      "solvepadHeight": mySolvepadSize.height,
+      "metadata": {
+        "courseId": widget.courseId,
+        "tutorId": widget.userId,
+        "duration": 0,
+      },
+      "actions": []
+    };
+    _actions = (_data['actions'] as List).cast<Map<String, dynamic>>();
+    _actions.add({
+      "time": solveStopwatch.elapsed.inMilliseconds,
+      "type": "start-recording",
+      "page": _currentPage,
+      "scrollX": currentScrollX,
+      "scrollY": currentScrollY,
+      "scale": currentScale,
     });
   }
 
@@ -711,15 +751,137 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     });
   }
 
+  // ---------- FUNCTION: Solvepad Data Collection
+  void addDrawing(List<StrokeStamp> strokeStamp, int initTime) {
+    _actions.add({
+      "time": initTime,
+      "type": "drawing",
+      "data": {
+        "tool": _mode.toString(),
+        "color": _strokeColors[_selectedIndexColors].value.toRadixString(16),
+        "strokeWidth": _strokeWidths[_selectedIndexLines],
+        "points": strokeStamp
+            .map((timedOffset) => {
+                  'x': double.parse(timedOffset.offset.dx.toStringAsFixed(2)),
+                  'y': double.parse(timedOffset.offset.dy.toStringAsFixed(2)),
+                  'time': timedOffset.timestamp,
+                })
+            .toList()
+      }
+    });
+  }
+
+  void addErasing(List<dynamic> eraserStroke) {
+    if (eraserStroke.isNotEmpty) {
+      List<Map<String, dynamic>> formattedActions = [];
+      List<Map<String, dynamic>> moveActions = [];
+
+      for (var action in eraserStroke) {
+        if (action[0] is Offset) {
+          moveActions.add({
+            'x': double.parse(action[0].dx.toStringAsFixed(2)),
+            'y': double.parse(action[0].dy.toStringAsFixed(2)),
+            'time': action[1],
+          });
+        } else if (action[0] is DrawingMode) {
+          if (moveActions.isNotEmpty) {
+            formattedActions.add({
+              'action': 'moves',
+              'points': moveActions,
+            });
+            moveActions = [];
+          }
+
+          formattedActions.add({
+            'action': 'erase',
+            'mode': action[0].toString(),
+            'prev': action[1],
+            'next': action[2],
+            'time': action[3],
+          });
+        }
+      }
+
+      if (moveActions.isNotEmpty) {
+        formattedActions.add({
+          'action': 'moves',
+          'points': moveActions,
+        });
+      }
+
+      _actions.add({
+        "time": eraserStroke[0][1],
+        "type": "erasing",
+        "data": formattedActions,
+      });
+    }
+  }
+
+  void addScrollZoom(List<ScrollZoomStamp> scrollZoomStamp, int initTime) {
+    log('add scroll-zoom');
+    _actions.add({
+      "time": initTime,
+      "type": "scroll-zoom",
+      "data": scrollZoomStamp
+          .map((timedScroll) => {
+                'x': double.parse(timedScroll.x.toStringAsFixed(2)),
+                'y': double.parse(timedScroll.y.toStringAsFixed(2)),
+                'scale': double.parse(timedScroll.scale.toStringAsFixed(2)),
+                'time': timedScroll.timestamp,
+              })
+          .toList(),
+    });
+  }
+
+  Future<void> writeToFile(String fileName, dynamic data) async {
+    Directory tempDir = await getTemporaryDirectory();
+    String tempPath = tempDir.path;
+    final file = File('$tempPath/$fileName');
+    final json = jsonEncode(data);
+    file.writeAsString(json);
+  }
+
+  Future<void> updateSolvepadData(String solvepadUrl) async {
+    var calendars = courseController.courseData?.calendars;
+    int indexToUpdate = calendars!.indexWhere((element) =>
+        element.start?.compareTo(
+            DateTime.fromMillisecondsSinceEpoch(widget.startTime)) ==
+        0);
+
+    if (indexToUpdate != -1) {
+      calendars[indexToUpdate].reviewFile = solvepadUrl;
+      await courseController.updateCourseDetails(
+          context, courseController.courseData);
+    }
+  }
+
+  Future<void> endSolvepadDataCollection() async {
+    if (currentScrollZoom.isNotEmpty) {
+      addScrollZoom(currentScrollZoom, currentScrollZoom[0].timestamp);
+      currentScrollZoom.clear();
+    }
+    _actions.add({
+      "time": solveStopwatch.elapsed.inMilliseconds,
+      "type": "stop-recording",
+      "data": null
+    });
+    int replayDuration = solveStopwatch.elapsed.inMilliseconds;
+    _data['metadata']['duration'] = replayDuration;
+    await writeToFile('solvepad.txt', _data);
+    String uploadUrl = await firebaseService
+        .uploadLiveSolvepad('${widget.courseId}_${widget.startTime}');
+    await updateSolvepadData(uploadUrl);
+  }
+
   @override
   dispose() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-      DeviceOrientation.landscapeRight,
-      DeviceOrientation.landscapeLeft,
-    ]);
+    // SystemChrome.setPreferredOrientations([
+    //   DeviceOrientation.portraitUp,
+    //   DeviceOrientation.portraitDown,
+    //   DeviceOrientation.landscapeRight,
+    //   DeviceOrientation.landscapeLeft,
+    // ]);
     _pageController.dispose();
     _meetingTimer?.cancel();
     super.dispose();
@@ -783,7 +945,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       if (errorMsg != null) {
         log("Meeting left due to $errorMsg !!");
       }
-      Navigator.pop(context);
       // Navigator.pushAndRemoveUntil(
       //     context,
       //     MaterialPageRoute(builder: (context) => const JoinScreen()),
@@ -805,7 +966,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
           });
           log('RECORDING_STOPPED:$recordIndex');
           sendMessage('RECORDING_STOPPED:$recordIndex',
-              stopwatch.elapsed.inMilliseconds);
+              solveStopwatch.elapsed.inMilliseconds);
           await fetchRecording(widget.meetingId);
           break;
         case 'RECORDING_STOPPING':
@@ -825,7 +986,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
           });
           log('RECORDING_STARTED:$recordIndex');
           sendMessage('RECORDING_STARTED:$recordIndex',
-              stopwatch.elapsed.inMilliseconds);
+              solveStopwatch.elapsed.inMilliseconds);
           break;
         default:
       }
@@ -945,6 +1106,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   }
 
   Future<bool> _onWillPopScope() async {
+    log('live on will pop');
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -986,14 +1148,14 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       removePointStack(pointStack, index);
       sendMessage(
         'Erase.pen.$index',
-        stopwatch.elapsed.inMilliseconds,
+        solveStopwatch.elapsed.inMilliseconds,
       );
     } else if (mode == DrawingMode.highlighter) {
       pointStack = _highlighterPoints[_currentPage];
       removePointStack(pointStack, index);
       sendMessage(
         'Erase.high.$index',
-        stopwatch.elapsed.inMilliseconds,
+        solveStopwatch.elapsed.inMilliseconds,
       );
     }
   }
@@ -1018,6 +1180,12 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       setState(() {
         pointStack.removeRange(prevNullIndex, nextNullIndex);
       });
+      currentEraserStroke.add([
+        _mode,
+        prevNullIndex,
+        nextNullIndex,
+        solveStopwatch.elapsed.inMilliseconds
+      ]);
     }
   }
 
@@ -1063,6 +1231,15 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       }
       _currentPage = page;
       _penPoints[_currentPage].add(null);
+    });
+    if (currentScrollZoom.isNotEmpty) {
+      addScrollZoom(currentScrollZoom, currentScrollZoom[0].timestamp);
+      currentScrollZoom.clear();
+    }
+    _actions.add({
+      "time": solveStopwatch.elapsed.inMilliseconds,
+      "type": "change-page",
+      "data": page,
     });
   }
 
@@ -1130,12 +1307,26 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
               ],
             ),
           ), // Share screen pill
-          // Positioned(
-          //   top: 145,
-          //   left: 15,
-          //   child: statusTouchMode(),
-          // ), // Touch mode pill
           showListStudents(),
+          if (isLoading)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0.5),
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Uploading Data',
+                          style: CustomStyles.bold14bluePrimary),
+                      S.w(16),
+                      const CircularProgressIndicator(
+                        color: Color(0xff0D47A1),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           if (openColors)
             Positioned(
               left: 150,
@@ -1168,7 +1359,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                     _selectedIndexColors = index;
                                     openColors = !openColors;
                                   });
-                                  int time = stopwatch.elapsed.inMilliseconds;
+                                  int time =
+                                      solveStopwatch.elapsed.inMilliseconds;
                                   for (int i = 0; i <= 2; i++) {
                                     sendMessage(
                                       'StrokeColor.$index',
@@ -1222,7 +1414,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                     _selectedIndexLines = index;
                                     openLines = !openLines;
                                   });
-                                  int time = stopwatch.elapsed.inMilliseconds;
+                                  int time =
+                                      solveStopwatch.elapsed.inMilliseconds;
                                   for (int i = 0; i <= 2; i++) {
                                     sendMessage(
                                       'StrokeWidth.$index',
@@ -1269,6 +1462,26 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             ],
           ),
 
+          if (isLoading)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0.5),
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Uploading Data',
+                          style: CustomStyles.bold14bluePrimary),
+                      S.w(16),
+                      const CircularProgressIndicator(
+                        color: Color(0xff0D47A1),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
           ///tools widget
           if (!selectedTools) toolsMobile(),
           if (selectedTools) toolsActiveMobile(),
@@ -1292,6 +1505,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
           builder: (BuildContext context, BoxConstraints constraints) {
         double solvepadWidth = constraints.maxWidth;
         double solvepadHeight = constraints.maxHeight;
+        currentScrollX = (-1 * solvepadWidth);
         if (mySolvepadSize.width != solvepadWidth) {
           initSolvepadScaling(solvepadWidth, solvepadHeight);
         }
@@ -1326,8 +1540,17 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                   if (_mode == DrawingMode.drag) {
                     sendMessage(
                       'ScrollZoom:${originalTranslationX.toStringAsFixed(2)}:${originalTranslationY.toStringAsFixed(2)}:${scale.toStringAsFixed(2)}',
-                      stopwatch.elapsed.inMilliseconds,
+                      solveStopwatch.elapsed.inMilliseconds,
                     );
+                    currentScrollZoom.add(ScrollZoomStamp(
+                        originalTranslationX,
+                        originalTranslationY,
+                        scale,
+                        solveStopwatch.elapsed.inMilliseconds));
+                  } else {
+                    currentScale = scale;
+                    currentScrollX = originalTranslationX;
+                    currentScrollY = originalTranslationY;
                   }
                 },
                 child: Stack(
@@ -1356,10 +1579,13 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                               }
                               sendMessage(
                                 details.localPosition.toString(),
-                                stopwatch.elapsed.inMilliseconds,
+                                solveStopwatch.elapsed.inMilliseconds,
                               );
                               switch (_mode) {
                                 case DrawingMode.pen:
+                                  currentStroke.add(StrokeStamp(
+                                      details.localPosition,
+                                      solveStopwatch.elapsed.inMilliseconds));
                                   _penPoints[_currentPage].add(
                                     SolvepadStroke(
                                         details.localPosition,
@@ -1377,6 +1603,9 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                   _laserDrawing();
                                   break;
                                 case DrawingMode.highlighter:
+                                  currentStroke.add(StrokeStamp(
+                                      details.localPosition,
+                                      solveStopwatch.elapsed.inMilliseconds));
                                   _highlighterPoints[_currentPage].add(
                                     SolvepadStroke(
                                         details.localPosition,
@@ -1385,6 +1614,10 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                   );
                                   break;
                                 case DrawingMode.eraser:
+                                  currentEraserStroke.add([
+                                    details.localPosition,
+                                    solveStopwatch.elapsed.inMilliseconds
+                                  ]);
                                   _eraserPoints[_currentPage] =
                                       details.localPosition;
                                   int penHit = _penPoints[_currentPage]
@@ -1424,10 +1657,13 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                               }
                               sendMessage(
                                 details.localPosition.toString(),
-                                stopwatch.elapsed.inMilliseconds,
+                                solveStopwatch.elapsed.inMilliseconds,
                               );
                               switch (_mode) {
                                 case DrawingMode.pen:
+                                  currentStroke.add(StrokeStamp(
+                                      details.localPosition,
+                                      solveStopwatch.elapsed.inMilliseconds));
                                   setState(() {
                                     _penPoints[_currentPage].add(SolvepadStroke(
                                         details.localPosition,
@@ -1447,6 +1683,9 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                   _laserDrawing();
                                   break;
                                 case DrawingMode.highlighter:
+                                  currentStroke.add(StrokeStamp(
+                                      details.localPosition,
+                                      solveStopwatch.elapsed.inMilliseconds));
                                   setState(() {
                                     _highlighterPoints[_currentPage].add(
                                       SolvepadStroke(
@@ -1457,6 +1696,10 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                   });
                                   break;
                                 case DrawingMode.eraser:
+                                  currentEraserStroke.add([
+                                    details.localPosition,
+                                    solveStopwatch.elapsed.inMilliseconds
+                                  ]);
                                   setState(() {
                                     _eraserPoints[_currentPage] =
                                         details.localPosition;
@@ -1493,7 +1736,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                   details.kind == PointerDeviceKind.touch) {
                                 return;
                               }
-                              int time = stopwatch.elapsed.inMilliseconds;
+                              int time = solveStopwatch.elapsed.inMilliseconds;
                               for (int i = 0; i <= 2; i++) {
                                 sendMessage(
                                   'null',
@@ -1502,6 +1745,9 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                               }
                               switch (_mode) {
                                 case DrawingMode.pen:
+                                  addDrawing(currentStroke,
+                                      currentStroke[0].timestamp);
+                                  currentStroke.clear();
                                   _penPoints[_currentPage].add(null);
                                   break;
                                 case DrawingMode.laser:
@@ -1511,9 +1757,14 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                       _stopLaserDrawing);
                                   break;
                                 case DrawingMode.highlighter:
+                                  addDrawing(currentStroke,
+                                      currentStroke[0].timestamp);
+                                  currentStroke.clear();
                                   _highlighterPoints[_currentPage].add(null);
                                   break;
                                 case DrawingMode.eraser:
+                                  addErasing(currentEraserStroke);
+                                  currentEraserStroke.clear();
                                   setState(() {
                                     _eraserPoints[_currentPage] =
                                         const Offset(-100, -100);
@@ -1530,7 +1781,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                   details.kind == PointerDeviceKind.touch) {
                                 return;
                               }
-                              int time = stopwatch.elapsed.inMilliseconds;
+                              int time = solveStopwatch.elapsed.inMilliseconds;
                               for (int i = 0; i <= 2; i++) {
                                 sendMessage(
                                   'null',
@@ -1539,6 +1790,9 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                               }
                               switch (_mode) {
                                 case DrawingMode.pen:
+                                  addDrawing(currentStroke,
+                                      currentStroke[0].timestamp);
+                                  currentStroke.clear();
                                   _penPoints[_currentPage].add(null);
                                   break;
                                 case DrawingMode.laser:
@@ -1548,9 +1802,14 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                       _stopLaserDrawing);
                                   break;
                                 case DrawingMode.highlighter:
+                                  addDrawing(currentStroke,
+                                      currentStroke[0].timestamp);
+                                  currentStroke.clear();
                                   _highlighterPoints[_currentPage].add(null);
                                   break;
                                 case DrawingMode.eraser:
+                                  addErasing(currentEraserStroke);
+                                  currentEraserStroke.clear();
                                   setState(() {
                                     _eraserPoints[_currentPage] =
                                         const Offset(-100, -100);
@@ -1704,10 +1963,13 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                     if (isRecordingOn) {
                       showAlertRecordingDialog(context);
                     } else {
+                      setState(() {
+                        isLoading = true;
+                      });
                       showCloseDialog(context, () async {
                         sendMessage(
                           'EndMeeting',
-                          stopwatch.elapsed.inMilliseconds,
+                          solveStopwatch.elapsed.inMilliseconds,
                         );
                         if (!widget.isMock) {
                           meeting.end();
@@ -1717,7 +1979,9 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                               .doc(widget.courseId)
                               .update({'currentMeetingCode': ''});
                           await updateActualTime();
+                          await endSolvepadDataCollection();
                         }
+                        if (!mounted) return;
                         Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(
@@ -1726,8 +1990,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                             (route) => false);
                       });
                     }
-                    // await meeting.stopRecording();
-                    // await fetchRecording(widget.meetingId);
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(
@@ -1811,7 +2073,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                               if (_pageController.hasClients &&
                                   _pageController.page!.toInt() != 0) {
                                 int page = _currentPage - 1;
-                                int time = stopwatch.elapsed.inMilliseconds;
+                                int time =
+                                    solveStopwatch.elapsed.inMilliseconds;
                                 for (int i = 0; i <= 2; i++) {
                                   sendMessage(
                                     'ChangePage:$page',
@@ -1872,7 +2135,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                     _pageController.page!.toInt() !=
                                         _pages.length - 1) {
                                   int page = _currentPage + 1;
-                                  int time = stopwatch.elapsed.inMilliseconds;
+                                  int time =
+                                      solveStopwatch.elapsed.inMilliseconds;
                                   for (int i = 0; i <= 2; i++) {
                                     sendMessage(
                                       'ChangePage:$page',
@@ -2075,7 +2339,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                             });
                             sendMessage(
                               'RequestScreenShare:$value',
-                              stopwatch.elapsed.inMilliseconds,
+                              solveStopwatch.elapsed.inMilliseconds,
                             );
                           },
                         ),
@@ -2322,7 +2586,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                       if (_pageController.hasClients &&
                           _pageController.page!.toInt() != 0) {
                         int page = _currentPage - 1;
-                        int time = stopwatch.elapsed.inMilliseconds;
+                        int time = solveStopwatch.elapsed.inMilliseconds;
                         for (int i = 0; i <= 2; i++) {
                           sendMessage(
                             'ChangePage:$page',
@@ -2380,7 +2644,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                             _pageController.page!.toInt() !=
                                 _pages.length - 1) {
                           int page = _currentPage + 1;
-                          int time = stopwatch.elapsed.inMilliseconds;
+                          int time = solveStopwatch.elapsed.inMilliseconds;
                           for (int i = 0; i <= 2; i++) {
                             sendMessage(
                               'ChangePage:$page',
@@ -2423,7 +2687,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                   onChanged: (bool value) {
                     sendMessage(
                       'RequestScreenShare:$value',
-                      stopwatch.elapsed.inMilliseconds,
+                      solveStopwatch.elapsed.inMilliseconds,
                     );
                     setState(() {
                       _requestScreenShare = value;
@@ -2764,7 +3028,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                             });
                                             if (index == 0) {
                                               _mode = DrawingMode.drag;
-                                              int time = stopwatch
+                                              int time = solveStopwatch
                                                   .elapsed.inMilliseconds;
                                               for (int i = 0; i <= 2; i++) {
                                                 sendMessage(
@@ -2774,7 +3038,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                               }
                                             } else if (index == 1) {
                                               _mode = DrawingMode.pen;
-                                              int time = stopwatch
+                                              int time = solveStopwatch
                                                   .elapsed.inMilliseconds;
                                               for (int i = 0; i <= 2; i++) {
                                                 sendMessage(
@@ -2784,7 +3048,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                               }
                                             } else if (index == 2) {
                                               _mode = DrawingMode.highlighter;
-                                              int time = stopwatch
+                                              int time = solveStopwatch
                                                   .elapsed.inMilliseconds;
                                               for (int i = 0; i <= 2; i++) {
                                                 sendMessage(
@@ -2794,7 +3058,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                               }
                                             } else if (index == 3) {
                                               _mode = DrawingMode.eraser;
-                                              int time = stopwatch
+                                              int time = solveStopwatch
                                                   .elapsed.inMilliseconds;
                                               for (int i = 0; i <= 2; i++) {
                                                 sendMessage(
@@ -2804,7 +3068,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                               }
                                             } else if (index == 4) {
                                               _mode = DrawingMode.laser;
-                                              int time = stopwatch
+                                              int time = solveStopwatch
                                                   .elapsed.inMilliseconds;
                                               for (int i = 0; i <= 2; i++) {
                                                 sendMessage(
@@ -2909,7 +3173,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                 showCloseDialog(context, () {
                   sendMessage(
                     'EndMeeting',
-                    stopwatch.elapsed.inMilliseconds,
+                    solveStopwatch.elapsed.inMilliseconds,
                   );
                   if (!widget.isMock) {
                     meeting.end();
@@ -3122,57 +3386,66 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                         setState(() {
                                           _selectedIndexTools = index;
                                         });
+                                        if (currentScrollZoom.isNotEmpty) {
+                                          addScrollZoom(currentScrollZoom,
+                                              currentScrollZoom[0].timestamp);
+                                          currentScrollZoom.clear();
+                                        }
                                         if (index == 0) {
                                           _mode = DrawingMode.drag;
-                                          int time =
-                                              stopwatch.elapsed.inMilliseconds;
+                                          int time = solveStopwatch
+                                              .elapsed.inMilliseconds;
                                           for (int i = 0; i <= 2; i++) {
                                             sendMessage(
                                               'DrawingMode.drag',
                                               time,
                                             );
                                           }
-                                        } else if (index == 1) {
+                                        } // drag
+                                        else if (index == 1) {
                                           _mode = DrawingMode.pen;
-                                          int time =
-                                              stopwatch.elapsed.inMilliseconds;
+                                          int time = solveStopwatch
+                                              .elapsed.inMilliseconds;
                                           for (int i = 0; i <= 2; i++) {
                                             sendMessage(
                                               'DrawingMode.pen',
                                               time,
                                             );
                                           }
-                                        } else if (index == 2) {
+                                        } // pen
+                                        else if (index == 2) {
                                           _mode = DrawingMode.highlighter;
-                                          int time =
-                                              stopwatch.elapsed.inMilliseconds;
+                                          int time = solveStopwatch
+                                              .elapsed.inMilliseconds;
                                           for (int i = 0; i <= 2; i++) {
                                             sendMessage(
                                               'DrawingMode.highlighter',
                                               time,
                                             );
                                           }
-                                        } else if (index == 3) {
+                                        } // high
+                                        else if (index == 3) {
                                           _mode = DrawingMode.eraser;
-                                          int time =
-                                              stopwatch.elapsed.inMilliseconds;
+                                          int time = solveStopwatch
+                                              .elapsed.inMilliseconds;
                                           for (int i = 0; i <= 2; i++) {
                                             sendMessage(
                                               'DrawingMode.eraser',
                                               time,
                                             );
                                           }
-                                        } else if (index == 4) {
+                                        } // eraser
+                                        else if (index == 4) {
                                           _mode = DrawingMode.laser;
-                                          int time =
-                                              stopwatch.elapsed.inMilliseconds;
+                                          int time = solveStopwatch
+                                              .elapsed.inMilliseconds;
                                           for (int i = 0; i <= 2; i++) {
                                             sendMessage(
                                               'DrawingMode.laser',
                                               time,
                                             );
                                           }
-                                        }
+                                        } // laser
                                       },
                                       child: Image.asset(
                                         _selectedIndexTools == index
@@ -3419,7 +3692,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                       double.parse(size[1]));
                                   sendMessage(
                                     'FocusStudentScreen:${students[index]['id']}',
-                                    stopwatch.elapsed.inMilliseconds,
+                                    solveStopwatch.elapsed.inMilliseconds,
                                   );
                                 }
                               },
@@ -3632,7 +3905,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                     );
                                     sendMessage(
                                       'FocusStudentScreen:${students[index]['id']}',
-                                      stopwatch.elapsed.inMilliseconds,
+                                      solveStopwatch.elapsed.inMilliseconds,
                                     );
                                     showStudent = false;
                                   }
@@ -3734,7 +4007,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                     double.parse(size[1]));
                                 sendMessage(
                                   'FocusStudentScreen:${students[selectedIndex]['id']}',
-                                  stopwatch.elapsed.inMilliseconds,
+                                  solveStopwatch.elapsed.inMilliseconds,
                                 );
                                 showStudent = false;
                               },
@@ -3815,7 +4088,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
               onTap: () {
                 sendMessage(
                   'HostLeaveScreen:$focusedStudentId',
-                  stopwatch.elapsed.inMilliseconds,
+                  solveStopwatch.elapsed.inMilliseconds,
                 );
                 focusedStudentId = '';
                 focusedStudentName = '';
@@ -5252,7 +5525,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                                               size[1]));
                                                       sendMessage(
                                                         'FocusStudentScreen:${students[index]['id']}',
-                                                        stopwatch.elapsed
+                                                        solveStopwatch.elapsed
                                                             .inMilliseconds,
                                                       );
                                                     }
