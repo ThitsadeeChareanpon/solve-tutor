@@ -280,7 +280,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   var courseController = CourseLiveController();
   late AuthProvider authProvider;
   late String courseName;
-  bool isCourseLoaded = false;
+  bool isSheetReady = false;
+  bool isLiveCourseReady = false;
 
   // ---------- VARIABLE: message control
   late Map<String, Function(String)> handlers;
@@ -296,7 +297,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   double currentScale = 2.0;
   double currentScrollX = 0;
   double currentScrollY = 0;
-  bool isLoading = false;
+  bool isUploading = false;
 
   /// TODO: Get rid of all Mockup reference
   @override
@@ -338,7 +339,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       }
       courseName = 'Mockup Test';
       micEnable = false;
-      isCourseLoaded = true;
+      isSheetReady = true;
     });
   }
 
@@ -365,7 +366,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       }
       courseName = courseController.courseData!.courseName!;
       micEnable = widget.micEnabled;
-      isCourseLoaded = true;
+      isSheetReady = true;
+      setLiveCourseLoadState();
     });
     var courseStudents = courseController.courseData!.studentDetails;
     List<Map<String, dynamic>>? studentsJson =
@@ -373,6 +375,15 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     setState(() {
       students = studentsJson!.cast<dynamic>();
     });
+  }
+
+  void setLiveCourseLoadState() async {
+    if (isSheetReady && _joined) {
+      setState(() {
+        isLiveCourseReady = true;
+      });
+      await meeting.startRecording(config: {"mode": "audio"});
+    }
   }
 
   void initTimer() {
@@ -929,6 +940,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
         setState(() {
           meeting = _meeting;
           _joined = true;
+          setLiveCourseLoadState();
           updateMeetingCode();
           // meeting.startRecording(config: {"mode": "audio"});
           initWss();
@@ -1269,7 +1281,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: _onWillPopScope,
-      child: _joined && isCourseLoaded
+      child: isLiveCourseReady
           ? Scaffold(
               backgroundColor: CustomColors.grayCFCFCF,
               body: !Responsive.isMobile(context)
@@ -1322,7 +1334,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             ),
           ), // Share screen pill
           showListStudents(),
-          if (isLoading)
+          if (isUploading)
             Positioned.fill(
               child: Container(
                 color: Colors.black.withOpacity(0.5),
@@ -1331,6 +1343,25 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text('Uploading Data',
+                          style: CustomStyles.bold14bluePrimary),
+                      S.w(16),
+                      const CircularProgressIndicator(
+                        color: Color(0xff0D47A1),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          if (isRecordingLoading)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0.5),
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Preparing Audio Record',
                           style: CustomStyles.bold14bluePrimary),
                       S.w(16),
                       const CircularProgressIndicator(
@@ -1476,7 +1507,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             ],
           ),
 
-          if (isLoading)
+          if (isUploading)
             Positioned.fill(
               child: Container(
                 color: Colors.black.withOpacity(0.5),
@@ -1485,6 +1516,25 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text('Uploading Data',
+                          style: CustomStyles.bold14bluePrimary),
+                      S.w(16),
+                      const CircularProgressIndicator(
+                        color: Color(0xff0D47A1),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          if (isRecordingLoading)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0.5),
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Preparing Audio Record',
                           style: CustomStyles.bold14bluePrimary),
                       S.w(16),
                       const CircularProgressIndicator(
@@ -1978,7 +2028,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                       showAlertRecordingDialog(context);
                     } else {
                       setState(() {
-                        isLoading = true;
+                        isUploading = true;
                       });
                       showCloseDialog(context, () async {
                         sendMessage(
