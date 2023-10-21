@@ -289,6 +289,7 @@ class _ReviewLessonState extends State<ReviewLesson>
     if (widget.audio == null) return;
     audioBuffer = await downloadAudio(widget.audio!);
     _isAudioReady = true;
+    setCourseLoadState();
   }
 
   void initAudioPlayer() async {
@@ -307,6 +308,7 @@ class _ReviewLessonState extends State<ReviewLesson>
   }
 
   void setCourseLoadState() {
+    if (isCourseLoaded) return;
     if (widget.audio == null) {
       if (_isPageReady && _isSolvepadDataReady) {
         setState(() {
@@ -354,7 +356,7 @@ class _ReviewLessonState extends State<ReviewLesson>
     return null;
   }
 
-  // ---------- FUNCTION: solve pad core
+  // ---------- FUNCTION: Replay
   void clearReplayPoint() {
     for (var point in _replayPenPoints) {
       point.clear();
