@@ -791,7 +791,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             'y': double.parse(action[0].dy.toStringAsFixed(2)),
             'time': action[1],
           });
-        } else if (action[0] is DrawingMode) {
+        } else if (action[0] is String) {
           if (moveActions.isNotEmpty) {
             formattedActions.add({
               'action': 'moves',
@@ -1155,22 +1155,24 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     List<SolvepadStroke?> pointStack;
     if (mode == DrawingMode.pen) {
       pointStack = _penPoints[_currentPage];
-      removePointStack(pointStack, index);
+      removePointStack(pointStack, index, removeMode: 'pen');
       sendMessage(
         'Erase.pen.$index',
         solveStopwatch.elapsed.inMilliseconds,
       );
-    } else if (mode == DrawingMode.highlighter) {
+    } // pen
+    else if (mode == DrawingMode.highlighter) {
       pointStack = _highlighterPoints[_currentPage];
-      removePointStack(pointStack, index);
+      removePointStack(pointStack, index, removeMode: 'high');
       sendMessage(
         'Erase.high.$index',
         solveStopwatch.elapsed.inMilliseconds,
       );
-    }
+    } // high
   }
 
-  void removePointStack(List<SolvepadStroke?> pointStack, int index) {
+  void removePointStack(List<SolvepadStroke?> pointStack, int index,
+      {String? removeMode}) {
     int prevNullIndex = -1;
     int nextNullIndex = -1;
     for (int i = index; i >= 0; i--) {
@@ -1190,12 +1192,14 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       setState(() {
         pointStack.removeRange(prevNullIndex, nextNullIndex);
       });
-      currentEraserStroke.add([
-        _mode,
-        prevNullIndex,
-        nextNullIndex,
-        solveStopwatch.elapsed.inMilliseconds
-      ]);
+      if (removeMode != null) {
+        currentEraserStroke.add([
+          removeMode,
+          prevNullIndex,
+          nextNullIndex,
+          solveStopwatch.elapsed.inMilliseconds
+        ]);
+      }
     }
   }
 

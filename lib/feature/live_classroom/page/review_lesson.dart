@@ -525,10 +525,10 @@ class _ReviewLessonState extends State<ReviewLesson>
             }
             List<SolvepadStroke?> pointStack =
                 _replayPenPoints[_tutorCurrentPage];
-            if (eraseAction['mode'] == "DrawingMode.pen") {
+            if (eraseAction['mode'] == "pen") {
               pointStack = _replayPenPoints[_tutorCurrentPage];
             } // erase pen
-            else if (eraseAction['mode'] == "DrawingMode.highlighter") {
+            else if (eraseAction['mode'] == "high") {
               pointStack = _replayHighlighterPoints[_tutorCurrentPage];
             } // erase high
             setState(() {
