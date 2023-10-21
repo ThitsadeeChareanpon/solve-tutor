@@ -2234,7 +2234,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                   ),
                 ),
                 S.w(8),
-                statusTouchMode(),
+                statusTouchModeIcon(),
               ],
             ),
           ),
@@ -4275,6 +4275,23 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget statusTouchModeIcon() {
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _isStylusActive = !_isStylusActive;
+        });
+      },
+      child: Image.asset(
+        _isStylusActive
+            ? 'assets/images/stylus-icon.png'
+            : 'assets/images/touch-icon.png',
+        height: 44,
+        width: 44,
       ),
     );
   }

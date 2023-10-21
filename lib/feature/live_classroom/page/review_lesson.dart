@@ -121,7 +121,7 @@ class _ReviewLessonState extends State<ReviewLesson>
     {"image": 'assets/images/pencil-tran.png'},
     {"image": 'assets/images/highlight-tran.png'},
     {"image": 'assets/images/rubber-tran.png'},
-    {"image": 'assets/images/laserPen-tran.png'},
+    // {"image": 'assets/images/laserPen-tran.png'},
   ];
   final List _strokeColors = [
     Colors.red,
@@ -429,6 +429,7 @@ class _ReviewLessonState extends State<ReviewLesson>
     _sliderTimer?.cancel();
     solveStopwatch.reset();
     currentReplayIndex = 0;
+    log('end replay is called');
   }
 
   Future<void> executeReplayAction(Map<String, dynamic> action) async {
@@ -537,7 +538,7 @@ class _ReviewLessonState extends State<ReviewLesson>
           } // erase
         }
         setState(() {
-          _replayEraserPoints[_currentPage] = const Offset(-100, -100);
+          _replayEraserPoints[_tutorCurrentPage] = const Offset(-100, -100);
         });
         break;
     }
@@ -648,6 +649,14 @@ class _ReviewLessonState extends State<ReviewLesson>
   dispose() {
     _audioPlayer.closePlayer();
     _pageController.dispose();
+    try {
+      progressController.dispose();
+    } catch (e) {
+      // ignore
+    }
+    for (var controller in _transformationController) {
+      controller.dispose();
+    }
     _sliderTimer?.cancel();
     _laserTimer?.cancel();
     super.dispose();
@@ -701,7 +710,7 @@ class _ReviewLessonState extends State<ReviewLesson>
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    tools(),
+                    tabFreestyle ? tools() : toolsDisable(),
                     solvePad(),
                   ],
                 ),
@@ -2417,8 +2426,7 @@ class _ReviewLessonState extends State<ReviewLesson>
               child: AnimatedContainer(
                 duration: const Duration(seconds: 1),
                 curve: Curves.fastOutSlowIn,
-                height:
-                    selectedTools ? 270 : MediaQuery.of(context).size.height,
+                height: selectedTools ? 270 : 450,
                 width: 120,
                 decoration: BoxDecoration(
                   border: Border.all(
@@ -2432,31 +2440,9 @@ class _ReviewLessonState extends State<ReviewLesson>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
-                    S.h(8),
-                    // Expanded(
-                    //   flex: 1,
-                    //   child: Padding(
-                    //     padding: const EdgeInsets.symmetric(
-                    //         horizontal: defaultPadding, vertical: 1),
-                    //     child: Row(
-                    //       mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    //       children: [
-                    //         Image.asset(
-                    //           ImageAssets.undoTran,
-                    //           width: 38,
-                    //         ),
-                    //         Image.asset(
-                    //           ImageAssets.redoTran,
-                    //           width: 38,
-                    //         ),
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ),
-                    Container(
-                        height: 2, width: 80, color: CustomColors.grayF3F3F3),
+                    S.h(12),
                     Expanded(
-                      flex: 4,
+                      flex: 3,
                       child: ListView.builder(
                           physics: const NeverScrollableScrollPhysics(),
                           scrollDirection: Axis.vertical,
@@ -2477,46 +2463,35 @@ class _ReviewLessonState extends State<ReviewLesson>
                     Container(
                         height: 2, width: 80, color: CustomColors.grayF3F3F3),
                     Expanded(
-                      flex: 2,
                       child: Column(
                         children: [
                           S.h(defaultPadding),
                           Expanded(
                             child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 1),
-                                child: Column(
-                                  children: [
-                                    Expanded(
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          Image.asset(
-                                            'assets/images/pick-green-tran.png',
-                                            width: 38,
-                                          ),
-                                          Image.asset(
-                                            'assets/images/pick-line-tran.png',
-                                            width: 38,
-                                          ),
-                                        ],
-                                      ),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 1),
+                              child: Column(
+                                children: [
+                                  Expanded(
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        Image.asset(
+                                          'assets/images/pick-green-tran.png',
+                                          width: 38,
+                                        ),
+                                        Image.asset(
+                                          'assets/images/pick-line-tran.png',
+                                          width: 38,
+                                        ),
+                                      ],
                                     ),
-                                    Expanded(
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          Image.asset(
-                                            'assets/images/clear_tran.png',
-                                            width: 38,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                )),
+                                  ),
+                                  S.h(38),
+                                ],
+                              ),
+                            ),
                           ),
                         ],
                       ),

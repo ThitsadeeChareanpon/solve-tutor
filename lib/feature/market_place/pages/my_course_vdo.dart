@@ -387,10 +387,10 @@ class _MyCourseVDOPageState extends State<MyCourseVDOPage> {
                   ),
                 ] else ...[
                   Image.asset(
-                    ImageAssets.emptyCourse,
+                    'assets/images/img_not_available.jpeg',
                     height: 180,
                     width: double.infinity,
-                    fit: BoxFit.fitHeight,
+                    fit: BoxFit.cover,
                   ),
                 ],
                 S.h(8),

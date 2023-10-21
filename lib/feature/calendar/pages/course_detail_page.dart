@@ -15,7 +15,9 @@ import 'package:solve_tutor/feature/calendar/widgets/divider.dart';
 import 'package:solve_tutor/feature/calendar/widgets/format_date.dart';
 import 'package:solve_tutor/feature/calendar/widgets/sizebox.dart';
 
+import '../../../constants/theme.dart';
 import '../../../firebase/database.dart';
+import '../../../widgets/sizer.dart';
 
 class CourseDetailPage extends StatefulWidget {
   CourseDetailPage({Key? key, required this.courseData}) : super(key: key);
@@ -81,15 +83,33 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CachedNetworkImage(
-                height: _util.isTablet() ? 447 : 200,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                imageUrl: widget.courseData.thumbnailUrl ?? '',
-                placeholder: (context, url) =>
-                    const Center(child: CircularProgressIndicator()),
-                errorWidget: (context, url, error) => const Icon(Icons.error),
-              ),
+              // CachedNetworkImage(
+              //   height: _util.isTablet() ? 447 : 200,
+              //   width: double.infinity,
+              //   fit: BoxFit.cover,
+              //   imageUrl: widget.courseData.thumbnailUrl ?? '',
+              //   placeholder: (context, url) =>
+              //       const Center(child: CircularProgressIndicator()),
+              //   errorWidget: (context, url, error) => const Icon(Icons.error),
+              // ),
+              if (widget.courseData.thumbnailUrl?.isNotEmpty == true) ...[
+                CachedNetworkImage(
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  height: 180,
+                  imageUrl: widget.courseData.thumbnailUrl ?? '',
+                  placeholder: (context, url) =>
+                      const Center(child: CircularProgressIndicator()),
+                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                ),
+              ] else ...[
+                Image.asset(
+                  'assets/images/img_not_available.jpeg',
+                  height: 180,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              ],
               S.h(32.0),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -193,78 +213,78 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                       ),
                     ),
                     S.h(16.0),
-                    Text(
-                      'ภาพรวมคอร์สเรียน:',
-                      style: CustomStyles.bold18Black363636,
-                    ),
-                    S.h(16.0),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'เรียนเป็นกลุ่มกับติวเตอร์ผ่านระบบ SOLVE LIVE',
-                          style: CustomStyles.reg16Black363636,
-                        ),
-                        // S.w(8.0),
-                        // buildVerticalDividerGray(20.0, 8.0),
-                        // S.w(8.0),
-                        // Text(
-                        //   '1 แบบทดสอบ',
-                        //   style: CustomStyles.reg16Black363636,
-                        // ),
-                        // S.w(8.0),
-                        // buildVerticalDividerGray(20.0, 8.0),
-                        // S.w(8.0),
-                        // Text(
-                        //   '35 นาที',
-                        //   style: CustomStyles.reg16Black363636,
-                        // ),
-                      ],
-                    ),
-                    S.h(16.0),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.play_arrow,
-                          color: CustomColors.gray878787,
-                          size: 20,
-                        ),
-                        S.w(8.0),
-                        Text(
-                          'เรียนผ่านแอปบน tablet  และมือถือ',
-                          style: CustomStyles.reg16Black363636,
-                        ),
-                      ],
-                    ),
-                    S.h(16.0),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.play_arrow,
-                          color: CustomColors.gray878787,
-                          size: 20,
-                        ),
-                        S.w(8.0),
-                        Text(
-                          'ทบทวนหลังจบ Live และถามคำถามได้ทันที',
-                          style: CustomStyles.reg16Black363636,
-                        ),
-                      ],
-                    ),
-                    S.h(16.0),
-                    Text(
-                      'ตารางเรียน',
-                      style: CustomStyles.bold18Black363636,
-                    ),
-                    S.h(16.0),
-                    Text(
-                      "ระยะเวลาเรียน:  ${FormatDate.dayOnlyNumber(widget.courseData.firstDay)} - ${FormatDate.dayOnlyNumber(widget.courseData.lastDay)}",
-                      textAlign: TextAlign.center,
-                      style: CustomStyles.med14Black363636
-                          .copyWith(color: CustomColors.gray363636)
-                          .copyWith(fontSize: _util.addMinusFontSize(16)),
-                    ),
-                    S.h(16.0),
+                    // Text(
+                    //   'ภาพรวมคอร์สเรียน:',
+                    //   style: CustomStyles.bold18Black363636,
+                    // ),
+                    // S.h(16.0),
+                    // Row(
+                    //   crossAxisAlignment: CrossAxisAlignment.start,
+                    //   children: [
+                    //     Text(
+                    //       'เรียนเป็นกลุ่มกับติวเตอร์ผ่านระบบ SOLVE LIVE',
+                    //       style: CustomStyles.reg16Black363636,
+                    //     ),
+                    //     S.w(8.0),
+                    //     buildVerticalDividerGray(20.0, 8.0),
+                    //     S.w(8.0),
+                    //     Text(
+                    //       '1 แบบทดสอบ',
+                    //       style: CustomStyles.reg16Black363636,
+                    //     ),
+                    //     S.w(8.0),
+                    //     buildVerticalDividerGray(20.0, 8.0),
+                    //     S.w(8.0),
+                    //     Text(
+                    //       '35 นาที',
+                    //       style: CustomStyles.reg16Black363636,
+                    //     ),
+                    //   ],
+                    // ),
+                    // S.h(16.0),
+                    // Row(
+                    //   children: [
+                    //     const Icon(
+                    //       Icons.play_arrow,
+                    //       color: CustomColors.gray878787,
+                    //       size: 20,
+                    //     ),
+                    //     S.w(8.0),
+                    //     Text(
+                    //       'เรียนผ่านแอปบน tablet  และมือถือ',
+                    //       style: CustomStyles.reg16Black363636,
+                    //     ),
+                    //   ],
+                    // ),
+                    // S.h(16.0),
+                    // Row(
+                    //   children: [
+                    //     const Icon(
+                    //       Icons.play_arrow,
+                    //       color: CustomColors.gray878787,
+                    //       size: 20,
+                    //     ),
+                    //     S.w(8.0),
+                    //     Text(
+                    //       'ทบทวนหลังจบ Live และถามคำถามได้ทันที',
+                    //       style: CustomStyles.reg16Black363636,
+                    //     ),
+                    //   ],
+                    // ),
+                    // S.h(16.0),
+                    // Text(
+                    //   'ตารางเรียน',
+                    //   style: CustomStyles.bold18Black363636,
+                    // ),
+                    // S.h(16.0),
+                    // Text(
+                    //   "ระยะเวลาเรียน:  ${FormatDate.dayOnlyNumber(widget.courseData.firstDay)} - ${FormatDate.dayOnlyNumber(widget.courseData.lastDay)}",
+                    //   textAlign: TextAlign.center,
+                    //   style: CustomStyles.med14Black363636
+                    //       .copyWith(color: CustomColors.gray363636)
+                    //       .copyWith(fontSize: _util.addMinusFontSize(16)),
+                    // ),
+                    // S.h(16.0),
                     // InkWell(
                     //   onTap: () {},
                     //   child: Align(
@@ -290,6 +310,58 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                   ],
                 ),
               ),
+              Builder(builder: (context) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "รายการเนื้อหา",
+                        style: TextStyle(
+                          color: appTextPrimaryColor,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: widget.courseData.lessons?.length ?? 0,
+                        itemBuilder: (context, index) {
+                          Lessons? chapter = widget.courseData.lessons?[index];
+                          return GestureDetector(
+                            onTap: () {},
+                            child: Container(
+                              width: Sizer(context).w,
+                              padding:
+                                  const EdgeInsets.fromLTRB(10, 10, 10, 10),
+                              margin: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+                              decoration: BoxDecoration(
+                                color: greyColor2,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.video_camera_back,
+                                    color: greyColor,
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Text('${chapter?.lessonName}'),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 10),
+                    ],
+                  ),
+                );
+              }),
               // Align(
               //   alignment: Alignment.center,
               //   child: Text(

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'dart:ui' as touch_ui;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -169,6 +170,7 @@ class _RecordCourseState extends State<RecordCourse> {
   String _formattedElapsedTime = 'Recording 00:00:00';
   bool _isPrevBtnActive = false;
   bool _isNextBtnActive = true;
+  bool _isStylusActive = false;
   int? activePointerId;
 
   // ---------- VARIABLE: page control
@@ -1179,6 +1181,15 @@ class _RecordCourseState extends State<RecordCourse> {
                               if (activePointerId != null) return;
                               if (!isRecording) return;
                               activePointerId = details.pointer;
+                              if (details.kind ==
+                                  touch_ui.PointerDeviceKind.stylus) {
+                                _isStylusActive = true;
+                              }
+                              if (_isStylusActive &&
+                                  details.kind ==
+                                      touch_ui.PointerDeviceKind.touch) {
+                                return;
+                              }
                               switch (_mode) {
                                 case DrawingMode.pen:
                                   currentStroke.add(StrokeStamp(
@@ -1247,6 +1258,15 @@ class _RecordCourseState extends State<RecordCourse> {
                               if (activePointerId != details.pointer) return;
                               if (!isRecording) return;
                               activePointerId = details.pointer;
+                              if (details.kind ==
+                                  touch_ui.PointerDeviceKind.stylus) {
+                                _isStylusActive = true;
+                              }
+                              if (_isStylusActive &&
+                                  details.kind ==
+                                      touch_ui.PointerDeviceKind.touch) {
+                                return;
+                              }
                               switch (_mode) {
                                 case DrawingMode.pen:
                                   currentStroke.add(StrokeStamp(
@@ -1321,6 +1341,11 @@ class _RecordCourseState extends State<RecordCourse> {
                               if (activePointerId != details.pointer) return;
                               if (!isRecording) return;
                               activePointerId = null;
+                              if (_isStylusActive &&
+                                  details.kind ==
+                                      touch_ui.PointerDeviceKind.touch) {
+                                return;
+                              }
                               switch (_mode) {
                                 case DrawingMode.pen:
                                   addDrawing(currentStroke,
@@ -1356,6 +1381,11 @@ class _RecordCourseState extends State<RecordCourse> {
                               if (activePointerId != details.pointer) return;
                               if (!isRecording) return;
                               activePointerId = null;
+                              if (_isStylusActive &&
+                                  details.kind ==
+                                      touch_ui.PointerDeviceKind.touch) {
+                                return;
+                              }
                               switch (_mode) {
                                 case DrawingMode.pen:
                                   addDrawing(currentStroke,
@@ -1550,122 +1580,129 @@ class _RecordCourseState extends State<RecordCourse> {
           ),
           S.w(Responsive.isTablet(context) ? 5 : 12),
           Expanded(
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: CustomColors.grayCFCFCF,
-                    style: BorderStyle.solid,
-                    width: 1.0,
-                  ),
-                  borderRadius: BorderRadius.circular(8),
-                  color: CustomColors.whitePrimary,
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 8),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    S.w(8),
-                    InkWell(
-                      onTap: () => headerLayer1Mobile(),
-                      child: Image.asset(
-                        ImageAssets.iconInfoPage,
-                        height: 24,
-                        width: 24,
+            child: Row(
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: CustomColors.grayCFCFCF,
+                        style: BorderStyle.solid,
+                        width: 1.0,
                       ),
+                      borderRadius: BorderRadius.circular(8),
+                      color: CustomColors.whitePrimary,
                     ),
-                    S.w(8),
-                    Container(
-                      width: 1,
-                      height: 24,
-                      color: CustomColors.grayCFCFCF,
-                    ),
-                    S.w(6),
-                    Material(
-                      child: InkWell(
-                        onTap: () {
-                          if (_pageController.hasClients &&
-                              _pageController.page!.toInt() != 0) {
-                            _pageController.animateToPage(
-                              _pageController.page!.toInt() - 1,
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                            );
-                          }
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 1, vertical: 8),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        S.w(8),
+                        InkWell(
+                          onTap: () => headerLayer1Mobile(),
                           child: Image.asset(
-                            ImageAssets.backDis,
-                            height: 16,
-                            width: 17,
-                            color: _isPrevBtnActive
-                                ? CustomColors.activePagingBtn
-                                : CustomColors.inactivePagingBtn,
+                            ImageAssets.iconInfoPage,
+                            height: 24,
+                            width: 24,
                           ),
                         ),
-                      ),
-                    ),
-                    S.w(6),
-                    Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(
+                        S.w(8),
+                        Container(
+                          width: 1,
+                          height: 24,
                           color: CustomColors.grayCFCFCF,
-                          style: BorderStyle.solid,
-                          width: 1.0,
                         ),
-                        borderRadius: BorderRadius.circular(4),
-                        color: CustomColors.whitePrimary,
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Text("Page ${_currentPage + 1}",
-                              style: CustomStyles.bold14greenPrimary),
-                        ],
-                      ),
-                    ),
-                    S.w(8.0),
-                    Text("/ ${_pages.length}",
-                        style: CustomStyles.med14Gray878787),
-                    S.w(6),
-                    Material(
-                      child: InkWell(
-                        // splashColor: Colors.lightGreen,
-                        onTap: () {
-                          if (_pages.length > 1) {
-                            if (_pageController.hasClients &&
-                                _pageController.page!.toInt() !=
-                                    _pages.length - 1) {
-                              _pageController.animateToPage(
-                                _pageController.page!.toInt() + 1,
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeInOut,
-                              );
-                            }
-                          }
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Image.asset(
-                            ImageAssets.forward,
-                            height: 16,
-                            width: 17,
-                            color: _isNextBtnActive
-                                ? CustomColors.activePagingBtn
-                                : CustomColors.inactivePagingBtn,
+                        S.w(6),
+                        Material(
+                          child: InkWell(
+                            onTap: () {
+                              if (_pageController.hasClients &&
+                                  _pageController.page!.toInt() != 0) {
+                                _pageController.animateToPage(
+                                  _pageController.page!.toInt() - 1,
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                );
+                              }
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Image.asset(
+                                ImageAssets.backDis,
+                                height: 16,
+                                width: 17,
+                                color: _isPrevBtnActive
+                                    ? CustomColors.activePagingBtn
+                                    : CustomColors.inactivePagingBtn,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                        S.w(6),
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: CustomColors.grayCFCFCF,
+                              style: BorderStyle.solid,
+                              width: 1.0,
+                            ),
+                            borderRadius: BorderRadius.circular(4),
+                            color: CustomColors.whitePrimary,
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              Text("Page ${_currentPage + 1}",
+                                  style: CustomStyles.bold14greenPrimary),
+                            ],
+                          ),
+                        ),
+                        S.w(8.0),
+                        Text("/ ${_pages.length}",
+                            style: CustomStyles.med14Gray878787),
+                        S.w(6),
+                        Material(
+                          child: InkWell(
+                            // splashColor: Colors.lightGreen,
+                            onTap: () {
+                              if (_pages.length > 1) {
+                                if (_pageController.hasClients &&
+                                    _pageController.page!.toInt() !=
+                                        _pages.length - 1) {
+                                  _pageController.animateToPage(
+                                    _pageController.page!.toInt() + 1,
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeInOut,
+                                  );
+                                }
+                              }
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Image.asset(
+                                ImageAssets.forward,
+                                height: 16,
+                                width: 17,
+                                color: _isNextBtnActive
+                                    ? CustomColors.activePagingBtn
+                                    : CustomColors.inactivePagingBtn,
+                              ),
+                            ),
+                          ),
+                        ),
+                        S.w(6),
+                      ],
                     ),
-                    S.w(6),
-                  ],
+                  ),
                 ),
-              ),
+                S.w(8),
+                statusTouchModeIcon(),
+              ],
             ),
           ),
           Expanded(
@@ -2604,6 +2641,65 @@ class _RecordCourseState extends State<RecordCourse> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget statusTouchMode() {
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _isStylusActive = !_isStylusActive;
+        });
+      },
+      child: Container(
+        height: 36,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(32),
+          color: CustomColors.greenPrimary,
+        ),
+        child: InkWell(
+          onTap: () {
+            setState(() {
+              _isStylusActive = !_isStylusActive;
+            });
+          },
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              S.w(16),
+              Image.asset(
+                _isStylusActive
+                    ? 'assets/images/pencil-dis.png'
+                    : 'assets/images/hand-dis.png',
+                width: 22,
+              ),
+              S.w(12),
+              Text(
+                _isStylusActive ? 'Stylus mode' : 'Touch mode',
+                style: CustomStyles.bold14White,
+              ),
+              S.w(16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget statusTouchModeIcon() {
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _isStylusActive = !_isStylusActive;
+        });
+      },
+      child: Image.asset(
+        _isStylusActive
+            ? 'assets/images/stylus-icon.png'
+            : 'assets/images/touch-icon.png',
+        height: 44,
+        width: 44,
+      ),
     );
   }
 
