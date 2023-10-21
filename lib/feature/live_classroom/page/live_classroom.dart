@@ -376,7 +376,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   }
 
   void initTimer() {
-    solveStopwatch.start();
     _meetingTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         _formattedElapsedTime = _formatElapsedTime(solveStopwatch.elapsed);
@@ -496,6 +495,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   }
 
   void initSolvepadData() {
+    solveStopwatch.reset();
+    solveStopwatch.start();
     _data = {
       "version": "2.0.0",
       "solvepadWidth": mySolvepadSize.width,
@@ -516,6 +517,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       "scrollY": currentScrollY,
       "scale": currentScale,
     });
+    log(_data.toString());
   }
 
   void initMessageHandler() {
@@ -749,6 +751,12 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       }
       _studentMode = DrawingMode.drag;
     });
+  }
+
+  void clearCurrentReviewData() {
+    currentStroke.clear();
+    currentEraserStroke.clear();
+    currentScrollZoom.clear();
   }
 
   // ---------- FUNCTION: Solvepad Data Collection
@@ -987,6 +995,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
           log('RECORDING_STARTED:$recordIndex');
           sendMessage('RECORDING_STARTED:$recordIndex',
               solveStopwatch.elapsed.inMilliseconds);
+          clearCurrentReviewData();
+          initSolvepadData();
           break;
         default:
       }
