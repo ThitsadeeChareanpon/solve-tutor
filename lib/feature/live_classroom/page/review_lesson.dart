@@ -355,6 +355,20 @@ class _ReviewLessonState extends State<ReviewLesson>
     return null;
   }
 
+  void clearCanvasData() {
+    _pages.clear();
+    _penPoints.clear();
+    _laserPoints.clear();
+    _highlighterPoints.clear();
+    _eraserPoints.clear();
+    _replayPenPoints.clear();
+    _replayLaserPoints.clear();
+    _replayHighlighterPoints.clear();
+    _replayEraserPoints.clear();
+    _replayPoints.clear();
+    _data.clear();
+  }
+
   // ---------- FUNCTION: Replay
   void clearReplayPoint() {
     for (var point in _replayPenPoints) {
@@ -396,7 +410,7 @@ class _ReviewLessonState extends State<ReviewLesson>
 
   Future<void> _replay() async {
     solveStopwatch.start();
-    _sliderTimer = Timer.periodic(const Duration(milliseconds: 10), (timer) {
+    _sliderTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
       setState(() {
         replayProgress = solveStopwatch.elapsed.inMilliseconds.toDouble();
         if (replayProgress >= replayDuration.toDouble()) {
@@ -428,6 +442,8 @@ class _ReviewLessonState extends State<ReviewLesson>
     _sliderTimer?.cancel();
     solveStopwatch.reset();
     currentReplayIndex = 0;
+    currentReplayPointIndex = 0;
+    currentReplayScrollIndex = 0;
     log('end replay is called');
   }
 
@@ -441,16 +457,12 @@ class _ReviewLessonState extends State<ReviewLesson>
           curve: Curves.easeInOut,
         );
         _tutorCurrentPage = page;
-        _transformationController[page].value = Matrix4.identity()
-          ..translate(scaleScrollX(action['scrollX'] / 2),
-              scaleScrollY(action['scrollY']))
-          ..scale(action['scale']);
         _tutorCurrentScrollZoom =
-            '${action['scrollX']}|${action['scrollY']}|${action['scale']}';
+            '${scaleScrollX(action['scrollX'] / 2)}|${scaleScrollY(action['scrollY'])}|${action['scale']}';
         break;
       case 'change-page':
         if (tabFollowing) {
-          _pageController.animateToPage(
+          await _pageController.animateToPage(
             action['data'],
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
@@ -467,7 +479,7 @@ class _ReviewLessonState extends State<ReviewLesson>
             if (solveStopwatch.elapsed.inMilliseconds >=
                 scrollAction[currentReplayScrollIndex]['time']) {
               if (tabFollowing) {
-                _transformationController[_currentPage]
+                _transformationController[_tutorCurrentPage]
                     .value = Matrix4.identity()
                   ..translate(
                       scaleScrollX(scrollAction[currentReplayScrollIndex]['x']),
@@ -475,7 +487,7 @@ class _ReviewLessonState extends State<ReviewLesson>
                   ..scale(scrollAction[currentReplayScrollIndex]['scale']);
               }
               _tutorCurrentScrollZoom =
-                  '${scaleScrollX(scrollAction[currentReplayScrollIndex]['x'])}|${scaleScrollX(scrollAction[currentReplayScrollIndex]['y'])}|${scrollAction[currentReplayScrollIndex]['scale']}';
+                  '${scaleScrollX(scrollAction[currentReplayScrollIndex]['x'])}|${scaleScrollY(scrollAction[currentReplayScrollIndex]['y'])}|${scrollAction[currentReplayScrollIndex]['scale']}';
               currentReplayScrollIndex++;
             }
           });
@@ -657,6 +669,7 @@ class _ReviewLessonState extends State<ReviewLesson>
 
   @override
   dispose() {
+    audioBuffer = null;
     _audioPlayer.closePlayer();
     _pageController.dispose();
     try {
@@ -669,6 +682,7 @@ class _ReviewLessonState extends State<ReviewLesson>
     }
     _sliderTimer?.cancel();
     _laserTimer?.cancel();
+    clearCanvasData();
     super.dispose();
   }
 
@@ -927,7 +941,10 @@ class _ReviewLessonState extends State<ReviewLesson>
             min: 0,
             handlerWidth: handler,
             handlerHeight: handler,
+            disabled: isReplayEnd || tabFreestyle,
             handlerAnimation: const FlutterSliderHandlerAnimation(scale: 1.2),
+            handler: FlutterSliderHandler(
+                opacity: (isReplayEnd || tabFreestyle) ? 0 : 1),
             tooltip: FlutterSliderTooltip(
               alwaysShowTooltip: true,
               textStyle: TextStyle(fontSize: fontSize, color: Colors.black),
@@ -952,6 +969,7 @@ class _ReviewLessonState extends State<ReviewLesson>
               ),
             ),
             onDragging: (handlerIndex, lowerValue, upperValue) {
+              if (isReplayEnd || tabFreestyle) return null;
               var seekPosition = Duration(milliseconds: lowerValue.round());
               if (lowerValue > replayProgress) {
                 solveStopwatch.jumpTo(seekPosition);
@@ -959,7 +977,12 @@ class _ReviewLessonState extends State<ReviewLesson>
                 setState(() {});
               }
             },
-            // onDragCompleted: (handlerIndex, lowerValue, upperValue) {},
+            onDragCompleted: (handlerIndex, lowerValue, upperValue) {
+              if (isReplayEnd || tabFreestyle) return null;
+              if (lowerValue >= replayDuration) {
+                endReplay();
+              }
+            },
           ),
         ),
         Positioned(
@@ -1321,17 +1344,15 @@ class _ReviewLessonState extends State<ReviewLesson>
 
   // ---------- FUNCTION: page control
   void _addPage() {
-    setState(() {
-      _penPoints.add([]);
-      _laserPoints.add([]);
-      _highlighterPoints.add([]);
-      _eraserPoints.add(const Offset(-100, -100));
-      _replayPoints.add([]);
-      _replayPenPoints.add([]);
-      _replayLaserPoints.add([]);
-      _replayHighlighterPoints.add([]);
-      _replayEraserPoints.add(const Offset(-100, -100));
-    });
+    _penPoints.add([]);
+    _laserPoints.add([]);
+    _highlighterPoints.add([]);
+    _eraserPoints.add(const Offset(-100, -100));
+    _replayPoints.add([]);
+    _replayPenPoints.add([]);
+    _replayLaserPoints.add([]);
+    _replayHighlighterPoints.add([]);
+    _replayEraserPoints.add(const Offset(-100, -100));
   }
 
   void _onPageViewChange(int page) {
@@ -1526,11 +1547,10 @@ class _ReviewLessonState extends State<ReviewLesson>
                                 curve: Curves.easeInOut,
                               );
                             } // re-correct page
-                            _transformationController[_tutorCurrentPage]
-                                .value = Matrix4.identity()
-                              ..translate(
-                                  scaleScrollX(scrollX), scaleScrollX(scrollY))
-                              ..scale(zoom);
+                            _transformationController[_tutorCurrentPage].value =
+                                Matrix4.identity()
+                                  ..translate(scrollX, scrollY)
+                                  ..scale(zoom);
                           }
                         }
                       });
@@ -1953,204 +1973,10 @@ class _ReviewLessonState extends State<ReviewLesson>
     );
   }
 
-  Widget mobileReviewHeader() {
-    return SafeArea(
-      child: StatefulBuilder(
-        builder: (context, setState) {
-          return Column(
-            children: [
-              Material(
-                color: Colors.transparent,
-                child: Container(
-                  width: double.infinity,
-                  height: 55,
-                  color: CustomColors.whitePrimary,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        flex: 3,
-                        child: Row(
-                          children: [
-                            InkWell(
-                              onTap: () {
-                                Navigator.of(context).pop();
-                              },
-                              child: const Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Icon(
-                                  Icons.arrow_back,
-                                  color: CustomColors.gray878787,
-                                  size: 20.0,
-                                ),
-                              ),
-                            ),
-                            S.w(defaultPadding),
-                            Text(
-                              widget.courseName,
-                              style: CustomStyles.bold16Black363636Overflow,
-                              maxLines: 1,
-                            ),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        flex: 3,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            InkWell(
-                              onTap: () {
-                                setState(() {
-                                  if (tabFreestyle == true) {
-                                    tabFollowing = !tabFollowing;
-                                    tabFreestyle = false;
-                                    var parts =
-                                        _tutorCurrentScrollZoom.split(':');
-                                    var scrollX = double.parse(parts[0]);
-                                    var scrollY = double.parse(parts[1]);
-                                    var zoom = double.parse(parts.last);
-                                    if (_currentPage != _tutorCurrentPage) {
-                                      _pageController.animateToPage(
-                                        _tutorCurrentPage,
-                                        duration:
-                                            const Duration(milliseconds: 300),
-                                        curve: Curves.easeInOut,
-                                      );
-                                    } // re-correct page
-                                    _transformationController[_tutorCurrentPage]
-                                        .value = Matrix4.identity()
-                                      ..translate(scaleScrollX(scrollX),
-                                          scaleScrollY(scrollY))
-                                      ..scale(zoom);
-                                  }
-                                });
-                              },
-                              child: Container(
-                                height: 50,
-                                width: 120,
-                                decoration: BoxDecoration(
-                                  color: tabFollowing
-                                      ? CustomColors.greenE5F6EB
-                                      : CustomColors.whitePrimary,
-                                  shape: BoxShape.rectangle,
-                                  border: Border.all(
-                                    color: CustomColors.grayCFCFCF,
-                                    style: BorderStyle.solid,
-                                    width: 1.0,
-                                  ),
-                                  borderRadius: const BorderRadius.horizontal(
-                                    left: Radius.circular(50.0),
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    Image.asset(
-                                      tabFollowing
-                                          ? ImageAssets.avatarMen
-                                          : ImageAssets.avatarDisMen,
-                                      width: 32,
-                                    ),
-                                    S.w(8),
-                                    Text("เรียนรู้",
-                                        style: tabFollowing
-                                            ? CustomStyles.bold14greenPrimary
-                                            : CustomStyles.bold14grayCFCFCF),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            InkWell(
-                              onTap: () {
-                                setState(() {
-                                  if (tabFollowing == true) {
-                                    tabFreestyle = !tabFreestyle;
-                                    tabFollowing = false;
-                                  }
-                                });
-                              },
-                              child: Container(
-                                height: 50,
-                                width: 120,
-                                decoration: BoxDecoration(
-                                  color: tabFreestyle
-                                      ? CustomColors.greenE5F6EB
-                                      : CustomColors.whitePrimary,
-                                  shape: BoxShape.rectangle,
-                                  border: Border.all(
-                                    color: CustomColors.grayCFCFCF,
-                                    style: BorderStyle.solid,
-                                    width: 1.0,
-                                  ),
-                                  borderRadius: const BorderRadius.horizontal(
-                                    right: Radius.circular(50.0),
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    Image.asset(
-                                      tabFreestyle
-                                          ? ImageAssets.pencilActive
-                                          : ImageAssets.penDisTab,
-                                      width: 32,
-                                    ),
-                                    S.w(8),
-                                    Text("เขียนอิสระ",
-                                        style: tabFreestyle
-                                            ? CustomStyles.bold14greenPrimary
-                                            : CustomStyles.bold14grayCFCFCF),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            S.w(12),
-                            // Container(
-                            //   width: 1,
-                            //   height: 32,
-                            //   color: CustomColors.grayCFCFCF,
-                            // ),
-                            S.w(12),
-                            // InkWell(
-                            //   onTap: () {},
-                            //   child: Container(
-                            //     padding: const EdgeInsets.symmetric(
-                            //       horizontal: 6,
-                            //       vertical: 10,
-                            //     ),
-                            //     decoration: BoxDecoration(
-                            //       color: CustomColors.greenPrimary,
-                            //       borderRadius: BorderRadius.circular(8.0),
-                            //     ),
-                            //     child:
-                            //         Text("ไปหน้าที่สอน", style: CustomStyles.bold14White),
-                            //   ),
-                            // ),
-                            // S.w(12),
-                          ],
-                        ),
-                      ),
-                      Align(
-                          alignment: Alignment.centerRight,
-                          child: pagingTools()),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
   Widget tools() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        if (Responsive.isDesktop(context)) S.w(10),
         Center(
           child: Padding(
             padding: const EdgeInsets.all(8.0),
@@ -2408,9 +2234,8 @@ class _ReviewLessonState extends State<ReviewLesson>
 
   Widget toolsDisable() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        if (Responsive.isDesktop(context)) S.w(10),
         InkWell(
           onTap: () {
             final snackBar = SnackBar(
