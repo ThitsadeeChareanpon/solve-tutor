@@ -533,7 +533,18 @@ class _ReviewLessonState extends State<ReviewLesson>
               pointStack = _replayHighlighterPoints[_tutorCurrentPage];
             } // erase high
             setState(() {
-              pointStack.removeRange(eraseAction['prev'], eraseAction['next']);
+              try {
+                setState(() {
+                  pointStack.removeRange(
+                      eraseAction['prev'], eraseAction['next']);
+                });
+              } catch (e) {
+                if (e is RangeError) {
+                  print("Error removing range: ${e.toString()}");
+                } else {
+                  rethrow; // If it's not a RangeError, rethrow to see the actual error
+                }
+              }
             });
           } // erase
         }
