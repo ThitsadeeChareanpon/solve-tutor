@@ -182,8 +182,8 @@ class _ReviewLessonState extends State<ReviewLesson>
   final List<TransformationController> _transformationController = [];
   late Map<String, Function(String)> handlers;
   List<dynamic> downloadedSolvepad = [];
-  bool tabFollowing = false;
-  bool tabFreestyle = true;
+  bool tabFollowing = true;
+  bool tabFreestyle = false;
   late AnimationController progressController;
   late Animation<double> animation;
   bool isCourseLoaded = false;
@@ -2415,9 +2415,6 @@ class _ReviewLessonState extends State<ReviewLesson>
                 },
               ),
             );
-
-            // Find the ScaffoldMessenger in the widget tree
-            // and use it to show a SnackBar.
             ScaffoldMessenger.of(context).showSnackBar(snackBar);
           },
           child: Center(
@@ -2426,7 +2423,7 @@ class _ReviewLessonState extends State<ReviewLesson>
               child: AnimatedContainer(
                 duration: const Duration(seconds: 1),
                 curve: Curves.fastOutSlowIn,
-                height: selectedTools ? 270 : 450,
+                height: 450,
                 width: 120,
                 decoration: BoxDecoration(
                   border: Border.all(
@@ -2442,12 +2439,11 @@ class _ReviewLessonState extends State<ReviewLesson>
                   children: <Widget>[
                     S.h(12),
                     Expanded(
-                      flex: 3,
+                      flex: 7, // flex 4 if have all
                       child: ListView.builder(
-                          physics: const NeverScrollableScrollPhysics(),
                           scrollDirection: Axis.vertical,
                           shrinkWrap: true,
-                          itemCount: _listToolsDisable.length,
+                          itemCount: _listTools.length,
                           itemBuilder: (context, index) {
                             return Column(
                               children: [
@@ -2463,6 +2459,7 @@ class _ReviewLessonState extends State<ReviewLesson>
                     Container(
                         height: 2, width: 80, color: CustomColors.grayF3F3F3),
                     Expanded(
+                      flex: 2,
                       child: Column(
                         children: [
                           S.h(defaultPadding),
