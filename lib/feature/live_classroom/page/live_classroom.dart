@@ -323,6 +323,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       initConference();
       initSolvepadData();
     } else {
+      isLiveCourseReady = true;
       _joined = true;
       mockInitPageData();
     }

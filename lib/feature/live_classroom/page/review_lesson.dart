@@ -278,7 +278,6 @@ class _ReviewLessonState extends State<ReviewLesson>
             Size(_data['solvepadWidth'], _data['solvepadHeight']);
         replayDuration = _data['metadata']['duration'];
       });
-      initSolvepadScaling();
     } // success
     else {
       log('Failed to download file');
@@ -988,6 +987,7 @@ class _ReviewLessonState extends State<ReviewLesson>
         currentScrollX = (-1 * solvepadWidth);
         if (mySolvepadSize.width != solvepadWidth) {
           mySolvepadSize = Size(solvepadWidth, solvepadHeight);
+          initSolvepadScaling();
         }
         return PageView.builder(
           onPageChanged: _onPageViewChange,
