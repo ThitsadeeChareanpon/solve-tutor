@@ -21,6 +21,10 @@ import 'package:solve_tutor/feature/market_place/pages/record_course.dart';
 import 'package:solve_tutor/feature/market_place/pages/reorderable_view_page.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
+import '../../../firebase/database.dart';
+import '../../live_classroom/utils/responsive.dart';
+import '../../profile/components/webview.dart';
+
 class VideoLessonTab extends StatefulWidget {
   @override
   _VideoLessonTabState createState() => _VideoLessonTabState();
@@ -42,7 +46,9 @@ enum DraggingMode {
 
 class _VideoLessonTabState extends State<VideoLessonTab> {
   var courseController = CourseController();
+  FirebaseService dbService = FirebaseService();
   static final _util = UtilityHelper();
+  String tutorialUrl = '';
   // List<ItemData> _items = [];
   // var controller = ExpansionTileController();
 
@@ -50,6 +56,12 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
   void initState() {
     super.initState();
     courseController = Provider.of<CourseController>(context, listen: false);
+    getTutUrl();
+  }
+
+  void getTutUrl() async {
+    tutorialUrl = await dbService.getRecordCourseTutorialUrl();
+    setState(() {});
   }
 
   @override
@@ -445,7 +457,7 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
             style: CustomStyles.med14Gray878787,
           ),
           const SizedBox(height: 10),
-          _buttonRecordSolvepad(lesson!)
+          if (!Responsive.isMobile(context)) _buttonRecordSolvepad(lesson!)
         ],
       ),
     );
@@ -726,9 +738,10 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
         await Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => DialogFileManager(
-                    tutorId: courseController.courseData?.tutorId ?? '',
-                  )),
+            builder: (context) => DialogFileManager(
+              tutorId: courseController.courseData?.tutorId ?? '',
+            ),
+          ),
         );
       },
       child: Text(
@@ -810,14 +823,14 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
                       fontSize: _util.addMinusFontSize(18)),
                 ),
                 Text(
-                  "คุณสามารถบันทึกวิดิโอขณะเขียนอธิบายบนชีทได้ผ่าน SOLVEPAD\nหากบทเรียนของคุณไม่สามารถสอนจบได้ในครั้งเดียว แนะนำให้บันทึกบทเรียนแยกเป็นหลายๆ วิดิโอ",
+                  "คุณสามารถบันทึกการสอนขณะพูดและเขียนอธิบายบนชีทได้ผ่าน SOLVEPAD\nแนะนำให้บันทึกบทเรียนแยกเป็นหลายๆบทเรียน บทเรียนละไม่เกิน 30นาที",
                   textAlign: TextAlign.center,
                   style: CustomStyles.med14White.copyWith(
                     color: CustomColors.gray363636,
                   ),
                 ),
                 S.h(10),
-                iconHowtoUploadPAD()
+                iconHowtoUploadPAD(context, tutorialUrl),
               ],
             ),
           ),
@@ -848,7 +861,7 @@ Widget iconHowtoUploadVDO() {
   );
 }
 
-Widget iconHowtoUploadPAD() {
+Widget iconHowtoUploadPAD(BuildContext context, String tutorialUrl) {
   return ElevatedButton.icon(
     icon: const Icon(
       Icons.play_circle,
@@ -861,7 +874,15 @@ Widget iconHowtoUploadPAD() {
         color: CustomColors.gray878787,
       ),
     ),
-    onPressed: () async {},
+    onPressed: () {
+      if (tutorialUrl == '') return;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => WebViewScreen(url: tutorialUrl),
+        ),
+      );
+    },
     style: ElevatedButton.styleFrom(
       backgroundColor: CustomColors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),

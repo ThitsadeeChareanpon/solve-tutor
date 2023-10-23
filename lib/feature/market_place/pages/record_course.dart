@@ -1728,20 +1728,20 @@ class _RecordCourseState extends State<RecordCourse> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                InkWell(
-                  onTap: () {
-                    setState(() {
-                      micEnable = !micEnable;
-                    });
-                  },
-                  child: Image.asset(
-                    micEnable ? ImageAssets.micEnable : ImageAssets.micDis,
-                    height: 44,
-                    width: 44,
-                  ),
-                ),
-                S.w(defaultPadding),
-                const DividerVer(),
+                // InkWell(
+                //   onTap: () {
+                //     setState(() {
+                //       micEnable = !micEnable;
+                //     });
+                //   },
+                //   child: Image.asset(
+                //     micEnable ? ImageAssets.micEnable : ImageAssets.micDis,
+                //     height: 44,
+                //     width: 44,
+                //   ),
+                // ),
+                // S.w(defaultPadding),
+                // const DividerVer(),
                 if (!isRecordEnd) recordCourseButton(),
                 if (isRecordEnd) S.w(defaultPadding),
                 RichText(

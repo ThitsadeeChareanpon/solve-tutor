@@ -79,4 +79,24 @@ class FirebaseService {
 
     return solvepadUrl;
   }
+
+  Future<String> getRecordCourseTutorialUrl() async {
+    try {
+      DocumentReference<Object?> docRef = FirebaseFirestore.instance
+          .collection('external_info')
+          .doc('solveExternalUrl');
+      DocumentSnapshot<Object?> docSnapshot = await docRef.get();
+      if (docSnapshot.exists) {
+        Map<String, dynamic>? data =
+            docSnapshot.data() as Map<String, dynamic>?;
+        return data?['tut_record_course'] as String;
+      } else {
+        log("Document does not exist");
+        return '';
+      }
+    } catch (e) {
+      log("Error fetching data from Firestore: $e");
+      return '';
+    }
+  }
 }

@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-class PrivacyPolicyScreen extends StatefulWidget {
+class WebViewScreen extends StatefulWidget {
   final String url;
 
-  const PrivacyPolicyScreen({super.key, required this.url});
+  const WebViewScreen({super.key, required this.url});
 
   @override
-  State<PrivacyPolicyScreen> createState() => _PrivacyPolicyScreenState();
+  State<WebViewScreen> createState() => _WebViewScreenState();
 }
 
-class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
+class _WebViewScreenState extends State<WebViewScreen> {
   late WebViewController controller;
 
   @override
