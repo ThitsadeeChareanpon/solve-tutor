@@ -373,9 +373,10 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     var courseStudents = courseController.courseData!.studentDetails;
     List<Map<String, dynamic>>? studentsJson =
         courseStudents?.map((student) => student.toJson()).toList();
-    setState(() {
-      students = studentsJson!.cast<dynamic>();
-    });
+    if (studentsJson != null) {
+      students = studentsJson.cast<dynamic>();
+    }
+    setState(() {});
   }
 
   void setLiveCourseLoadState() async {
@@ -1113,7 +1114,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       calendars[indexToUpdate].liveDuration = duration;
       await courseController.updateCourseDetails(
           context, courseController.courseData);
-      int students = courseController.courseData!.studentIds!.length;
+      int students = courseController.courseData?.studentIds?.length ?? 0;
       await updateBalanceAndLiveDuration(duration, students);
     }
   }

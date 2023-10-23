@@ -84,11 +84,11 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
                 widget.course.start!.millisecondsSinceEpoch) /
             60000)
         .ceil();
-    int? students = widget.course.studentCount;
-    int? minPoint = totalMinuteLive * students!;
+    int? students = widget.course.studentCount ?? 0;
+    int? minPoint = totalMinuteLive * students;
     await authProvider.getWallet();
-    int? point = authProvider.wallet!.balance;
-    if (point! >= minPoint) {
+    int? point = authProvider.wallet?.balance ?? 0;
+    if (point >= minPoint) {
       await updateActualTime();
       try {
         var meetingID = await createMeeting(_token);
