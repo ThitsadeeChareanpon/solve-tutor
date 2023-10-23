@@ -170,7 +170,6 @@ class _UpdateCourseLiveTabState extends State<UpdateCourseLiveTab>
           children: [
             _lastUpdate(courseController.courseData?.updateTime),
             Expanded(child: Container()),
-            _buttonExample(),
             S.w(10),
             _buttonSaveCourse(context),
             S.w(10),

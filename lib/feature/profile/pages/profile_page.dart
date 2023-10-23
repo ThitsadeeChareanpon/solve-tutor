@@ -482,7 +482,7 @@ class _ProfilePageState extends State<ProfilePage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => PrivacyPolicyScreen(url: url),
+              builder: (context) => WebViewScreen(url: url),
             ),
           );
         }

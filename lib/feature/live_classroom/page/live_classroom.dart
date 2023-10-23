@@ -743,11 +743,11 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       studentSolvepadSize = Size(solvepadWidth, solvepadHeight);
       studentImageWidth = solvepadHeight * sheetImageRatio;
       studentExtraSpaceX = (solvepadWidth - studentImageWidth) / 2;
-      myImageWidth = mySolvepadSize!.height * sheetImageRatio;
-      myExtraSpaceX = (mySolvepadSize!.width - myImageWidth) / 2;
+      myImageWidth = mySolvepadSize.height * sheetImageRatio;
+      myExtraSpaceX = (mySolvepadSize.width - myImageWidth) / 2;
       scaleImageX = myImageWidth / studentImageWidth;
-      scaleX = mySolvepadSize!.width / studentSolvepadSize.width;
-      scaleY = mySolvepadSize!.height / studentSolvepadSize.height;
+      scaleX = mySolvepadSize.width / studentSolvepadSize.width;
+      scaleY = mySolvepadSize.height / studentSolvepadSize.height;
     });
   }
 
@@ -984,7 +984,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
         case 'RECORDING_STOPPED':
           setState(() {
             isRecordingLoading = false;
-            isRecordingOn = !isRecordingOn;
+            isRecordingOn = false;
           });
           log('RECORDING_STOPPED:$recordIndex');
           sendMessage('RECORDING_STOPPED:$recordIndex',
@@ -1004,7 +1004,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
         case 'RECORDING_STARTED':
           setState(() {
             isRecordingLoading = false;
-            isRecordingOn = !isRecordingOn;
+            isRecordingOn = true;
           });
           log('RECORDING_STARTED:$recordIndex');
           sendMessage('RECORDING_STARTED:$recordIndex',
