@@ -1407,7 +1407,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                   });
                                   int time =
                                       solveStopwatch.elapsed.inMilliseconds;
-                                  for (int i = 0; i <= 2; i++) {
+                                  for (int i = 0; i <= 4; i++) {
                                     sendMessage(
                                       'StrokeColor.$index',
                                       time,
@@ -1462,7 +1462,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                   });
                                   int time =
                                       solveStopwatch.elapsed.inMilliseconds;
-                                  for (int i = 0; i <= 2; i++) {
+                                  for (int i = 0; i <= 4; i++) {
                                     sendMessage(
                                       'StrokeWidth.$index',
                                       time,
@@ -1802,7 +1802,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                 return;
                               }
                               int time = solveStopwatch.elapsed.inMilliseconds;
-                              for (int i = 0; i <= 2; i++) {
+                              for (int i = 0; i <= 4; i++) {
                                 sendMessage(
                                   'null',
                                   time,
@@ -1847,7 +1847,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                 return;
                               }
                               int time = solveStopwatch.elapsed.inMilliseconds;
-                              for (int i = 0; i <= 2; i++) {
+                              for (int i = 0; i <= 4; i++) {
                                 sendMessage(
                                   'null',
                                   time,
@@ -2140,7 +2140,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                 int page = _currentPage - 1;
                                 int time =
                                     solveStopwatch.elapsed.inMilliseconds;
-                                for (int i = 0; i <= 2; i++) {
+                                for (int i = 0; i <= 4; i++) {
                                   sendMessage(
                                     'ChangePage:$page',
                                     time,
@@ -2202,7 +2202,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                   int page = _currentPage + 1;
                                   int time =
                                       solveStopwatch.elapsed.inMilliseconds;
-                                  for (int i = 0; i <= 2; i++) {
+                                  for (int i = 0; i <= 4; i++) {
                                     sendMessage(
                                       'ChangePage:$page',
                                       time,
@@ -2652,7 +2652,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                           _pageController.page!.toInt() != 0) {
                         int page = _currentPage - 1;
                         int time = solveStopwatch.elapsed.inMilliseconds;
-                        for (int i = 0; i <= 2; i++) {
+                        for (int i = 0; i <= 4; i++) {
                           sendMessage(
                             'ChangePage:$page',
                             time,
@@ -2710,7 +2710,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                 _pages.length - 1) {
                           int page = _currentPage + 1;
                           int time = solveStopwatch.elapsed.inMilliseconds;
-                          for (int i = 0; i <= 2; i++) {
+                          for (int i = 0; i <= 4; i++) {
                             sendMessage(
                               'ChangePage:$page',
                               time,
@@ -3095,7 +3095,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                               _mode = DrawingMode.drag;
                                               int time = solveStopwatch
                                                   .elapsed.inMilliseconds;
-                                              for (int i = 0; i <= 2; i++) {
+                                              for (int i = 0; i <= 4; i++) {
                                                 sendMessage(
                                                   'DrawingMode.drag',
                                                   time,
@@ -3105,7 +3105,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                               _mode = DrawingMode.pen;
                                               int time = solveStopwatch
                                                   .elapsed.inMilliseconds;
-                                              for (int i = 0; i <= 2; i++) {
+                                              for (int i = 0; i <= 4; i++) {
                                                 sendMessage(
                                                   'DrawingMode.pen',
                                                   time,
@@ -3115,7 +3115,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                               _mode = DrawingMode.highlighter;
                                               int time = solveStopwatch
                                                   .elapsed.inMilliseconds;
-                                              for (int i = 0; i <= 2; i++) {
+                                              for (int i = 0; i <= 4; i++) {
                                                 sendMessage(
                                                   'DrawingMode.highlighter',
                                                   time,
@@ -3125,7 +3125,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                               _mode = DrawingMode.eraser;
                                               int time = solveStopwatch
                                                   .elapsed.inMilliseconds;
-                                              for (int i = 0; i <= 2; i++) {
+                                              for (int i = 0; i <= 4; i++) {
                                                 sendMessage(
                                                   'DrawingMode.eraser',
                                                   time,
@@ -3135,7 +3135,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                               _mode = DrawingMode.laser;
                                               int time = solveStopwatch
                                                   .elapsed.inMilliseconds;
-                                              for (int i = 0; i <= 2; i++) {
+                                              for (int i = 0; i <= 4; i++) {
                                                 sendMessage(
                                                   'DrawingMode.laser',
                                                   time,
@@ -3460,7 +3460,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                           _mode = DrawingMode.drag;
                                           int time = solveStopwatch
                                               .elapsed.inMilliseconds;
-                                          for (int i = 0; i <= 2; i++) {
+                                          for (int i = 0; i <= 4; i++) {
                                             sendMessage(
                                               'DrawingMode.drag',
                                               time,
@@ -3471,7 +3471,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                           _mode = DrawingMode.pen;
                                           int time = solveStopwatch
                                               .elapsed.inMilliseconds;
-                                          for (int i = 0; i <= 2; i++) {
+                                          for (int i = 0; i <= 4; i++) {
                                             sendMessage(
                                               'DrawingMode.pen',
                                               time,
@@ -3482,7 +3482,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                           _mode = DrawingMode.highlighter;
                                           int time = solveStopwatch
                                               .elapsed.inMilliseconds;
-                                          for (int i = 0; i <= 2; i++) {
+                                          for (int i = 0; i <= 4; i++) {
                                             sendMessage(
                                               'DrawingMode.highlighter',
                                               time,
@@ -3493,7 +3493,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                           _mode = DrawingMode.eraser;
                                           int time = solveStopwatch
                                               .elapsed.inMilliseconds;
-                                          for (int i = 0; i <= 2; i++) {
+                                          for (int i = 0; i <= 4; i++) {
                                             sendMessage(
                                               'DrawingMode.eraser',
                                               time,
@@ -3504,7 +3504,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                           _mode = DrawingMode.laser;
                                           int time = solveStopwatch
                                               .elapsed.inMilliseconds;
-                                          for (int i = 0; i <= 2; i++) {
+                                          for (int i = 0; i <= 4; i++) {
                                             sendMessage(
                                               'DrawingMode.laser',
                                               time,
