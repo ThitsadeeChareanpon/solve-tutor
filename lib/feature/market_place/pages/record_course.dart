@@ -594,6 +594,14 @@ class _RecordCourseState extends State<RecordCourse> {
     }
   }
 
+  void clearZoomPosition() {
+    for (int i = 0; i < _transformationController.length; i++) {
+      _transformationController[i].value = Matrix4.identity()
+        ..scale(2.0)
+        ..translate(-1 * mySolvepadSize.width / 4, 0);
+    }
+  }
+
   void pauseReplay() {
     log('pause replay');
     setState(() {
@@ -618,6 +626,7 @@ class _RecordCourseState extends State<RecordCourse> {
       isReplaying = true;
       isReplayEnd = false;
       clearReplayPoint();
+      clearZoomPosition();
     });
     _replay();
     playAudioPlayer();
