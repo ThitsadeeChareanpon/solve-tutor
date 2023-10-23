@@ -816,6 +816,7 @@ class _RecordCourseState extends State<RecordCourse> {
   Future<void> openTheRecorder() async {
     if (!kIsWeb) {
       var status = await Permission.microphone.request();
+      log("sound!!!!!!!!!!!!!!!!!!! : $status");
       if (status != PermissionStatus.granted) {
         throw RecordingPermissionException('Microphone permission not granted');
       }
