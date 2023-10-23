@@ -99,9 +99,9 @@ Future<void> showCloseDialog(
 }
 
 Future<void> showAlertRecordingDialog(BuildContext context,
-    {String title = 'ระบบกำลังทำการบันทึกเสียง',
+    {String title = 'ระบบกำลังทำการบันทึกการสอน',
     String detail =
-        'ท่านไม่สามารถปิดห้องเรียนระหว่างบันทึกเสียงได้ กรุณาสิ้นสุดการบันทึกเสียง',
+        'ท่านไม่สามารถปิดห้องเรียนระหว่างบันทึกการสอนได้ กรุณาสิ้นสุดการบันทึก',
     String confirm = 'ตกลง'}) {
   return showDialog(
     context: context,

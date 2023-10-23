@@ -14,6 +14,7 @@ import 'package:solve_tutor/feature/calendar/widgets/sizebox.dart';
 
 import '../../../authentication/service/auth_provider.dart';
 import '../../live_classroom/page/review_lesson.dart';
+import '../../live_classroom/utils/responsive.dart';
 import '../widgets/format_date.dart';
 import '../widgets/sizebox.dart';
 
@@ -180,6 +181,7 @@ class _CourseHistoryState extends State<CourseHistory>
 
                 return InkWell(
                   onTap: () {
+                    if (Responsive.isMobile(context)) return;
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -191,6 +193,8 @@ class _CourseHistoryState extends State<CourseHistory>
                           tutorId: authProvider!.user!.id!,
                           userId: authProvider!.user!.id!,
                           docId: reviewList[index].documentId!,
+                          start: reviewList[index].start!,
+                          end: reviewList[index].end!,
                         ),
                       ),
                     );

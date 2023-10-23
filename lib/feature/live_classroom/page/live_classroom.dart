@@ -280,7 +280,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   var courseController = CourseLiveController();
   late AuthProvider authProvider;
   late String courseName;
-  bool isCourseLoaded = false;
+  bool isSheetReady = false;
+  bool isLiveCourseReady = false;
 
   // ---------- VARIABLE: message control
   late Map<String, Function(String)> handlers;
@@ -294,9 +295,9 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   List<dynamic> currentEraserStroke = [];
   List<ScrollZoomStamp> currentScrollZoom = [];
   double currentScale = 2.0;
-  double currentScrollX = 2.0;
+  double currentScrollX = 0;
   double currentScrollY = 0;
-  bool isLoading = false;
+  bool isUploading = false;
 
   /// TODO: Get rid of all Mockup reference
   @override
@@ -322,6 +323,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       initConference();
       initSolvepadData();
     } else {
+      isLiveCourseReady = true;
       _joined = true;
       mockInitPageData();
     }
@@ -338,7 +340,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       }
       courseName = 'Mockup Test';
       micEnable = false;
-      isCourseLoaded = true;
+      isSheetReady = true;
     });
   }
 
@@ -365,7 +367,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       }
       courseName = courseController.courseData!.courseName!;
       micEnable = widget.micEnabled;
-      isCourseLoaded = true;
+      isSheetReady = true;
+      setLiveCourseLoadState();
     });
     var courseStudents = courseController.courseData!.studentDetails;
     List<Map<String, dynamic>>? studentsJson =
@@ -375,8 +378,16 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     });
   }
 
+  void setLiveCourseLoadState() async {
+    if (isSheetReady && _joined) {
+      setState(() {
+        isLiveCourseReady = true;
+      });
+      await meeting.startRecording(config: {"mode": "audio"});
+    }
+  }
+
   void initTimer() {
-    solveStopwatch.start();
     _meetingTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         _formattedElapsedTime = _formatElapsedTime(solveStopwatch.elapsed);
@@ -496,6 +507,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   }
 
   void initSolvepadData() {
+    solveStopwatch.reset();
+    solveStopwatch.start();
     _data = {
       "version": "2.0.0",
       "solvepadWidth": mySolvepadSize.width,
@@ -516,6 +529,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       "scrollY": currentScrollY,
       "scale": currentScale,
     });
+    log(_data.toString());
   }
 
   void initMessageHandler() {
@@ -751,6 +765,12 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     });
   }
 
+  void clearCurrentReviewData() {
+    currentStroke.clear();
+    currentEraserStroke.clear();
+    currentScrollZoom.clear();
+  }
+
   // ---------- FUNCTION: Solvepad Data Collection
   void addDrawing(List<StrokeStamp> strokeStamp, int initTime) {
     _actions.add({
@@ -783,7 +803,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             'y': double.parse(action[0].dy.toStringAsFixed(2)),
             'time': action[1],
           });
-        } else if (action[0] is DrawingMode) {
+        } else if (action[0] is String) {
           if (moveActions.isNotEmpty) {
             formattedActions.add({
               'action': 'moves',
@@ -921,6 +941,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
         setState(() {
           meeting = _meeting;
           _joined = true;
+          setLiveCourseLoadState();
           updateMeetingCode();
           // meeting.startRecording(config: {"mode": "audio"});
           initWss();
@@ -987,6 +1008,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
           log('RECORDING_STARTED:$recordIndex');
           sendMessage('RECORDING_STARTED:$recordIndex',
               solveStopwatch.elapsed.inMilliseconds);
+          clearCurrentReviewData();
+          initSolvepadData();
           break;
         default:
       }
@@ -1145,22 +1168,24 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     List<SolvepadStroke?> pointStack;
     if (mode == DrawingMode.pen) {
       pointStack = _penPoints[_currentPage];
-      removePointStack(pointStack, index);
+      removePointStack(pointStack, index, removeMode: 'pen');
       sendMessage(
         'Erase.pen.$index',
         solveStopwatch.elapsed.inMilliseconds,
       );
-    } else if (mode == DrawingMode.highlighter) {
+    } // pen
+    else if (mode == DrawingMode.highlighter) {
       pointStack = _highlighterPoints[_currentPage];
-      removePointStack(pointStack, index);
+      removePointStack(pointStack, index, removeMode: 'high');
       sendMessage(
         'Erase.high.$index',
         solveStopwatch.elapsed.inMilliseconds,
       );
-    }
+    } // high
   }
 
-  void removePointStack(List<SolvepadStroke?> pointStack, int index) {
+  void removePointStack(List<SolvepadStroke?> pointStack, int index,
+      {String? removeMode}) {
     int prevNullIndex = -1;
     int nextNullIndex = -1;
     for (int i = index; i >= 0; i--) {
@@ -1180,12 +1205,14 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       setState(() {
         pointStack.removeRange(prevNullIndex, nextNullIndex);
       });
-      currentEraserStroke.add([
-        _mode,
-        prevNullIndex,
-        nextNullIndex,
-        solveStopwatch.elapsed.inMilliseconds
-      ]);
+      if (removeMode != null) {
+        currentEraserStroke.add([
+          removeMode,
+          prevNullIndex,
+          nextNullIndex,
+          solveStopwatch.elapsed.inMilliseconds
+        ]);
+      }
     }
   }
 
@@ -1255,7 +1282,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: _onWillPopScope,
-      child: _joined && isCourseLoaded
+      child: isLiveCourseReady
           ? Scaffold(
               backgroundColor: CustomColors.grayCFCFCF,
               body: !Responsive.isMobile(context)
@@ -1308,7 +1335,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             ),
           ), // Share screen pill
           showListStudents(),
-          if (isLoading)
+          if (isUploading)
             Positioned.fill(
               child: Container(
                 color: Colors.black.withOpacity(0.5),
@@ -1317,6 +1344,25 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text('Uploading Data',
+                          style: CustomStyles.bold14bluePrimary),
+                      S.w(16),
+                      const CircularProgressIndicator(
+                        color: Color(0xff0D47A1),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          if (isRecordingLoading)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0.5),
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Preparing Audio Record',
                           style: CustomStyles.bold14bluePrimary),
                       S.w(16),
                       const CircularProgressIndicator(
@@ -1361,7 +1407,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                   });
                                   int time =
                                       solveStopwatch.elapsed.inMilliseconds;
-                                  for (int i = 0; i <= 2; i++) {
+                                  for (int i = 0; i <= 4; i++) {
                                     sendMessage(
                                       'StrokeColor.$index',
                                       time,
@@ -1416,7 +1462,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                   });
                                   int time =
                                       solveStopwatch.elapsed.inMilliseconds;
-                                  for (int i = 0; i <= 2; i++) {
+                                  for (int i = 0; i <= 4; i++) {
                                     sendMessage(
                                       'StrokeWidth.$index',
                                       time,
@@ -1462,7 +1508,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             ],
           ),
 
-          if (isLoading)
+          if (isUploading)
             Positioned.fill(
               child: Container(
                 color: Colors.black.withOpacity(0.5),
@@ -1471,6 +1517,25 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text('Uploading Data',
+                          style: CustomStyles.bold14bluePrimary),
+                      S.w(16),
+                      const CircularProgressIndicator(
+                        color: Color(0xff0D47A1),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          if (isRecordingLoading)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0.5),
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Preparing Audio Record',
                           style: CustomStyles.bold14bluePrimary),
                       S.w(16),
                       const CircularProgressIndicator(
@@ -1737,7 +1802,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                 return;
                               }
                               int time = solveStopwatch.elapsed.inMilliseconds;
-                              for (int i = 0; i <= 2; i++) {
+                              for (int i = 0; i <= 4; i++) {
                                 sendMessage(
                                   'null',
                                   time,
@@ -1782,7 +1847,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                 return;
                               }
                               int time = solveStopwatch.elapsed.inMilliseconds;
-                              for (int i = 0; i <= 2; i++) {
+                              for (int i = 0; i <= 4; i++) {
                                 sendMessage(
                                   'null',
                                   time,
@@ -1964,7 +2029,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                       showAlertRecordingDialog(context);
                     } else {
                       setState(() {
-                        isLoading = true;
+                        isUploading = true;
                       });
                       showCloseDialog(context, () async {
                         sendMessage(
@@ -2075,7 +2140,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                 int page = _currentPage - 1;
                                 int time =
                                     solveStopwatch.elapsed.inMilliseconds;
-                                for (int i = 0; i <= 2; i++) {
+                                for (int i = 0; i <= 4; i++) {
                                   sendMessage(
                                     'ChangePage:$page',
                                     time,
@@ -2137,7 +2202,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                   int page = _currentPage + 1;
                                   int time =
                                       solveStopwatch.elapsed.inMilliseconds;
-                                  for (int i = 0; i <= 2; i++) {
+                                  for (int i = 0; i <= 4; i++) {
                                     sendMessage(
                                       'ChangePage:$page',
                                       time,
@@ -2170,7 +2235,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                   ),
                 ),
                 S.w(8),
-                statusTouchMode(),
+                statusTouchModeIcon(),
               ],
             ),
           ),
@@ -2587,7 +2652,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                           _pageController.page!.toInt() != 0) {
                         int page = _currentPage - 1;
                         int time = solveStopwatch.elapsed.inMilliseconds;
-                        for (int i = 0; i <= 2; i++) {
+                        for (int i = 0; i <= 4; i++) {
                           sendMessage(
                             'ChangePage:$page',
                             time,
@@ -2645,7 +2710,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                 _pages.length - 1) {
                           int page = _currentPage + 1;
                           int time = solveStopwatch.elapsed.inMilliseconds;
-                          for (int i = 0; i <= 2; i++) {
+                          for (int i = 0; i <= 4; i++) {
                             sendMessage(
                               'ChangePage:$page',
                               time,
@@ -2833,36 +2898,37 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
 
   Widget toolsActiveMobile() {
     return Positioned(
-        child: Align(
-            alignment: Alignment.bottomLeft,
-            child: Stack(
-              children: [
-                Container(
-                  width: 100,
-                  height: 100,
-                  decoration: const BoxDecoration(
-                    color: CustomColors.greenPrimary,
-                    borderRadius:
-                        BorderRadius.only(topRight: Radius.circular(90)),
-                  ),
+      child: Align(
+        alignment: Alignment.bottomLeft,
+        child: Stack(
+          children: [
+            Container(
+              width: 100,
+              height: 100,
+              decoration: const BoxDecoration(
+                color: CustomColors.greenPrimary,
+                borderRadius: BorderRadius.only(topRight: Radius.circular(90)),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 15),
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    selectedTools = !selectedTools;
+                  });
+                },
+                child: Image.asset(
+                  _listTools[_selectedIndexTools]['image_active'],
+                  height: 70,
+                  width: 70,
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 15),
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        selectedTools = !selectedTools;
-                      });
-                    },
-                    child: Image.asset(
-                      _listTools[_selectedIndexTools]['image_active'],
-                      height: 70,
-                      width: 70,
-                    ),
-                  ),
-                ),
-              ],
-            )));
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget toolsMobile() {
@@ -2896,9 +2962,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                         itemCount: _listColors.length,
                         itemBuilder: (context, index) {
                           return Row(
-                            // // crossAxisAlignment: CrossAxisAlignment.start,
-                            // mainAxisAlignment:
-                            //     MainAxisAlignment.center,
                             children: [
                               InkWell(
                                 onTap: () {
@@ -2908,8 +2971,14 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                     // Close popup
                                     openColors = !openColors;
                                   });
-                                  log('Tap : index $index');
-                                  log('Tap : _selectIndex $_selectedIndexColors');
+                                  int time =
+                                      solveStopwatch.elapsed.inMilliseconds;
+                                  for (int i = 0; i <= 4; i++) {
+                                    sendMessage(
+                                      'StrokeColor.$index',
+                                      time,
+                                    );
+                                  }
                                 },
                                 child: Image.asset(_listColors[index]['color'],
                                     width: 48),
@@ -2946,13 +3015,19 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                               InkWell(
                                   onTap: () {
                                     setState(() {
-                                      setState(() {
-                                        _selectedIndexLines = index;
+                                      _selectedIndexLines = index;
 
-                                        // Close popup
-                                        openLines = !openLines;
-                                      });
+                                      // Close popup
+                                      openLines = !openLines;
                                     });
+                                    int time =
+                                        solveStopwatch.elapsed.inMilliseconds;
+                                    for (int i = 0; i <= 4; i++) {
+                                      sendMessage(
+                                        'StrokeWidth.$index',
+                                        time,
+                                      );
+                                    }
                                   },
                                   child: Row(
                                     children: [
@@ -3030,7 +3105,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                               _mode = DrawingMode.drag;
                                               int time = solveStopwatch
                                                   .elapsed.inMilliseconds;
-                                              for (int i = 0; i <= 2; i++) {
+                                              for (int i = 0; i <= 4; i++) {
                                                 sendMessage(
                                                   'DrawingMode.drag',
                                                   time,
@@ -3040,7 +3115,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                               _mode = DrawingMode.pen;
                                               int time = solveStopwatch
                                                   .elapsed.inMilliseconds;
-                                              for (int i = 0; i <= 2; i++) {
+                                              for (int i = 0; i <= 4; i++) {
                                                 sendMessage(
                                                   'DrawingMode.pen',
                                                   time,
@@ -3050,7 +3125,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                               _mode = DrawingMode.highlighter;
                                               int time = solveStopwatch
                                                   .elapsed.inMilliseconds;
-                                              for (int i = 0; i <= 2; i++) {
+                                              for (int i = 0; i <= 4; i++) {
                                                 sendMessage(
                                                   'DrawingMode.highlighter',
                                                   time,
@@ -3060,7 +3135,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                               _mode = DrawingMode.eraser;
                                               int time = solveStopwatch
                                                   .elapsed.inMilliseconds;
-                                              for (int i = 0; i <= 2; i++) {
+                                              for (int i = 0; i <= 4; i++) {
                                                 sendMessage(
                                                   'DrawingMode.eraser',
                                                   time,
@@ -3070,7 +3145,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                               _mode = DrawingMode.laser;
                                               int time = solveStopwatch
                                                   .elapsed.inMilliseconds;
-                                              for (int i = 0; i <= 2; i++) {
+                                              for (int i = 0; i <= 4; i++) {
                                                 sendMessage(
                                                   'DrawingMode.laser',
                                                   time,
@@ -3395,7 +3470,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                           _mode = DrawingMode.drag;
                                           int time = solveStopwatch
                                               .elapsed.inMilliseconds;
-                                          for (int i = 0; i <= 2; i++) {
+                                          for (int i = 0; i <= 4; i++) {
                                             sendMessage(
                                               'DrawingMode.drag',
                                               time,
@@ -3406,7 +3481,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                           _mode = DrawingMode.pen;
                                           int time = solveStopwatch
                                               .elapsed.inMilliseconds;
-                                          for (int i = 0; i <= 2; i++) {
+                                          for (int i = 0; i <= 4; i++) {
                                             sendMessage(
                                               'DrawingMode.pen',
                                               time,
@@ -3417,7 +3492,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                           _mode = DrawingMode.highlighter;
                                           int time = solveStopwatch
                                               .elapsed.inMilliseconds;
-                                          for (int i = 0; i <= 2; i++) {
+                                          for (int i = 0; i <= 4; i++) {
                                             sendMessage(
                                               'DrawingMode.highlighter',
                                               time,
@@ -3428,7 +3503,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                           _mode = DrawingMode.eraser;
                                           int time = solveStopwatch
                                               .elapsed.inMilliseconds;
-                                          for (int i = 0; i <= 2; i++) {
+                                          for (int i = 0; i <= 4; i++) {
                                             sendMessage(
                                               'DrawingMode.eraser',
                                               time,
@@ -3439,7 +3514,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                           _mode = DrawingMode.laser;
                                           int time = solveStopwatch
                                               .elapsed.inMilliseconds;
-                                          for (int i = 0; i <= 2; i++) {
+                                          for (int i = 0; i <= 4; i++) {
                                             sendMessage(
                                               'DrawingMode.laser',
                                               time,
@@ -4211,6 +4286,23 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget statusTouchModeIcon() {
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _isStylusActive = !_isStylusActive;
+        });
+      },
+      child: Image.asset(
+        _isStylusActive
+            ? 'assets/images/stylus-icon.png'
+            : 'assets/images/touch-icon.png',
+        height: 44,
+        width: 44,
       ),
     );
   }
