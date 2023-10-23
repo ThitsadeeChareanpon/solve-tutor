@@ -382,14 +382,21 @@ class _RecordCourseState extends State<RecordCourse> {
       square(p1.dx - p2.dx) + square(p1.dy - p2.dy);
 
   void doErase(int index, DrawingMode mode) {
+    List<SolvepadStroke?> pointStack;
+    if (mode == DrawingMode.pen) {
+      pointStack = _penPoints[_currentPage];
+      removePointStack(pointStack, index, removeMode: 'pen');
+    } // pen
+    else if (mode == DrawingMode.highlighter) {
+      pointStack = _highlighterPoints[_currentPage];
+      removePointStack(pointStack, index, removeMode: 'high');
+    } // high
+  }
+
+  void removePointStack(List<SolvepadStroke?> pointStack, int index,
+      {String? removeMode}) {
     int prevNullIndex = -1;
     int nextNullIndex = -1;
-    List<SolvepadStroke?> pointStack;
-    if (mode == DrawingMode.highlighter) {
-      pointStack = _highlighterPoints[_currentPage];
-    } else {
-      pointStack = _penPoints[_currentPage];
-    }
     for (int i = index; i >= 0; i--) {
       if (pointStack[i]?.offset == null) {
         prevNullIndex = i;
@@ -407,12 +414,14 @@ class _RecordCourseState extends State<RecordCourse> {
       setState(() {
         pointStack.removeRange(prevNullIndex, nextNullIndex);
       });
-      currentEraserStroke.add([
-        mode,
-        prevNullIndex,
-        nextNullIndex,
-        solveStopwatch.elapsed.inMilliseconds
-      ]);
+      if (removeMode != null) {
+        currentEraserStroke.add([
+          removeMode,
+          prevNullIndex,
+          nextNullIndex,
+          solveStopwatch.elapsed.inMilliseconds
+        ]);
+      }
     }
   }
 
@@ -750,11 +759,12 @@ class _RecordCourseState extends State<RecordCourse> {
               await Future.delayed(const Duration(milliseconds: 0), () {});
             }
             List<SolvepadStroke?> pointStack = _penPoints[_currentPage];
-            if (eraseAction['mode'] == "DrawingMode.pen") {
+            if (eraseAction['mode'] == "pen") {
               pointStack = _penPoints[_currentPage];
-            } else if (eraseAction['mode'] == "DrawingMode.highlighter") {
+            } // pen
+            else if (eraseAction['mode'] == "highlighter") {
               pointStack = _highlighterPoints[_currentPage];
-            }
+            } // high
             setState(() {
               pointStack.removeRange(eraseAction['prev'], eraseAction['next']);
             });
