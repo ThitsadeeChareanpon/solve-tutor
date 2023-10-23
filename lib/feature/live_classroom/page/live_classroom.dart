@@ -2898,36 +2898,37 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
 
   Widget toolsActiveMobile() {
     return Positioned(
-        child: Align(
-            alignment: Alignment.bottomLeft,
-            child: Stack(
-              children: [
-                Container(
-                  width: 100,
-                  height: 100,
-                  decoration: const BoxDecoration(
-                    color: CustomColors.greenPrimary,
-                    borderRadius:
-                        BorderRadius.only(topRight: Radius.circular(90)),
-                  ),
+      child: Align(
+        alignment: Alignment.bottomLeft,
+        child: Stack(
+          children: [
+            Container(
+              width: 100,
+              height: 100,
+              decoration: const BoxDecoration(
+                color: CustomColors.greenPrimary,
+                borderRadius: BorderRadius.only(topRight: Radius.circular(90)),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 15),
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    selectedTools = !selectedTools;
+                  });
+                },
+                child: Image.asset(
+                  _listTools[_selectedIndexTools]['image_active'],
+                  height: 70,
+                  width: 70,
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 15),
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        selectedTools = !selectedTools;
-                      });
-                    },
-                    child: Image.asset(
-                      _listTools[_selectedIndexTools]['image_active'],
-                      height: 70,
-                      width: 70,
-                    ),
-                  ),
-                ),
-              ],
-            )));
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget toolsMobile() {
@@ -2961,9 +2962,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                         itemCount: _listColors.length,
                         itemBuilder: (context, index) {
                           return Row(
-                            // // crossAxisAlignment: CrossAxisAlignment.start,
-                            // mainAxisAlignment:
-                            //     MainAxisAlignment.center,
                             children: [
                               InkWell(
                                 onTap: () {
@@ -2973,8 +2971,14 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                     // Close popup
                                     openColors = !openColors;
                                   });
-                                  log('Tap : index $index');
-                                  log('Tap : _selectIndex $_selectedIndexColors');
+                                  int time =
+                                      solveStopwatch.elapsed.inMilliseconds;
+                                  for (int i = 0; i <= 4; i++) {
+                                    sendMessage(
+                                      'StrokeColor.$index',
+                                      time,
+                                    );
+                                  }
                                 },
                                 child: Image.asset(_listColors[index]['color'],
                                     width: 48),
@@ -3011,13 +3015,19 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                               InkWell(
                                   onTap: () {
                                     setState(() {
-                                      setState(() {
-                                        _selectedIndexLines = index;
+                                      _selectedIndexLines = index;
 
-                                        // Close popup
-                                        openLines = !openLines;
-                                      });
+                                      // Close popup
+                                      openLines = !openLines;
                                     });
+                                    int time =
+                                        solveStopwatch.elapsed.inMilliseconds;
+                                    for (int i = 0; i <= 4; i++) {
+                                      sendMessage(
+                                        'StrokeWidth.$index',
+                                        time,
+                                      );
+                                    }
                                   },
                                   child: Row(
                                     children: [
