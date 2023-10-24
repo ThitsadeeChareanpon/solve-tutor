@@ -54,8 +54,8 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> updateLiveDuration(
-      int duration,
-      ) async {
+    int duration,
+  ) async {
     try {
       uid = firebaseAuth.currentUser?.uid ?? "";
       final users = FirestoreService('users');
@@ -64,15 +64,17 @@ class AuthProvider extends ChangeNotifier {
         "tutor_id": uid,
         "update_data": {"live_duration": duration}
       };
-      await users.updateDocumentById(body['id'], body['update_data'], body['tutor_id']);
+      await users.updateDocumentById(
+          body['id'], body['update_data'], body['tutor_id']);
     } catch (error) {
       rethrow;
     }
   }
 
   Future<void> updateWalletBalance(
-      int value, int duration,
-      ) async {
+    int value,
+    int duration,
+  ) async {
     try {
       uid = firebaseAuth.currentUser?.uid ?? "";
       final wallet = FirestoreService('wallet');
@@ -81,7 +83,8 @@ class AuthProvider extends ChangeNotifier {
         "tutor_id": uid,
         "update_data": {"balance": value, 'live_duration': duration}
       };
-      await wallet.updateDocumentById(body['id'], body['update_data'], body['tutor_id']);
+      await wallet.updateDocumentById(
+          body['id'], body['update_data'], body['tutor_id']);
     } catch (error) {
       rethrow;
     }
