@@ -1170,18 +1170,18 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     if (mode == DrawingMode.pen) {
       pointStack = _penPoints[_currentPage];
       removePointStack(pointStack, index, removeMode: 'pen');
-      sendMessage(
-        'Erase.pen.$index',
-        solveStopwatch.elapsed.inMilliseconds,
-      );
+      // sendMessage(
+      //   'Erase.pen.$index',
+      //   solveStopwatch.elapsed.inMilliseconds,
+      // );
     } // pen
     else if (mode == DrawingMode.highlighter) {
       pointStack = _highlighterPoints[_currentPage];
       removePointStack(pointStack, index, removeMode: 'high');
-      sendMessage(
-        'Erase.high.$index',
-        solveStopwatch.elapsed.inMilliseconds,
-      );
+      // sendMessage(
+      //   'Erase.high.$index',
+      //   solveStopwatch.elapsed.inMilliseconds,
+      // );
     } // high
   }
 
@@ -1203,8 +1203,12 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       }
     }
     if (prevNullIndex != -1 && nextNullIndex != -1) {
+      var del = pointStack.sublist(prevNullIndex, nextNullIndex + 1);
+      del.removeAt(0);
+      del.removeAt(del.length - 1);
       setState(() {
-        pointStack.removeRange(prevNullIndex, nextNullIndex);
+        pointStack.removeWhere((element) => del.contains(element));
+        // pointStack.removeRange(prevNullIndex, nextNullIndex);
       });
       if (removeMode != null) {
         currentEraserStroke.add([
@@ -1213,6 +1217,10 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
           nextNullIndex,
           solveStopwatch.elapsed.inMilliseconds
         ]);
+        sendMessage(
+              'Erase.$removeMode.$del',
+              solveStopwatch.elapsed.inMilliseconds,
+            );
       }
     }
   }
