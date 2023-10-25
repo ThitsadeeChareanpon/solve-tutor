@@ -376,7 +376,14 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     if (studentsJson != null) {
       students = studentsJson.cast<dynamic>();
     }
+    setNullStart();
     setState(() {});
+  }
+
+  void setNullStart() {
+    _penPoints[0].add(null);
+    _highlighterPoints[0].add(null);
+    _laserPoints[0].add(null);
   }
 
   void setLiveCourseLoadState() async {
@@ -451,8 +458,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       if (!mounted) return;
       setState(() {
         var decodedMessage = json.decode(message);
-        log('json message');
-        log(decodedMessage.toString());
+        // log('json message');
+        // log(decodedMessage.toString());
 
         var item = decodedMessage[0];
         var data = item['data'];
@@ -1165,24 +1172,37 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   double sqrDistanceBetween(Offset p1, Offset p2) =>
       square(p1.dx - p2.dx) + square(p1.dy - p2.dy);
 
+  int countNullOccurrences(List<SolvepadStroke?> strokeArray, int strokeIndex) {
+    int nullOccurrences = 0;
+    for (int i = 0; i < strokeIndex; i++) {
+      if (strokeArray[i] == null) {
+        nullOccurrences++;
+      }
+    }
+
+    return nullOccurrences;
+  }
+
   void doErase(int index, DrawingMode mode) {
     List<SolvepadStroke?> pointStack;
+    String removeMode = 'pen';
     if (mode == DrawingMode.pen) {
       pointStack = _penPoints[_currentPage];
-      removePointStack(pointStack, index, removeMode: 'pen');
-      sendMessage(
-        'Erase.pen.$index',
-        solveStopwatch.elapsed.inMilliseconds,
-      );
+      removeMode = 'pen';
     } // pen
     else if (mode == DrawingMode.highlighter) {
       pointStack = _highlighterPoints[_currentPage];
-      removePointStack(pointStack, index, removeMode: 'high');
-      sendMessage(
-        'Erase.high.$index',
-        solveStopwatch.elapsed.inMilliseconds,
-      );
+      removeMode = 'high';
     } // high
+    else {
+      pointStack = _penPoints[_currentPage];
+    }
+    int nullCount = countNullOccurrences(pointStack, index);
+    removePointStack(pointStack, index, removeMode: removeMode);
+    sendMessage(
+      'Erase.$removeMode.$nullCount',
+      solveStopwatch.elapsed.inMilliseconds,
+    );
   }
 
   void removePointStack(List<SolvepadStroke?> pointStack, int index,
@@ -1203,6 +1223,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       }
     }
     if (prevNullIndex != -1 && nextNullIndex != -1) {
+      log('prevNullIndex: $prevNullIndex');
+      log('nextNullIndex: $nextNullIndex');
       setState(() {
         pointStack.removeRange(prevNullIndex, nextNullIndex);
       });
@@ -1259,6 +1281,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       }
       _currentPage = page;
       _penPoints[_currentPage].add(null);
+      _highlighterPoints[_currentPage].add(null);
     });
     if (currentScrollZoom.isNotEmpty) {
       addScrollZoom(currentScrollZoom, currentScrollZoom[0].timestamp);
@@ -1803,7 +1826,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                 return;
                               }
                               int time = solveStopwatch.elapsed.inMilliseconds;
-                              for (int i = 0; i <= 4; i++) {
+                              for (int i = 0; i <= 2; i++) {
                                 sendMessage(
                                   'null',
                                   time,
@@ -1848,7 +1871,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                                 return;
                               }
                               int time = solveStopwatch.elapsed.inMilliseconds;
-                              for (int i = 0; i <= 4; i++) {
+                              for (int i = 0; i <= 2; i++) {
                                 sendMessage(
                                   'null',
                                   time,
@@ -1944,10 +1967,15 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
           if (Responsive.isDesktop(context))
             Expanded(
               flex: 4,
-              child: Text(
-                widget.isMock ? "คอร์สปรับพื้นฐานคณิตศาสตร์" : courseName,
-                style: CustomStyles.bold16Black363636Overflow,
-                maxLines: 1,
+              child: InkWell(
+                onTap: () {
+                  log(_penPoints[_currentPage].toString());
+                },
+                child: Text(
+                  widget.isMock ? "คอร์สปรับพื้นฐานคณิตศาสตร์" : courseName,
+                  style: CustomStyles.bold16Black363636Overflow,
+                  maxLines: 1,
+                ),
               ),
             ),
           if (Responsive.isMobile(context))
@@ -2047,6 +2075,9 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                           await updateActualTime();
                           await endSolvepadDataCollection();
                         }
+                        setState(() {
+                          isUploading = false;
+                        });
                         if (!mounted) return;
                         Navigator.pushAndRemoveUntil(
                             context,

@@ -443,7 +443,7 @@ class CourseLiveController extends ChangeNotifier {
         }
       }
     } catch (error) {
-      debugPrint(error.toString());
+      debugPrint('updateCourseDetails error: $error');
     }
   }
 
