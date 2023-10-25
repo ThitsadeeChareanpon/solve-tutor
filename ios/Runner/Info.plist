@@ -40,7 +40,7 @@
 	<key>NSCameraUsageDescription</key>
 	<string>This app requires to access your photo library to show image on profile and send via chat</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>This app requires to access your microphone to record video with your voice send via chat</string>
+	<string>This app requires to access your microphone to record video with your voice in live classroom</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app requires to access your photo library to show image on profile and send via chat</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
