@@ -2165,6 +2165,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                         Material(
                           child: InkWell(
                             onTap: () {
+                              if (_isViewingFocusStudent) return;
                               if (_pageController.hasClients &&
                                   _pageController.page!.toInt() != 0) {
                                 int page = _currentPage - 1;
@@ -2223,8 +2224,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                         S.w(8),
                         Material(
                           child: InkWell(
-                            // splashColor: Colors.lightGreen,
                             onTap: () {
+                              if (_isViewingFocusStudent) return;
                               if (_pages.length > 1) {
                                 if (_pageController.hasClients &&
                                     _pageController.page!.toInt() !=
