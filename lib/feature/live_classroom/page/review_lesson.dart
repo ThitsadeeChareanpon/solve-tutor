@@ -308,6 +308,7 @@ class _ReviewLessonState extends State<ReviewLesson>
     scaleImageX = myImageWidth / tutorImageWidth;
     scaleX = mySolvepadSize.width / tutorSolvepadSize.width;
     scaleY = mySolvepadSize.height / tutorSolvepadSize.height;
+    _instantReplay();
   }
 
   void setCourseLoadState() {
@@ -317,7 +318,6 @@ class _ReviewLessonState extends State<ReviewLesson>
         setState(() {
           isCourseLoaded = true;
         });
-        _instantReplay();
       }
     } else {
       if (_isPageReady && _isSolvepadDataReady && _isAudioReady) {
@@ -457,7 +457,7 @@ class _ReviewLessonState extends State<ReviewLesson>
     currentReplayIndex = 0;
     currentReplayPointIndex = 0;
     currentReplayScrollIndex = 0;
-    log('end replay is called');
+    log('replay End');
   }
 
   Future<void> executeReplayAction(Map<String, dynamic> action) async {
@@ -580,6 +580,9 @@ class _ReviewLessonState extends State<ReviewLesson>
   }
 
   Future<void> _instantReplay() async {
+    log('instant replay');
+    log(_data['actions'].length.toString());
+    log('$currentReplayIndex');
     while (currentReplayIndex < _data['actions'].length) {
       await instantReplayAction(_data['actions'][currentReplayIndex]);
       currentReplayIndex++;
@@ -642,7 +645,6 @@ class _ReviewLessonState extends State<ReviewLesson>
         stroke,
       ));
       setState(() {});
-      // log(_replayPenPoints[_tutorCurrentPage].toString());
     } // pen
     else if (tool == "DrawingMode.highlighter") {
       _replayHighlighterPoints[_tutorCurrentPage].add(SolvepadStroke(
@@ -1682,6 +1684,12 @@ class _ReviewLessonState extends State<ReviewLesson>
                 ],
               ),
             ),
+          // InkWell(
+          //   onTap: () {
+          //     _instantReplay();
+          //   },
+          //   child: Text('TEST BUTTON'),
+          // ),
           S.w(16.0),
         ],
       ),

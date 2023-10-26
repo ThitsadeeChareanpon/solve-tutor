@@ -1223,8 +1223,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       }
     }
     if (prevNullIndex != -1 && nextNullIndex != -1) {
-      log('prevNullIndex: $prevNullIndex');
-      log('nextNullIndex: $nextNullIndex');
       setState(() {
         pointStack.removeRange(prevNullIndex, nextNullIndex);
       });
