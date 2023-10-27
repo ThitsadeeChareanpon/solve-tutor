@@ -1200,25 +1200,17 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     String removeMode = 'pen';
     if (mode == DrawingMode.pen) {
       pointStack = _penPoints[_currentPage];
-      removePointStack(pointStack, index, removeMode: 'pen');
-      sendMessage(
-        'Erase.pen.$index',
-        solveStopwatch.elapsed.inMilliseconds,
-      );
     } // pen
     else if (mode == DrawingMode.highlighter) {
+      removeMode = 'high';
       pointStack = _highlighterPoints[_currentPage];
-      removePointStack(pointStack, index, removeMode: 'high');
-      sendMessage(
-        'Erase.high.$index',
-        solveStopwatch.elapsed.inMilliseconds,
-      );
     } // high
     else {
       pointStack = _penPoints[_currentPage];
     }
     int nullCount = countNullOccurrences(pointStack, index);
     removePointStack(pointStack, index, removeMode: removeMode);
+    log('Erase.$removeMode.$nullCount');
     sendMessage(
       'Erase.$removeMode.$nullCount',
       solveStopwatch.elapsed.inMilliseconds,
@@ -1280,14 +1272,14 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   // ---------- FUNCTION: page control
   void _addPage() {
     setState(() {
-      _penPoints.add([]);
-      _laserPoints.add([]);
-      _highlighterPoints.add([]);
+      _penPoints.add([null]);
+      _laserPoints.add([null]);
+      _highlighterPoints.add([null]);
       _eraserPoints.add(const Offset(-100, -100));
-      _replayPoints.add([]);
-      _studentPenPoints.add([]);
-      _studentLaserPoints.add([]);
-      _studentHighlighterPoints.add([]);
+      _replayPoints.add([null]);
+      _studentPenPoints.add([null]);
+      _studentLaserPoints.add([null]);
+      _studentHighlighterPoints.add([null]);
       _studentEraserPoints.add(const Offset(-100, -100));
     });
   }
@@ -1298,8 +1290,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
         point.clear();
       }
       _currentPage = page;
-      _penPoints[_currentPage].add(null);
-      _highlighterPoints[_currentPage].add(null);
     });
     if (currentScrollZoom.isNotEmpty) {
       addScrollZoom(currentScrollZoom, currentScrollZoom[0].timestamp);
@@ -2171,10 +2161,16 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Image.asset(
-                          ImageAssets.allPages,
-                          height: 30,
-                          width: 32,
+                        InkWell(
+                          onTap: () {
+                            log('TEST');
+                            log(_highlighterPoints[_currentPage].toString());
+                          },
+                          child: Image.asset(
+                            ImageAssets.allPages,
+                            height: 30,
+                            width: 32,
+                          ),
                         ),
                         S.w(defaultPadding),
                         Container(
@@ -2686,10 +2682,17 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                   color: CustomColors.grayCFCFCF,
                 ),
                 S.w(8),
-                Image.asset(
-                  ImageAssets.allPages,
-                  height: 24,
-                  width: 24,
+                InkWell(
+                  onTap: () {
+                    log('TEST');
+                    log(_highlighterPoints[_currentPage].toString());
+                    log(_penPoints[_currentPage].toString());
+                  },
+                  child: Image.asset(
+                    ImageAssets.allPages,
+                    height: 24,
+                    width: 24,
+                  ),
                 ),
                 S.w(8),
                 Container(
