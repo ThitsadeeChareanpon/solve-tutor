@@ -2073,9 +2073,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                           await updateActualTime();
                           await endSolvepadDataCollection();
                         }
-                        setState(() {
-                          isUploading = false;
-                        });
                         if (!mounted) return;
                         Navigator.pushAndRemoveUntil(
                             context,
@@ -2083,6 +2080,10 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                               builder: (context) => Nav(),
                             ),
                             (route) => false);
+                      }, onCancel: () {
+                        setState(() {
+                          isUploading = false;
+                        });
                       });
                     }
                   },
