@@ -13,6 +13,7 @@ Future<void> showCloseDialog(
   String detail = 'นักเรียนในห้องของคุณทั้งหมดจะถูกบังคับให้ออกจากห้อง',
   String confirm = 'ปิดห้องเรียน',
   String cancel = 'กลับไปที่ห้องเรียน',
+  Function? onCancel = _defaultOnCancel,
 }) {
   return showDialog(
     context: context,
@@ -81,6 +82,7 @@ Future<void> showCloseDialog(
                           ),
                         ),
                         onPressed: () {
+                          onCancel?.call();
                           Navigator.of(context).pop();
                         },
                         child:
@@ -97,6 +99,8 @@ Future<void> showCloseDialog(
     },
   );
 }
+
+void _defaultOnCancel() {}
 
 Future<void> showAlertRecordingDialog(BuildContext context,
     {String title = 'ระบบกำลังทำการบันทึกการสอน',
