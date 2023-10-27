@@ -20,6 +20,7 @@ import '../../../firebase/database.dart';
 import '../../../nav.dart';
 import '../../calendar/constants/custom_styles.dart';
 import '../../calendar/controller/create_course_live_controller.dart';
+import '../../calendar/widgets/alert_snackbar.dart';
 import '../../calendar/widgets/sizebox.dart';
 import '../components/close_dialog.dart';
 import '../components/divider.dart';
@@ -318,15 +319,18 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     initTimer();
     initPagingBtn();
     if (!widget.isMock) {
-      initPagesData();
-      initMessageHandler();
-      initConference();
-      initSolvepadData();
+      startDataPreparation();
     } else {
       isLiveCourseReady = true;
       _joined = true;
       mockInitPageData();
     }
+  }
+
+  void startDataPreparation() async {
+    await initPagesData();
+    initMessageHandler();
+    initConference();
   }
 
   void mockInitPageData() {
@@ -425,6 +429,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     scaleImageX = myImageWidth / studentImageWidth;
     scaleX = mySolvepadSize.width / studentSolvepadSize.width;
     scaleY = mySolvepadSize.height / studentSolvepadSize.height;
+    initSolvepadData();
   }
 
   void initConference() {
@@ -1066,7 +1071,14 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
         (error) => {
               log('meeting function error'),
               log(error['name'].toString()),
-              log(error['message'].toString())
+              log(error['message'].toString()),
+              if (error['name'] == 'START_RECORDING_FAILED')
+                {
+                  showSnackBar(
+                      context,
+                      'ERROR_RECORDING_FAILED: เกิดปัญหาทางเทคนิค ไม่สามารถบันทึกได้',
+                      'red'),
+                }
             });
   }
 

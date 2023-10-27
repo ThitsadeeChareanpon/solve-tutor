@@ -247,6 +247,7 @@ class _ReviewLessonState extends State<ReviewLesson>
       return;
     }
     var sheet = await getDocFiles(widget.tutorId, widget.docId);
+    updateRatio(sheet[0]);
     _isPageReady = true;
     setCourseLoadState();
     setState(() {
@@ -343,6 +344,16 @@ class _ReviewLessonState extends State<ReviewLesson>
 
   double scaleScrollX(double scrollX) => scrollX * scaleX;
   double scaleScrollY(double scrollY) => scrollY * scaleY;
+
+  void updateRatio(String url) {
+    Image image = Image.network(url);
+    image.image
+        .resolve(const ImageConfiguration())
+        .addListener(ImageStreamListener((ImageInfo info, bool _) {
+      double ratio = info.image.width / info.image.height;
+      sheetImageRatio = ratio;
+    }));
+  }
 
   Future<Uint8List?> downloadAudio(String url) async {
     try {
