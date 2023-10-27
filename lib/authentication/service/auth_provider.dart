@@ -15,7 +15,7 @@ class AuthProvider extends ChangeNotifier {
   WalletModel? wallet;
   UserModel? user;
   String? uid;
-
+  bool isLoading = true;
   getSelfInfo() async {
     // log("getSelfInfo");
     uid = firebaseAuth.currentUser?.uid ?? "";
@@ -34,9 +34,12 @@ class AuthProvider extends ChangeNotifier {
         }
         await getWallet();
         // log('My Data: ${userFirebase.data()}');
-        notifyListeners();
       }
     });
+    notifyListeners();
+    await Future.delayed(const Duration(seconds: 2));
+    isLoading = false;
+    notifyListeners();
   }
 
   getWallet() async {
@@ -54,8 +57,8 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> updateLiveDuration(
-      int duration,
-      ) async {
+    int duration,
+  ) async {
     try {
       uid = firebaseAuth.currentUser?.uid ?? "";
       final users = FirestoreService('users');
@@ -64,15 +67,17 @@ class AuthProvider extends ChangeNotifier {
         "tutor_id": uid,
         "update_data": {"live_duration": duration}
       };
-      await users.updateDocumentById(body['id'], body['update_data'], body['tutor_id']);
+      await users.updateDocumentById(
+          body['id'], body['update_data'], body['tutor_id']);
     } catch (error) {
       rethrow;
     }
   }
 
   Future<void> updateWalletBalance(
-      int value, int duration,
-      ) async {
+    int value,
+    int duration,
+  ) async {
     try {
       uid = firebaseAuth.currentUser?.uid ?? "";
       final wallet = FirestoreService('wallet');
@@ -81,7 +86,8 @@ class AuthProvider extends ChangeNotifier {
         "tutor_id": uid,
         "update_data": {"balance": value, 'live_duration': duration}
       };
-      await wallet.updateDocumentById(body['id'], body['update_data'], body['tutor_id']);
+      await wallet.updateDocumentById(
+          body['id'], body['update_data'], body['tutor_id']);
     } catch (error) {
       rethrow;
     }
@@ -130,6 +136,7 @@ class AuthProvider extends ChangeNotifier {
     );
     user = chatUser;
     await firebaseFirestore.collection('users').doc(id).set(chatUser.toJson());
+    await updateWallet();
     notifyListeners();
   }
 
@@ -148,43 +155,52 @@ class AuthProvider extends ChangeNotifier {
     //     .update({'role': role});
   }
 
-  // --------------more--------------------------
-  Future<UserModel?> createAccount(
-      String name, String email, String password) async {
-    FirebaseAuth _auth = FirebaseAuth.instance;
-    FirebaseFirestore _firestore = FirebaseFirestore.instance;
-    try {
-      UserCredential userCrendetial = await _auth
-          .createUserWithEmailAndPassword(email: email, password: password);
-      userCrendetial.user!.updateDisplayName(name);
-      final time = DateTime.now().millisecondsSinceEpoch.toString();
-      final chatUser = UserModel(
-        id: _auth.currentUser!.uid,
-        name: name,
-        email: email,
-        about: "I'm new.",
-        image: "",
-        createdAt: time,
-        isOnline: false,
-        lastActive: time,
-        pushToken: '',
-        role: 'tutor',
-      );
-      user = chatUser;
-      await _firestore
-          .collection('users')
-          .doc(_auth.currentUser!.uid)
-          .set(user!.toJson());
-      if (user?.role == null || user?.role == "") {
-        await updateRoleFirestore('tutor');
-      }
-      notifyListeners();
-      return user;
-    } catch (e) {
-      print(e);
-      return null;
-    }
+  Future<void> updateWallet() async {
+    final CollectionReference users = firebaseFirestore.collection("wallet");
+    final String uid = firebaseAuth.currentUser?.uid ?? '';
+    WalletModel only = WalletModel(uid: uid, balance: 400, liveDuration: 0);
+    users.doc(uid).set(only.toJson());
+    notifyListeners();
   }
+
+  // --------------more--------------------------
+  // Future<UserModel?> createAccount(
+  //     String name, String email, String password) async {
+  //   FirebaseAuth _auth = FirebaseAuth.instance;
+  //   FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  //   try {
+  //     UserCredential userCrendetial = await _auth
+  //         .createUserWithEmailAndPassword(email: email, password: password);
+  //     userCrendetial.user!.updateDisplayName(name);
+  //     final time = DateTime.now().millisecondsSinceEpoch.toString();
+  //     final chatUser = UserModel(
+  //       id: _auth.currentUser!.uid,
+  //       name: name,
+  //       email: email,
+  //       about: "I'm new.",
+  //       image: "",
+  //       createdAt: time,
+  //       isOnline: false,
+  //       lastActive: time,
+  //       pushToken: '',
+  //       role: 'tutor',
+  //     );
+  //     user = chatUser;
+  //     await _firestore
+  //         .collection('users')
+  //         .doc(_auth.currentUser!.uid)
+  //         .set(user!.toJson());
+  //     if (user?.role == null || user?.role == "") {
+  //       await updateRoleFirestore('tutor');
+  //     }
+  //     updateWallet();
+  //     notifyListeners();
+  //     return user;
+  //   } catch (e) {
+  //     print(e);
+  //     return null;
+  //   }
+  // }
 
   Future<User?> logIn(String email, String password) async {
     FirebaseAuth _auth = FirebaseAuth.instance;

@@ -1,10 +1,5 @@
 class WalletModel {
-  WalletModel({
-    this.uid,
-    this.balance,
-    this.liveDuration,
-    this.transaction
-  });
+  WalletModel({this.uid, this.balance, this.liveDuration, this.transaction});
   String? uid;
   int? balance;
   int? liveDuration;

@@ -437,7 +437,7 @@ class CourseLiveController extends ChangeNotifier {
           await chat.sendFirstMessage(
             data?.chatId ?? "",
             data?.customerId ?? "",
-            "คุณถูกเพิ่มเข้าคอร์สนี้",
+            "ข้อความอัตโนมัตินี้สร้างโดย SOLVE คุณสามารถส่งข้อความหากันภายในช่องแชทนี้ได้แล้ว",
             MessageType.text,
           );
         }

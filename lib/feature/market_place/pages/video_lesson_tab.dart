@@ -435,21 +435,16 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
             style: CustomStyles.bold22Black363636,
           ),
           const SizedBox(height: 20),
-          RichText(
-            text: TextSpan(
-              style: DefaultTextStyle.of(context).style,
-              children: <TextSpan>[
-                TextSpan(
-                  text: 'แต่ละครั้งสามารถ คุณบันทึกบทเรียน',
-                  style: CustomStyles.blod16gray878787,
-                ),
-                TextSpan(
-                  text: 'ได้สูงสุด 30 นาที',
-                  style: CustomStyles.med16Green
-                      .copyWith(fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
+          Text(
+            'แต่ละครั้งสามารถ คุณบันทึกบทเรียน',
+            style: DefaultTextStyle.of(context).style,
+            textAlign: TextAlign.center,
+          ),
+          Text(
+            'ได้สูงสุด 30 นาที',
+            style:
+                CustomStyles.med16Green.copyWith(fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
           ),
           Text(
             'หน้าจอขณะบันทึกจะถูกเปลี่ยนเป็นแนวนอน',

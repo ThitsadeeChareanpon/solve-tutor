@@ -21,7 +21,6 @@ class _AuthenticateState extends State<Authenticate> {
       auth = Provider.of<AuthProvider>(context, listen: false);
       if (auth.firebaseAuth.currentUser != null) {
         auth.getSelfInfo();
-        // await auth.updateRoleFirestore(role);
         await Future.delayed(const Duration(milliseconds: 500));
       }
     });
@@ -33,10 +32,25 @@ class _AuthenticateState extends State<Authenticate> {
     return Consumer<AuthProvider>(
       builder: (context, con, child) {
         if (con.firebaseAuth.currentUser != null) {
-          if (con.user?.role != role || con.user?.isDeleted == true) {
-            return const NoPermissionPage();
+          if (!con.isLoading) {
+            if (con.user?.role == role && con.user?.isDeleted != true) {
+              return Nav();
+            } else {
+              return const NoPermissionPage();
+            }
           } else {
-            return Nav();
+            return const Material(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 10),
+                    Text("กำลังโหลด..."),
+                  ],
+                ),
+              ),
+            );
           }
         } else {
           return const LoginPage();

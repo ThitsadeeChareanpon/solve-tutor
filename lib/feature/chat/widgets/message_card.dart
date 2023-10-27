@@ -170,7 +170,7 @@ class _MessageCardState extends State<MessageCard> {
                   return Container(
                     constraints:
                         const BoxConstraints(maxWidth: 200, maxHeight: 200),
-                    margin: const EdgeInsets.fromLTRB(0, 0, 10, 0),
+                    margin: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -191,7 +191,7 @@ class _MessageCardState extends State<MessageCard> {
                 }
                 return Container(
                     padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
-                    margin: const EdgeInsets.fromLTRB(0, 0, 10, 0),
+                    margin: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                     decoration: BoxDecoration(
                         color: primaryColor.withOpacity(0.8),
                         border: Border.all(color: primaryColor),
