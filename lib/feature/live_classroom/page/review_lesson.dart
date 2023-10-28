@@ -361,7 +361,7 @@ class _ReviewLessonState extends State<ReviewLesson>
   }
 
   void setScalingStatus() {
-    if (!_isRatioReady && !_isScalingReady) return;
+    if (!_isRatioReady || !_isScalingReady) return;
     _instantReplay();
   }
 
