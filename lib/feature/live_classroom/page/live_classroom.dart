@@ -395,7 +395,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       setState(() {
         isLiveCourseReady = true;
       });
-      await meeting.startRecording(config: {"mode": "audio"});
+      // await meeting.startRecording(config: {"mode": "audio"});
     }
   }
 
@@ -2451,6 +2451,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                               showStudent = value;
                               if (value == false) {
                                 _isViewingFocusStudent = false;
+                                cleanStudentSolvepad();
                               }
                             });
                             sendMessage(
