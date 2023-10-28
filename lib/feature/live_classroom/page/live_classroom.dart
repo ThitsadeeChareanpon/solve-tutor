@@ -2449,6 +2449,9 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                             setState(() {
                               _requestScreenShare = value;
                               showStudent = value;
+                              if (value == false) {
+                                _isViewingFocusStudent = false;
+                              }
                             });
                             sendMessage(
                               'RequestScreenShare:$value',
