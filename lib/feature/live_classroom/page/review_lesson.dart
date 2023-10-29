@@ -171,6 +171,8 @@ class _ReviewLessonState extends State<ReviewLesson>
   int? activePointerId;
   bool _isPageReady = false;
   bool _isSolvepadDataReady = false;
+  bool _isRatioReady = false;
+  bool _isScalingReady = false;
   int replayIndex = 0;
 
   // ---------- VARIABLE: page control
@@ -309,7 +311,8 @@ class _ReviewLessonState extends State<ReviewLesson>
     scaleImageX = myImageWidth / tutorImageWidth;
     scaleX = mySolvepadSize.width / tutorSolvepadSize.width;
     scaleY = mySolvepadSize.height / tutorSolvepadSize.height;
-    _instantReplay();
+    _isScalingReady = true;
+    setScalingStatus();
   }
 
   void setCourseLoadState() {
@@ -353,6 +356,13 @@ class _ReviewLessonState extends State<ReviewLesson>
       double ratio = info.image.width / info.image.height;
       sheetImageRatio = ratio;
     }));
+    _isRatioReady = true;
+    setScalingStatus();
+  }
+
+  void setScalingStatus() {
+    if (!_isRatioReady || !_isScalingReady) return;
+    _instantReplay();
   }
 
   Future<Uint8List?> downloadAudio(String url) async {
