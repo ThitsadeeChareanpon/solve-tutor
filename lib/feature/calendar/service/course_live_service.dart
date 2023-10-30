@@ -29,6 +29,20 @@ class CourseLiveService {
     }
   }
 
+  Future<List<CourseModel>> getCourseLiveListByTutorIdAndCourseType(String id, String courseType) async {
+    try {
+      final get = await course.getDocumentsWithMultipleWheres([{'field': 'tutor_id', 'operator': '==', 'value': id},{'field': 'course_type', 'operator': '==', 'value': courseType}]);
+      Map<String, dynamic> json = {'data': get};
+      var data = json['data'];
+      return List.generate(
+        data.length,
+            (index) => CourseModel.fromJson(json['data'][index]),
+      );
+    } catch (error) {
+      rethrow;
+    }
+  }
+
   Future<CourseModel> getCourseLiveById(String id) async {
     try {
       final courses = await course.getDocumentById(id);

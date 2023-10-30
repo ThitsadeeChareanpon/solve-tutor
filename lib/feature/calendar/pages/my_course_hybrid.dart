@@ -21,18 +21,18 @@ import '../../../constants/school_subject_constants.dart';
 
 enum CourseLiveActionType { create, update }
 
-class MyCourseLivePage extends StatefulWidget {
-  const MyCourseLivePage({Key? key, required this.tutorId}) : super(key: key);
+class MyCourseHybridPage extends StatefulWidget {
+  const MyCourseHybridPage({Key? key, required this.tutorId}) : super(key: key);
   final String tutorId;
   @override
-  State<MyCourseLivePage> createState() => _MyCourseLivePageState();
+  State<MyCourseHybridPage> createState() => _MyCourseHybridPageState();
 }
 
-class _MyCourseLivePageState extends State<MyCourseLivePage> {
+class _MyCourseHybridPageState extends State<MyCourseHybridPage> {
   final util = UtilityHelper();
   var courseController = CourseLiveController();
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
-      GlobalKey<RefreshIndicatorState>();
+  GlobalKey<RefreshIndicatorState>();
   String selectClass = SchoolSubjectConstants.schoolSubjectFilterList.first;
   String selectClassLevel = SchoolSubjectConstants.schoolClassLevel.first;
 
@@ -52,7 +52,7 @@ class _MyCourseLivePageState extends State<MyCourseLivePage> {
     courseController.isLoading = true;
     await courseController.getLevels();
     await courseController.getSubjects();
-    await courseController.getCourseListByTutorIdAndCourseType(widget.tutorId, 'live');
+    await courseController.getCourseListByTutorIdAndCourseType(widget.tutorId, 'hybrid');
   }
 
   @override
@@ -100,7 +100,7 @@ class _MyCourseLivePageState extends State<MyCourseLivePage> {
           child: RefreshIndicator(
             key: _refreshIndicatorKey,
             onRefresh: () async {
-              courseController.refreshCourseListByTutorIdAndCourseType(widget.tutorId, 'live');
+              courseController.refreshCourseListByTutorIdAndCourseType(widget.tutorId, 'hybrid');
               await Future.delayed(const Duration(seconds: 1));
             },
             child: Column(
@@ -122,7 +122,7 @@ class _MyCourseLivePageState extends State<MyCourseLivePage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  CreateCourseLivePage(tutorId: widget.tutorId),
+                                  CreateCourseLivePage(tutorId: widget.tutorId, courseType: 'hybrid'),
                             ),
                           );
                         },
@@ -143,7 +143,7 @@ class _MyCourseLivePageState extends State<MyCourseLivePage> {
                               ),
                               S.w(10),
                               Text(
-                                "สร้างคอร์สออนไลน์",
+                                "สร้างคอร์ส Hybrid",
                                 style: CustomStyles.bold14White,
                               ),
                               S.w(10),
@@ -159,25 +159,25 @@ class _MyCourseLivePageState extends State<MyCourseLivePage> {
                 Expanded(
                   child: courseController.isLoading
                       ? const Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              width: 60,
-                              height: 60,
-                              child: CircularProgressIndicator(),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(top: 16),
-                              child: Text('กำลังโหลด...'),
-                            ),
-                          ],
-                        )
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 60,
+                        height: 60,
+                        child: CircularProgressIndicator(),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(top: 16),
+                        child: Text('กำลังโหลด...'),
+                      ),
+                    ],
+                  )
                       : listMyCourse(
-                          course.courseFilter.isNotEmpty
-                              ? course.courseFilter
-                              : course.courseList,
-                          context),
+                      course.courseFilter.isNotEmpty
+                          ? course.courseFilter
+                          : course.courseList,
+                      context),
                 )
               ],
             ),
@@ -327,9 +327,9 @@ class _MyCourseLivePageState extends State<MyCourseLivePage> {
                     height: 180,
                     imageUrl: courseModel.thumbnailUrl ?? '',
                     placeholder: (context, url) =>
-                        const Center(child: CircularProgressIndicator()),
+                    const Center(child: CircularProgressIndicator()),
                     errorWidget: (context, url, error) =>
-                        const Icon(Icons.error),
+                    const Icon(Icons.error),
                   ),
                 ] else ...[
                   Image.asset(
@@ -349,7 +349,7 @@ class _MyCourseLivePageState extends State<MyCourseLivePage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          solveIcon(),
+                          HybridSolveIcon(),
                           Row(
                             children: [
                               _tagType(
@@ -389,16 +389,16 @@ class _MyCourseLivePageState extends State<MyCourseLivePage> {
     return tag.isEmpty
         ? const SizedBox()
         : Container(
-            padding: const EdgeInsets.all(5.0),
-            decoration: BoxDecoration(
-              color: CustomColors.grayF3F3F3,
-              borderRadius: BorderRadius.circular(20.0),
-            ),
-            child: Text(
-              tag,
-              style: CustomStyles.med12gray878787.copyWith(color: Colors.black),
-            ),
-          );
+      padding: const EdgeInsets.all(5.0),
+      decoration: BoxDecoration(
+        color: CustomColors.grayF3F3F3,
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      child: Text(
+        tag,
+        style: CustomStyles.med12gray878787.copyWith(color: Colors.black),
+      ),
+    );
   }
 
   Widget _buttonCard(CourseModel course) {
@@ -518,11 +518,11 @@ class _MyCourseLivePageState extends State<MyCourseLivePage> {
   }
 
   PopupMenuItem _buildPopupMenuItem(
-    BuildContext context, {
-    required String title,
-    required String path,
-    required Widget page,
-  }) {
+      BuildContext context, {
+        required String title,
+        required String path,
+        required Widget page,
+      }) {
     return PopupMenuItem(
       enabled: false,
       child: TextButton(

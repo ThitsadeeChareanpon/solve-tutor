@@ -281,6 +281,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   var courseController = CourseLiveController();
   late AuthProvider authProvider;
   late String courseName;
+  late String courseType;
   bool isSheetReady = false;
   bool isLiveCourseReady = false;
 
@@ -330,7 +331,16 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   void startDataPreparation() async {
     await initPagesData();
     initMessageHandler();
-    initConference();
+    if(courseType == 'live') {
+      initConference();
+    }else{
+      setState(() {
+        _joined = true;
+        setLiveCourseLoadState();
+        updateMeetingCode();
+        initWss();
+      });
+    }
   }
 
   void mockInitPageData() {
@@ -370,6 +380,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
         }
       }
       courseName = courseController.courseData!.courseName!;
+      courseType = courseController.courseData!.courseType!;
       micEnable = widget.micEnabled;
       isSheetReady = true;
       setLiveCourseLoadState();
@@ -1166,7 +1177,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     FirebaseFirestore.instance
         .collection('course_live')
         .doc(widget.courseId)
-        .update({'currentMeetingCode': meeting.id});
+        .update({'currentMeetingCode': courseType == 'live' ? meeting.id : 'hybrid'});
   }
 
   void updateRatio(String url) {
@@ -2074,7 +2085,9 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                           solveStopwatch.elapsed.inMilliseconds,
                         );
                         if (!widget.isMock) {
-                          meeting.end();
+                          if(courseType == 'live') {
+                            meeting.end();
+                          }
                           closeChanel();
                           FirebaseFirestore.instance
                               .collection('course_live')
@@ -3310,7 +3323,9 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                     solveStopwatch.elapsed.inMilliseconds,
                   );
                   if (!widget.isMock) {
-                    meeting.end();
+                    if(courseType == 'live') {
+                      meeting.end();
+                    }
                     closeChanel();
                     FirebaseFirestore.instance
                         .collection('course_live')

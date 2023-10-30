@@ -290,11 +290,30 @@ class CourseLiveController extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> getCourseListByTutorIdAndCourseType(String tutor, String courseType) async {
+    isLoading = true;
+    courseList.clear();
+    final data = await CourseLiveService().getCourseLiveListByTutorIdAndCourseType(tutor, courseType);
+    courseList.addAll(data);
+    isLoading = false;
+    notifyListeners();
+  }
+
   Future<void> refreshCourseListByTutorId(String tutor) async {
     isLoading = true;
     courseList.clear();
     notifyListeners();
     final data = await CourseLiveService().getCourseLiveListByTutorId(tutor);
+    courseList.addAll(data);
+    isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> refreshCourseListByTutorIdAndCourseType(String tutor, String courseType) async {
+    isLoading = true;
+    courseList.clear();
+    notifyListeners();
+    final data = await CourseLiveService().getCourseLiveListByTutorIdAndCourseType(tutor, courseType);
     courseList.addAll(data);
     isLoading = false;
     notifyListeners();

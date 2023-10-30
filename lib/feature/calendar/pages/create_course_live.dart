@@ -19,10 +19,12 @@ class CreateCourseLivePage extends StatefulWidget {
     required this.tutorId,
     this.studentId,
     this.studentName,
+    this.courseType
   }) : super(key: key);
   final String tutorId;
   final String? studentId;
   final String? studentName;
+  final String? courseType;
   @override
   State<CreateCourseLivePage> createState() => _CreateCourseLivePageState();
 }
@@ -164,6 +166,7 @@ class _CreateCourseLivePageState extends State<CreateCourseLivePage> {
                         levelId: courseController.selectedLevel,
                         subjectId: courseController.selectedSubject,
                         tutorId: widget.tutorId,
+                        courseType: widget.courseType ?? 'live'
                       );
                       courseData = await initStudent(courseData);
                       if (courseData.courseName?.isNotEmpty == true &&
