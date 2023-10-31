@@ -20,18 +20,12 @@ class ChatOrderCard extends StatefulWidget {
 class _ChatOrderCardState extends State<ChatOrderCard> {
   Message? _message;
   RoleType me = RoleType.student;
-  late AuthProvider auth;
   late ChatProvider chat;
 
   @override
   void initState() {
     super.initState();
-    auth = Provider.of<AuthProvider>(context, listen: false);
     chat = Provider.of<ChatProvider>(context, listen: false);
-    me = auth.user!.getRoleType();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      chat.init(auth: auth);
-    });
   }
 
   @override
@@ -50,87 +44,88 @@ class _ChatOrderCardState extends State<ChatOrderCard> {
               OrderClassModel? order;
               if (snapshot1.hasData) {
                 order = OrderClassModel.fromJson(snapshot1.data!.data()!);
-              }
-              return FutureBuilder(
-                future: chat.getTutorInfo("${order?.studentId ?? ""}"),
-                builder: (context, snapshot2) {
-                  UserModel? tutor;
-                  if (snapshot1.hasData && snapshot2.hasData) {
-                    tutor = UserModel.fromJson(snapshot2.data!.data()!);
-                    return InkWell(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => ChatRoomPage(
-                              chat: widget.chat,
-                              order: order!,
-                            ),
-                          ),
-                        );
-                      },
-                      child: Row(
-                        children: [
-                          const SizedBox(width: 10),
-                          Builder(builder: (context) {
-                            if (tutor?.image == null) {
-                              return const CircleAvatar(
-                                child: Icon(CupertinoIcons.person),
-                              );
-                            }
-                            return ClipRRect(
-                              borderRadius: BorderRadius.circular(500),
-                              child: CachedNetworkImage(
-                                width: 50,
-                                height: 50,
-                                imageUrl: tutor?.image ?? "",
-                                errorWidget: (context, url, error) =>
-                                    const CircleAvatar(
-                                        child: Icon(CupertinoIcons.person)),
+                return FutureBuilder(
+                  future: chat.getTutorInfo("${order?.studentId ?? ""}"),
+                  builder: (context, snapshot2) {
+                    UserModel? tutor;
+                    if (snapshot1.hasData && snapshot2.hasData) {
+                      tutor = UserModel.fromJson(snapshot2.data!.data()!);
+                      return InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ChatRoomPage(
+                                chat: widget.chat,
+                                order: order!,
                               ),
-                            );
-                          }),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("class : ${order?.title}"),
-                                StreamBuilder(
-                                  stream: chat
-                                      .getLastMessage(widget.chat.chatId ?? ""),
-                                  builder: (context, snapshot) {
-                                    final data = snapshot.data?.docs;
-                                    final list = data
-                                            ?.map((e) =>
-                                                Message.fromJson(e.data()))
-                                            .toList() ??
-                                        [];
-                                    if (list.isNotEmpty) _message = list[0];
-                                    if (_message?.type == MessageType.image) {
-                                      return const Text(
-                                        "รูปภาพ",
+                            ),
+                          );
+                        },
+                        child: Row(
+                          children: [
+                            const SizedBox(width: 10),
+                            Builder(builder: (context) {
+                              if (tutor?.image == null) {
+                                return const CircleAvatar(
+                                  child: Icon(CupertinoIcons.person),
+                                );
+                              }
+                              return ClipRRect(
+                                borderRadius: BorderRadius.circular(500),
+                                child: CachedNetworkImage(
+                                  width: 50,
+                                  height: 50,
+                                  imageUrl: tutor?.image ?? "",
+                                  errorWidget: (context, url, error) =>
+                                      const CircleAvatar(
+                                          child: Icon(CupertinoIcons.person)),
+                                ),
+                              );
+                            }),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text("class : ${order?.title}"),
+                                  StreamBuilder(
+                                    stream: chat.getLastMessage(
+                                        widget.chat.chatId ?? ""),
+                                    builder: (context, snapshot) {
+                                      final data = snapshot.data?.docs;
+                                      final list = data
+                                              ?.map((e) =>
+                                                  Message.fromJson(e.data()))
+                                              .toList() ??
+                                          [];
+                                      if (list.isNotEmpty) _message = list[0];
+                                      if (_message?.type == MessageType.image) {
+                                        return const Text(
+                                          "รูปภาพ",
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        );
+                                      }
+                                      return Text(
+                                        "${_message?.msg ?? ""} ",
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       );
-                                    }
-                                    return Text(
-                                      "${_message?.msg ?? ""} ",
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    );
-                                  },
-                                ),
-                              ],
+                                    },
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                  return const Text("loading..");
-                },
-              );
+                          ],
+                        ),
+                      );
+                    }
+                    return const Text("loading..");
+                  },
+                );
+              }
+              return const Text("Errod Data..");
             } catch (e) {
               return const Text("Errod Data..");
             }
