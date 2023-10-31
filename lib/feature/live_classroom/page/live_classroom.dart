@@ -1486,35 +1486,36 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                         itemCount: _listLines.length,
                         itemBuilder: (context, index) {
                           return InkWell(
-                              onTap: () {
+                            onTap: () {
+                              setState(() {
                                 setState(() {
-                                  setState(() {
-                                    _selectedIndexLines = index;
-                                    openLines = !openLines;
-                                  });
-                                  int time =
-                                      solveStopwatch.elapsed.inMilliseconds;
-                                  for (int i = 0; i <= 4; i++) {
-                                    sendMessage(
-                                      'StrokeWidth.$index',
-                                      time,
-                                    );
-                                  }
+                                  _selectedIndexLines = index;
+                                  openLines = !openLines;
                                 });
-                              },
-                              child: Column(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(3.0),
-                                    child: Image.asset(
-                                      _selectedIndexLines == index
-                                          ? _listLines[index]['image_active']
-                                          : _listLines[index]['image_dis'],
-                                    ),
+                                int time =
+                                    solveStopwatch.elapsed.inMilliseconds;
+                                for (int i = 0; i <= 4; i++) {
+                                  sendMessage(
+                                    'StrokeWidth.$index',
+                                    time,
+                                  );
+                                }
+                              });
+                            },
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(3.0),
+                                  child: Image.asset(
+                                    _selectedIndexLines == index
+                                        ? _listLines[index]['image_active']
+                                        : _listLines[index]['image_dis'],
                                   ),
-                                  S.h(8)
-                                ],
-                              ));
+                                ),
+                                S.h(8)
+                              ],
+                            ),
+                          );
                         })
                   ],
                 ),
@@ -2145,142 +2146,290 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
               children: [
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: CustomColors.grayCFCFCF,
-                        style: BorderStyle.solid,
-                        width: 1.0,
-                      ),
-                      borderRadius: BorderRadius.circular(8),
-                      color: CustomColors.whitePrimary,
-                    ),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 1, vertical: 8),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        InkWell(
-                          onTap: () {
-                            log('TEST');
-                            log(_highlighterPoints[_currentPage].toString());
-                          },
-                          child: Image.asset(
-                            ImageAssets.allPages,
-                            height: 30,
-                            width: 32,
-                          ),
-                        ),
-                        S.w(defaultPadding),
-                        Container(
-                          width: 1,
-                          height: 24,
-                          color: CustomColors.grayCFCFCF,
-                        ),
-                        S.w(defaultPadding),
-                        Material(
-                          child: InkWell(
-                            onTap: () {
-                              if (_isViewingFocusStudent) return;
-                              if (_pageController.hasClients &&
-                                  _pageController.page!.toInt() != 0) {
-                                int page = _currentPage - 1;
-                                int time =
-                                    solveStopwatch.elapsed.inMilliseconds;
-                                for (int i = 0; i <= 4; i++) {
-                                  sendMessage(
-                                    'ChangePage:$page',
-                                    time,
-                                  );
-                                }
-                                _pageController.animateToPage(
-                                  _pageController.page!.toInt() - 1,
-                                  duration: const Duration(milliseconds: 300),
-                                  curve: Curves.easeInOut,
-                                );
-                              }
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Image.asset(
-                                ImageAssets.backDis,
-                                height: 16,
-                                width: 17,
-                                color: _isPrevBtnActive
-                                    ? CustomColors.activePagingBtn
-                                    : CustomColors.inactivePagingBtn,
+                  child: _requestScreenShare
+                      ? ColorFiltered(
+                          colorFilter: ColorFilter.mode(
+                              Colors.grey.withOpacity(0.3), BlendMode.modulate),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: CustomColors.grayCFCFCF,
+                                style: BorderStyle.solid,
+                                width: 1.0,
                               ),
+                              borderRadius: BorderRadius.circular(8),
+                              color: CustomColors.whitePrimary,
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 1, vertical: 8),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                InkWell(
+                                  onTap: () {
+                                    log('TEST');
+                                    log(_highlighterPoints[_currentPage]
+                                        .toString());
+                                  },
+                                  child: Image.asset(
+                                    ImageAssets.allPages,
+                                    height: 30,
+                                    width: 32,
+                                  ),
+                                ),
+                                S.w(defaultPadding),
+                                Container(
+                                  width: 1,
+                                  height: 24,
+                                  color: CustomColors.grayCFCFCF,
+                                ),
+                                S.w(defaultPadding),
+                                Material(
+                                  child: InkWell(
+                                    onTap: () {
+                                      if (_isViewingFocusStudent) return;
+                                      if (_pageController.hasClients &&
+                                          _pageController.page!.toInt() != 0) {
+                                        int page = _currentPage - 1;
+                                        int time = solveStopwatch
+                                            .elapsed.inMilliseconds;
+                                        for (int i = 0; i <= 4; i++) {
+                                          sendMessage(
+                                            'ChangePage:$page',
+                                            time,
+                                          );
+                                        }
+                                        _pageController.animateToPage(
+                                          _pageController.page!.toInt() - 1,
+                                          duration:
+                                              const Duration(milliseconds: 300),
+                                          curve: Curves.easeInOut,
+                                        );
+                                      }
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Image.asset(
+                                        ImageAssets.backDis,
+                                        height: 16,
+                                        width: 17,
+                                        color: _isPrevBtnActive
+                                            ? CustomColors.activePagingBtn
+                                            : CustomColors.inactivePagingBtn,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                S.w(defaultPadding),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: CustomColors.grayCFCFCF,
+                                      style: BorderStyle.solid,
+                                      width: 1.0,
+                                    ),
+                                    borderRadius: BorderRadius.circular(4),
+                                    color: CustomColors.whitePrimary,
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 4),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      Text("Page ${_currentPage + 1}",
+                                          style:
+                                              CustomStyles.bold14greenPrimary),
+                                    ],
+                                  ),
+                                ),
+                                S.w(8.0),
+                                Text("/ ${_pages.length}",
+                                    style: CustomStyles.med14Gray878787),
+                                S.w(8),
+                                Material(
+                                  child: InkWell(
+                                    onTap: () {
+                                      if (_isViewingFocusStudent) return;
+                                      if (_pages.length > 1) {
+                                        if (_pageController.hasClients &&
+                                            _pageController.page!.toInt() !=
+                                                _pages.length - 1) {
+                                          int page = _currentPage + 1;
+                                          int time = solveStopwatch
+                                              .elapsed.inMilliseconds;
+                                          for (int i = 0; i <= 4; i++) {
+                                            sendMessage(
+                                              'ChangePage:$page',
+                                              time,
+                                            );
+                                          }
+                                          _pageController.animateToPage(
+                                            _pageController.page!.toInt() + 1,
+                                            duration: const Duration(
+                                                milliseconds: 300),
+                                            curve: Curves.easeInOut,
+                                          );
+                                        }
+                                      }
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Image.asset(
+                                        ImageAssets.forward,
+                                        height: 16,
+                                        width: 17,
+                                        color: _isNextBtnActive
+                                            ? CustomColors.activePagingBtn
+                                            : CustomColors.inactivePagingBtn,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                S.w(6.0),
+                              ],
                             ),
                           ),
-                        ),
-                        S.w(defaultPadding),
-                        Container(
+                        )
+                      : Container(
                           decoration: BoxDecoration(
                             border: Border.all(
                               color: CustomColors.grayCFCFCF,
                               style: BorderStyle.solid,
                               width: 1.0,
                             ),
-                            borderRadius: BorderRadius.circular(4),
+                            borderRadius: BorderRadius.circular(8),
                             color: CustomColors.whitePrimary,
                           ),
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 4),
+                              horizontal: 1, vertical: 8),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: <Widget>[
-                              Text("Page ${_currentPage + 1}",
-                                  style: CustomStyles.bold14greenPrimary),
+                              InkWell(
+                                onTap: () {
+                                  log('TEST');
+                                  log(_highlighterPoints[_currentPage]
+                                      .toString());
+                                },
+                                child: Image.asset(
+                                  ImageAssets.allPages,
+                                  height: 30,
+                                  width: 32,
+                                ),
+                              ),
+                              S.w(defaultPadding),
+                              Container(
+                                width: 1,
+                                height: 24,
+                                color: CustomColors.grayCFCFCF,
+                              ),
+                              S.w(defaultPadding),
+                              Material(
+                                child: InkWell(
+                                  onTap: () {
+                                    if (_isViewingFocusStudent) return;
+                                    if (_pageController.hasClients &&
+                                        _pageController.page!.toInt() != 0) {
+                                      int page = _currentPage - 1;
+                                      int time =
+                                          solveStopwatch.elapsed.inMilliseconds;
+                                      for (int i = 0; i <= 4; i++) {
+                                        sendMessage(
+                                          'ChangePage:$page',
+                                          time,
+                                        );
+                                      }
+                                      _pageController.animateToPage(
+                                        _pageController.page!.toInt() - 1,
+                                        duration:
+                                            const Duration(milliseconds: 300),
+                                        curve: Curves.easeInOut,
+                                      );
+                                    }
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Image.asset(
+                                      ImageAssets.backDis,
+                                      height: 16,
+                                      width: 17,
+                                      color: _isPrevBtnActive
+                                          ? CustomColors.activePagingBtn
+                                          : CustomColors.inactivePagingBtn,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              S.w(defaultPadding),
+                              Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: CustomColors.grayCFCFCF,
+                                    style: BorderStyle.solid,
+                                    width: 1.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(4),
+                                  color: CustomColors.whitePrimary,
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 4),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    Text("Page ${_currentPage + 1}",
+                                        style: CustomStyles.bold14greenPrimary),
+                                  ],
+                                ),
+                              ),
+                              S.w(8.0),
+                              Text("/ ${_pages.length}",
+                                  style: CustomStyles.med14Gray878787),
+                              S.w(8),
+                              Material(
+                                child: InkWell(
+                                  onTap: () {
+                                    if (_isViewingFocusStudent) return;
+                                    if (_pages.length > 1) {
+                                      if (_pageController.hasClients &&
+                                          _pageController.page!.toInt() !=
+                                              _pages.length - 1) {
+                                        int page = _currentPage + 1;
+                                        int time = solveStopwatch
+                                            .elapsed.inMilliseconds;
+                                        for (int i = 0; i <= 4; i++) {
+                                          sendMessage(
+                                            'ChangePage:$page',
+                                            time,
+                                          );
+                                        }
+                                        _pageController.animateToPage(
+                                          _pageController.page!.toInt() + 1,
+                                          duration:
+                                              const Duration(milliseconds: 300),
+                                          curve: Curves.easeInOut,
+                                        );
+                                      }
+                                    }
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Image.asset(
+                                      ImageAssets.forward,
+                                      height: 16,
+                                      width: 17,
+                                      color: _isNextBtnActive
+                                          ? CustomColors.activePagingBtn
+                                          : CustomColors.inactivePagingBtn,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              S.w(6.0),
                             ],
                           ),
                         ),
-                        S.w(8.0),
-                        Text("/ ${_pages.length}",
-                            style: CustomStyles.med14Gray878787),
-                        S.w(8),
-                        Material(
-                          child: InkWell(
-                            onTap: () {
-                              if (_isViewingFocusStudent) return;
-                              if (_pages.length > 1) {
-                                if (_pageController.hasClients &&
-                                    _pageController.page!.toInt() !=
-                                        _pages.length - 1) {
-                                  int page = _currentPage + 1;
-                                  int time =
-                                      solveStopwatch.elapsed.inMilliseconds;
-                                  for (int i = 0; i <= 4; i++) {
-                                    sendMessage(
-                                      'ChangePage:$page',
-                                      time,
-                                    );
-                                  }
-                                  _pageController.animateToPage(
-                                    _pageController.page!.toInt() + 1,
-                                    duration: const Duration(milliseconds: 300),
-                                    curve: Curves.easeInOut,
-                                  );
-                                }
-                              }
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Image.asset(
-                                ImageAssets.forward,
-                                height: 16,
-                                width: 17,
-                                color: _isNextBtnActive
-                                    ? CustomColors.activePagingBtn
-                                    : CustomColors.inactivePagingBtn,
-                              ),
-                            ),
-                          ),
-                        ),
-                        S.w(6.0),
-                      ],
-                    ),
-                  ),
                 ),
                 S.w(8),
                 statusTouchModeIcon(),
@@ -4859,12 +5008,13 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                   ),
                 ),
                 Material(
-                    // color: Colors.transparent,
-                    child: Container(
-                  width: double.infinity,
-                  height: 1,
-                  color: CustomColors.grayCFCFCF,
-                )),
+                  // color: Colors.transparent,
+                  child: Container(
+                    width: double.infinity,
+                    height: 1,
+                    color: CustomColors.grayCFCFCF,
+                  ),
+                ),
 
                 ///Header2
                 Material(
