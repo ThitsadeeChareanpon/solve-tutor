@@ -92,11 +92,11 @@ class OrderMockProvider extends ChangeNotifier {
       'customer_id': '${cutomer.id}',
       'tutor_id': '${order.tutorId}',
     });
-    await sendFirstMessage(chatId);
-    await sendToFirstMessage(
-      me == RoleType.student ? tutorId : studentId,
-      chatId,
-    );
+    // await sendFirstMessage(chatId);
+    // await sendToFirstMessage(
+    //   me == RoleType.student ? tutorId : studentId,
+    //   chatId,
+    // );
     return getChatInfo(chatId);
   }
 
@@ -115,23 +115,23 @@ class OrderMockProvider extends ChangeNotifier {
     return chat;
   }
 
-  Future<void> sendFirstMessage(String orderId) async {
-    await firebaseFirestore
-        .collection('users')
-        .doc(auth?.uid)
-        .collection('my_order_chat')
-        .doc(orderId)
-        .set({});
-  }
+  // Future<void> sendFirstMessage(String orderId) async {
+  //   await firebaseFirestore
+  //       .collection('users')
+  //       .doc(auth?.uid)
+  //       .collection('my_order_chat')
+  //       .doc(orderId)
+  //       .set({});
+  // }
 
-  Future<void> sendToFirstMessage(String userTo, String orderId) async {
-    await firebaseFirestore
-        .collection('users')
-        .doc(userTo)
-        .collection('my_order_chat')
-        .doc(orderId)
-        .set({});
-  }
+  // Future<void> sendToFirstMessage(String userTo, String orderId) async {
+  //   await firebaseFirestore
+  //       .collection('users')
+  //       .doc(userTo)
+  //       .collection('my_order_chat')
+  //       .doc(orderId)
+  //       .set({});
+  // }
 
   Future<OrderClassModel> updateOrderStatus(
       String orderId, String status) async {

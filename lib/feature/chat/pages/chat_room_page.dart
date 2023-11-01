@@ -69,28 +69,28 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     mq = Sizer(context);
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
-      child: SafeArea(
-        child: WillPopScope(
-          onWillPop: () {
-            if (_showEmoji) {
-              setState(() => _showEmoji = !_showEmoji);
-              return Future.value(false);
-            } else {
-              return Future.value(true);
-            }
-          },
-          child: Scaffold(
-            appBar: PreferredSize(
-              preferredSize: const Size.fromHeight(80),
-              child: AppBar(
-                backgroundColor: Colors.white,
-                leading: const SizedBox(),
-                flexibleSpace: _appBar(),
-              ),
+      child: WillPopScope(
+        onWillPop: () {
+          if (_showEmoji) {
+            setState(() => _showEmoji = !_showEmoji);
+            return Future.value(false);
+          } else {
+            return Future.value(true);
+          }
+        },
+        child: Scaffold(
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(80),
+            child: AppBar(
+              backgroundColor: Colors.white,
+              leading: const SizedBox(),
+              flexibleSpace: _appBar(),
             ),
-            backgroundColor: Colors.white,
-            // backgroundColor: const Color.fromARGB(255, 234, 248, 255),
-            body: Column(
+          ),
+          backgroundColor: Colors.white,
+          // backgroundColor: const Color.fromARGB(255, 234, 248, 255),
+          body: SafeArea(
+            child: Column(
               children: [
                 Expanded(
                   child: StreamBuilder(
@@ -161,131 +161,133 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     if (me == RoleType.student) {
       toUser = widget.order.tutorId ?? "";
     }
-    return InkWell(
-      onTap: () {
-        // Navigator.push(
-        //     context,
-        //     MaterialPageRoute(
-        //         builder: (_) => ViewProfilePage(user: widget.user)));
-      },
-      child: StreamBuilder(
-        stream: chat.getUserInfo(toUser),
-        builder: (context, snapshot) {
-          final data = snapshot.data?.docs;
-          final list =
-              data?.map((e) => UserModel.fromJson(e.data())).toList() ?? [];
-          return Padding(
-            padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(
-                    Icons.chevron_left,
-                    color: Colors.black,
+    return SafeArea(
+      child: InkWell(
+        onTap: () {
+          // Navigator.push(
+          //     context,
+          //     MaterialPageRoute(
+          //         builder: (_) => ViewProfilePage(user: widget.user)));
+        },
+        child: StreamBuilder(
+          stream: chat.getUserInfo(toUser),
+          builder: (context, snapshot) {
+            final data = snapshot.data?.docs;
+            final list =
+                data?.map((e) => UserModel.fromJson(e.data())).toList() ?? [];
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(
+                      Icons.chevron_left,
+                      color: Colors.black,
+                    ),
                   ),
-                ),
-                Builder(builder: (context) {
-                  if (list.isNotEmpty && list[0].image != null) {
-                    return ClipRRect(
-                      borderRadius: BorderRadius.circular(500),
-                      child: CachedNetworkImage(
-                        width: 50,
-                        height: 50,
-                        imageUrl: list.isNotEmpty
-                            ? list[0].image ?? ""
-                            : auth.user!.image ?? "",
-                        errorWidget: (context, url, error) =>
-                            const CircleAvatar(
-                                child: Icon(CupertinoIcons.person)),
-                      ),
+                  Builder(builder: (context) {
+                    if (list.isNotEmpty && list[0].image != null) {
+                      return ClipRRect(
+                        borderRadius: BorderRadius.circular(500),
+                        child: CachedNetworkImage(
+                          width: 50,
+                          height: 50,
+                          imageUrl: list.isNotEmpty
+                              ? list[0].image ?? ""
+                              : auth.user!.image ?? "",
+                          errorWidget: (context, url, error) =>
+                              const CircleAvatar(
+                                  child: Icon(CupertinoIcons.person)),
+                        ),
+                      );
+                    }
+                    return const CircleAvatar(
+                      child: Icon(CupertinoIcons.person),
                     );
-                  }
-                  return const CircleAvatar(
-                    child: Icon(CupertinoIcons.person),
-                  );
-                }),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        list.isNotEmpty
-                            ? list[0].name ?? ""
-                            : auth.user!.name ?? "",
-                        maxLines: 1,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: appTextPrimaryColor,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        list.isNotEmpty
-                            ? list[0].isOnline!
-                                ? 'Online'
-                                : MyDateUtil.getLastActiveTime(
-                                    context: context,
-                                    lastActive: list[0].lastActive ?? "")
-                            : MyDateUtil.getLastActiveTime(
-                                context: context,
-                                lastActive: auth.user!.lastActive ?? ""),
-                        maxLines: 1,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: appTextPrimaryColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Builder(builder: (context) {
-                  if (widget.order.fromMarketPlace) {
-                    return const SizedBox();
-                  }
-                  return Container(
-                    width: 150,
-                    padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
-                    child: Row(
+                  }),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Builder(builder: (context) {
-                                String text = "ยังไม่ชำระเงิน";
-                                if (orderDetail?.paymentStatus == "paid") {
-                                  text = "ชำระเรียบร้อยแล้ว";
-                                }
-                                return Text(
-                                  "สถานะการชำระเงิน : \n$text",
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  textAlign: TextAlign.end,
-                                );
-                              }),
-                              Text(
-                                "คอร์สเรียน : ${orderDetail?.title ?? ""}",
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.end,
-                              ),
-                            ],
+                        Text(
+                          list.isNotEmpty
+                              ? list[0].name ?? ""
+                              : auth.user!.name ?? "",
+                          maxLines: 1,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: appTextPrimaryColor,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          list.isNotEmpty
+                              ? list[0].isOnline!
+                                  ? 'Online'
+                                  : MyDateUtil.getLastActiveTime(
+                                      context: context,
+                                      lastActive: list[0].lastActive ?? "")
+                              : MyDateUtil.getLastActiveTime(
+                                  context: context,
+                                  lastActive: auth.user!.lastActive ?? ""),
+                          maxLines: 1,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: appTextPrimaryColor,
                           ),
                         ),
                       ],
                     ),
-                  );
-                }),
-              ],
-            ),
-          );
-        },
+                  ),
+                  const SizedBox(width: 10),
+                  Builder(builder: (context) {
+                    if (widget.order.fromMarketPlace) {
+                      return const SizedBox();
+                    }
+                    return Container(
+                      width: 150,
+                      padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Builder(builder: (context) {
+                                  String text = "ยังไม่ชำระเงิน";
+                                  if (orderDetail?.paymentStatus == "paid") {
+                                    text = "ชำระเรียบร้อยแล้ว";
+                                  }
+                                  return Text(
+                                    "สถานะการชำระเงิน : \n$text",
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.end,
+                                  );
+                                }),
+                                Text(
+                                  "คอร์สเรียน : ${orderDetail?.title ?? ""}",
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.end,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

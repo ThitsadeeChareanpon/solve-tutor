@@ -433,7 +433,7 @@ class CourseLiveController extends ChangeNotifier {
             courseData.tutorId ?? "",
             courseData.studentIds?[i] ?? "",
           );
-          await chat.setMyChat(data);
+          // await chat.setMyChat(data);
           await chat.sendFirstMessage(
             data?.chatId ?? "",
             data?.customerId ?? "",

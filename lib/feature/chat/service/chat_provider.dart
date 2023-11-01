@@ -44,14 +44,14 @@ class ChatProvider extends ChangeNotifier {
         .snapshots();
   }
 
-  Future<void> setMyChat(ChatModel? chatModel) async {
-    await firebaseFirestore
-        .collection('users')
-        .doc(auth?.uid ?? "")
-        .collection('my_order_chat')
-        .doc(chatModel?.chatId)
-        .set({});
-  }
+  // Future<void> setMyChat(ChatModel? chatModel) async {
+  //   await firebaseFirestore
+  //       .collection('users')
+  //       .doc(auth?.uid ?? "")
+  //       .collection('my_order_chat')
+  //       .doc(chatModel?.chatId)
+  //       .set({});
+  // }
 
   Future<void> sendFirstMessage(
     String chatId,
