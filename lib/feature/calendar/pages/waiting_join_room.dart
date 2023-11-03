@@ -80,33 +80,71 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
   }
 
   Future<void> createAndJoinMeeting(displayName) async {
-    int totalMinuteLive = ((widget.course.end!.millisecondsSinceEpoch -
-                widget.course.start!.millisecondsSinceEpoch) /
-            60000)
-        .ceil();
-    int? students = widget.course.studentCount ?? 0;
-    int? minPoint = totalMinuteLive * students;
-    await authProvider.getWallet();
-    int? point = authProvider.wallet?.balance ?? 0;
-    if (point >= minPoint) {
-      await updateActualTime();
+    if(widget.course.courseType == 'live') {
+      int totalMinuteLive = ((widget.course.end!.millisecondsSinceEpoch -
+          widget.course.start!.millisecondsSinceEpoch) /
+          60000)
+          .ceil();
+      int? students = widget.course.studentCount ?? 0;
+      int? minPoint = totalMinuteLive * students;
+      await authProvider.getWallet();
+      int? point = authProvider.wallet?.balance ?? 0;
+      if (point >= minPoint) {
+        await updateActualTime();
+        try {
+          var meetingID = await createMeeting(_token);
+          if (mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    TutorLiveClassroom(
+                      token: _token,
+                      userId: widget.course.tutorId!,
+                      courseId: widget.course.courseId!,
+                      startTime: widget.course.start!.millisecondsSinceEpoch,
+                      meetingId: meetingID,
+                      isHost: true,
+                      displayName: displayName,
+                      micEnabled: isMicOn,
+                      camEnabled: false,
+                    ),
+              ),
+            );
+          }
+        } catch (error) {
+          showSnackBarMessage(
+              message: 'ERROR ON CREATE ROOM ${error.toString()}',
+              context: context);
+        }
+      } else {
+        showAlertRecordingDialog(
+          context,
+          title: 'Solve Coin ไม่เพียงพอ',
+          detail:
+          '\t\t\tSolve Coin ของคุณไม่เพียงพอสำหรับใช้เข้าสอนในคลาสนี้\nกรุณาติดต่อทีมงานดูแลลูกค้าได้ในเวลา 11.00-22.00 น.',
+          confirm: 'ตกลง',
+        );
+      }
+    }else{
       try {
         var meetingID = await createMeeting(_token);
         if (mounted) {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => TutorLiveClassroom(
-                token: _token,
-                userId: widget.course.tutorId!,
-                courseId: widget.course.courseId!,
-                startTime: widget.course.start!.millisecondsSinceEpoch,
-                meetingId: meetingID,
-                isHost: true,
-                displayName: displayName,
-                micEnabled: isMicOn,
-                camEnabled: false,
-              ),
+              builder: (context) =>
+                  TutorLiveClassroom(
+                    token: _token,
+                    userId: widget.course.tutorId!,
+                    courseId: widget.course.courseId!,
+                    startTime: widget.course.start!.millisecondsSinceEpoch,
+                    meetingId: meetingID,
+                    isHost: true,
+                    displayName: displayName,
+                    micEnabled: isMicOn,
+                    camEnabled: false,
+                  ),
             ),
           );
         }
@@ -115,14 +153,6 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
             message: 'ERROR ON CREATE ROOM ${error.toString()}',
             context: context);
       }
-    } else {
-      showAlertRecordingDialog(
-        context,
-        title: 'Solve Coin ไม่เพียงพอ',
-        detail:
-            '\t\t\tSolve Coin ของคุณไม่เพียงพอสำหรับใช้เข้าสอนในคลาสนี้\nกรุณาติดต่อทีมงานดูแลลูกค้าได้ในเวลา 11.00-22.00 น.',
-        confirm: 'ตกลง',
-      );
     }
   }
 
@@ -211,8 +241,8 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
                 S.h(10),
                 _timeJoin(),
                 S.h(10),
-                SizedBox(height: 100, child: _microphone()),
-                S.h(10),
+                widget.course.courseType == 'live' ? SizedBox(height: 100, child: _microphone()) : const SizedBox(),
+                widget.course.courseType == 'live' ? S.h(10) : const SizedBox(),
                 _tutorTitle(),
                 S.h(30),
                 isActive
@@ -228,8 +258,8 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
                 S.h(10),
                 isActive ? _buttonJoinRoom() : _buttonNotYet(),
               ] else ...[
-                SizedBox(height: 70, child: _microphone()),
-                S.h(10),
+                widget.course.courseType == 'live' ? SizedBox(height: 70, child: _microphone()) : const SizedBox(),
+                widget.course.courseType == 'live' ? S.h(10) : const SizedBox(),
                 if (!isActive)
                   Countdown(
                     courseStart: widget.course.start!,
