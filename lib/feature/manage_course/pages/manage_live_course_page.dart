@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:solve_tutor/authentication/service/auth_provider.dart';
 import 'package:solve_tutor/constants/theme.dart';
+import 'package:solve_tutor/feature/calendar/pages/my_course_hybrid.dart';
 import 'package:solve_tutor/feature/calendar/pages/my_course_live.dart';
 import 'package:solve_tutor/feature/cheet/pages/my_document.dart';
 import 'package:solve_tutor/feature/class/pages/class_list_page.dart';
@@ -40,7 +41,9 @@ class _ManageLiveCoursePageState extends State<ManageLiveCoursePage> {
                         'Hybrid Solution',
                         'สร้างคอร์ส Hybrid ของคุณ',
                         true,
-                        const MaintenancePage()),
+                        MyCourseHybridPage(
+                          tutorId: auth?.uid ?? "",
+                        )),
                     mobileCard(
                         'assets/images/graph.png',
                         'การใช้งาน',

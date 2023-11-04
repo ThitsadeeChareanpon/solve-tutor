@@ -63,6 +63,7 @@ class TutorLiveClassroom extends StatefulWidget {
 
 class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   // Conference
+  bool isAudioMode = true;
   bool isRecordingOn = false;
   bool isRecordingLoading = false;
   int recordIndex = 0;
@@ -281,6 +282,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   var courseController = CourseLiveController();
   late AuthProvider authProvider;
   late String courseName;
+  late String courseType;
   bool isSheetReady = false;
   bool isLiveCourseReady = false;
 
@@ -330,7 +332,16 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   void startDataPreparation() async {
     await initPagesData();
     initMessageHandler();
-    initConference();
+    if(courseType == 'live') {
+      initConference();
+    }else{
+      setState(() {
+        _joined = true;
+        setLiveCourseLoadState();
+        updateMeetingCode();
+        initWss();
+      });
+    }
   }
 
   void mockInitPageData() {
@@ -370,6 +381,12 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
         }
       }
       courseName = courseController.courseData!.courseName!;
+      courseType = courseController.courseData!.courseType!;
+      if(courseType != 'live'){
+        setState(() {
+          isAudioMode = false;
+        });
+      }
       micEnable = widget.micEnabled;
       isSheetReady = true;
       setLiveCourseLoadState();
@@ -748,6 +765,19 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
         break;
       }
     }
+  }
+
+  void switchAudioMode(){
+    if(isAudioMode){
+      meeting.end();
+      sendMessage('AudioMode:OFF', solveStopwatch.elapsed.inMilliseconds);
+    }else{
+      initConference();
+      sendMessage('AudioMode:${widget.meetingId}', solveStopwatch.elapsed.inMilliseconds);
+    }
+    setState(() {
+      isAudioMode = !isAudioMode;
+    });
   }
 
   void changeSolvepadScaling(double solvepadWidth, double solvepadHeight) {
@@ -1133,8 +1163,10 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       calendars[indexToUpdate].liveDuration = duration;
       await courseController.updateCourseDetails(
           context, courseController.courseData);
-      int students = courseController.courseData?.studentIds?.length ?? 0;
-      await updateBalanceAndLiveDuration(duration, students);
+      if(courseType == 'live') {
+        int students = courseController.courseData?.studentIds?.length ?? 0;
+        await updateBalanceAndLiveDuration(duration, students);
+      }
     }
   }
 
@@ -1166,7 +1198,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     FirebaseFirestore.instance
         .collection('course_live')
         .doc(widget.courseId)
-        .update({'currentMeetingCode': meeting.id});
+        .update({'currentMeetingCode': courseType == 'live' ? meeting.id : 'hybrid'});
   }
 
   void updateRatio(String url) {
@@ -2075,7 +2107,9 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                           solveStopwatch.elapsed.inMilliseconds,
                         );
                         if (!widget.isMock) {
-                          meeting.end();
+                          if(isAudioMode) {
+                            meeting.end();
+                          }
                           closeChanel();
                           FirebaseFirestore.instance
                               .collection('course_live')
@@ -2433,6 +2467,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                 ),
                 S.w(8),
                 statusTouchModeIcon(),
+                courseType == 'live' ? const SizedBox() : S.w(8),
+                courseType == 'live' ? const SizedBox() : audioModeIcon(),
               ],
             ),
           ),
@@ -2441,6 +2477,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                isAudioMode ?
                 Material(
                   child: InkWell(
                     onTap: () async {
@@ -2485,8 +2522,10 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                             ),
                           ),
                   ),
-                ),
-                S.w(defaultPadding),
+                ) : const Material(),
+                isAudioMode ?
+                S.w(defaultPadding) : const SizedBox(),
+                isAudioMode ?
                 Material(
                   child: InkWell(
                     onTap: () {
@@ -2505,7 +2544,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                       width: 44,
                     ),
                   ),
-                ),
+                ) : const Material(),
                 // S.w(defaultPadding),
                 // InkWell(
                 //   onTap: () {
@@ -3459,7 +3498,9 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                     solveStopwatch.elapsed.inMilliseconds,
                   );
                   if (!widget.isMock) {
-                    meeting.end();
+                    if(isAudioMode) {
+                      meeting.end();
+                    }
                     closeChanel();
                     FirebaseFirestore.instance
                         .collection('course_live')
@@ -3534,7 +3575,8 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             //     width: 44,
             //   ),
             // ),
-            S.h(8),
+            isAudioMode ? S.h(8) : const SizedBox(),
+            isAudioMode ?
             InkWell(
               onTap: () async {
                 if (!isRecordingLoading) {
@@ -3554,8 +3596,9 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                 height: 44,
                 width: 44,
               ),
-            ),
-            S.h(8),
+            ) : const SizedBox(),
+            isAudioMode ? S.h(8) : const SizedBox(),
+            isAudioMode ?
             InkWell(
               onTap: () {
                 setState(() {
@@ -3571,7 +3614,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                 micEnable ? ImageAssets.micEnable : ImageAssets.micDis,
                 width: 44,
               ),
-            ),
+            ) : const SizedBox(),
           ],
         ),
       ),
@@ -4509,6 +4552,21 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
         _isStylusActive
             ? 'assets/images/stylus-icon.png'
             : 'assets/images/touch-icon.png',
+        height: 44,
+        width: 44,
+      ),
+    );
+  }
+
+  Widget audioModeIcon() {
+    return InkWell(
+      onTap: () {
+        switchAudioMode();
+      },
+      child: Image.asset(
+        isAudioMode
+            ? 'assets/images/power-button-icon.png'
+            : 'assets/images/video-conference-icon.png',
         height: 44,
         width: 44,
       ),

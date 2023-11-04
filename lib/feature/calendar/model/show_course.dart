@@ -11,6 +11,7 @@ class ShowCourseStudent {
   String? documentId;
   String? file;
   String? audio;
+  String? courseType;
 
   ShowCourseStudent({
     this.courseId,
@@ -25,6 +26,7 @@ class ShowCourseStudent {
     this.documentId,
     this.file,
     this.audio,
+    this.courseType,
   });
 
   ShowCourseStudent.fromJson(Map<String, dynamic> json) {
@@ -40,6 +42,7 @@ class ShowCourseStudent {
     documentId = json['document_id'];
     file = json['review_file'];
     audio = json['audio_file']?.first;
+    courseType = json['course_type'];
   }
 
   Map<String, dynamic> toJson() {
@@ -56,6 +59,7 @@ class ShowCourseStudent {
     data['document_id'] = documentId;
     data['review_file'] = file;
     data['audio_file'] = audio;
+    data['course_type'] = courseType;
     return data;
   }
 }
@@ -72,6 +76,7 @@ class ShowCourseTutor {
   String? detailsText;
   String? documentId;
   int? studentCount;
+  String? courseType;
 
   ShowCourseTutor({
     this.courseId,
@@ -85,6 +90,7 @@ class ShowCourseTutor {
     this.detailsText,
     this.documentId,
     this.studentCount,
+    this.courseType,
   });
 
   ShowCourseTutor.fromJson(Map<String, dynamic> json) {
@@ -100,5 +106,6 @@ class ShowCourseTutor {
     documentId = json['document_id'];
     studentCount =
         json['student_list'] != null ? json['student_list'].length : 0;
+    courseType = json['course_type'];
   }
 }

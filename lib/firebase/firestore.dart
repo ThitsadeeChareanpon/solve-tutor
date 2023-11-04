@@ -137,6 +137,63 @@ class FirestoreService {
     }
   }
 
+  Future<List> getDocumentsWithMultipleWheres(List<Map<String, dynamic>> conditions) async {
+    try {
+      Query query = collection;
+
+      for (var condition in conditions) {
+        final field = condition['field'];
+        final operator = condition['operator'];
+        final value = condition['value'];
+
+        switch (operator) {
+          case '==':
+            query = query.where(field, isEqualTo: value);
+            break;
+          case '!=':
+            query = query.where(field, isNotEqualTo: value);
+            break;
+          case '<':
+            query = query.where(field, isLessThan: value);
+            break;
+          case '>':
+            query = query.where(field, isGreaterThan: value);
+            break;
+          case '<=':
+            query = query.where(field, isLessThanOrEqualTo: value);
+            break;
+          case '>=':
+            query = query.where(field, isGreaterThanOrEqualTo: value);
+            break;
+          case 'array-contains':
+            query = query.where(field, arrayContains: value);
+            break;
+          case 'array-contains-any':
+            query = query.where(field, arrayContainsAny: value);
+            break;
+          case '??':
+            query = query.where(field, isNull: value);
+            break;
+          default:
+            throw Exception('Unsupported operator: $operator');
+        }
+      }
+
+      final querySnapshot = await query.get();
+      final documents = [];
+      if (querySnapshot.docs.isEmpty) {
+        return documents;
+      }
+      querySnapshot.docs.forEach((doc) {
+        documents.add({'id': doc.id, 'data': doc.data()});
+      });
+      return documents;
+    } catch (error) {
+      log('Error querying documents: $error');
+      throw Exception('Failed to query documents');
+    }
+  }
+
   Future<bool> updateDocumentById(
       String id, Map<String, dynamic> data, String user) async {
     try {
