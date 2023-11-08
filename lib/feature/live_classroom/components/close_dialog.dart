@@ -45,21 +45,16 @@ Future<void> showCloseDialog(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     SizedBox(
-                      width: 185,
+                      width: Responsive.isMobile(context) ? 100 : 185,
                       height: 40,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: CustomColors.redF44336,
                           shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(8.0), // <-- Radius
-                          ), // NEW
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
                         ),
                         onPressed: () {
-                          // SystemChrome.setPreferredOrientations([
-                          //   DeviceOrientation.portraitUp,
-                          //   DeviceOrientation.portraitDown,
-                          // ]);
                           Navigator.of(context).pop();
                           onConfirm(); // Execute the confirmation function
                         },
@@ -67,7 +62,7 @@ Future<void> showCloseDialog(
                       ),
                     ),
                     SizedBox(
-                      width: 185,
+                      width: Responsive.isMobile(context) ? 100 : 185,
                       height: 40,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
@@ -90,7 +85,7 @@ Future<void> showCloseDialog(
                       ),
                     ),
                   ],
-                )
+                ),
               ],
             ),
           ),
