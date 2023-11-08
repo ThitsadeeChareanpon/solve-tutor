@@ -295,7 +295,7 @@ class _ManageLiveCoursePageState extends State<ManageLiveCoursePage> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(30),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(10),
@@ -311,12 +311,11 @@ class _ManageLiveCoursePageState extends State<ManageLiveCoursePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: SizedBox(
-                child: Image.asset(
-                  image,
-                  fit: BoxFit.contain,
-                ),
+            SizedBox(
+              height: 60,
+              child: Image.asset(
+                image,
+                fit: BoxFit.contain,
               ),
             ),
             const SizedBox(height: 20),
@@ -332,7 +331,7 @@ class _ManageLiveCoursePageState extends State<ManageLiveCoursePage> {
                           style: const TextStyle(
                             color: appTextPrimaryColor,
                             fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                            fontSize: 15,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,

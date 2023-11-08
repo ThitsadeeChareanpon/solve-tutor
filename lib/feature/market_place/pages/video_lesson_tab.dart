@@ -423,39 +423,58 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
   }
 
   _bodyBuilderPAD(Lessons? lesson) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-      color: CustomColors.white,
-      child: Column(
-        children: [
-          Text(
-            'บันทึกบทเรียนด้วย SOLVE PAD',
-            style: CustomStyles.bold22Black363636,
-          ),
-          const SizedBox(height: 20),
-          Text(
-            'แต่ละครั้งสามารถ คุณบันทึกบทเรียน',
-            style: DefaultTextStyle.of(context).style,
-            textAlign: TextAlign.center,
-          ),
-          Text(
-            'ได้สูงสุด 30 นาที',
-            style:
-                CustomStyles.med16Green.copyWith(fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-          Text(
-            'หน้าจอขณะบันทึกจะถูกเปลี่ยนเป็นแนวนอน',
-            textAlign: TextAlign.center,
-            style: CustomStyles.med14Gray878787,
-          ),
-          const SizedBox(height: 10),
-          if (!Responsive.isMobile(context)) _buttonRecordSolvepad(lesson!)
-        ],
-      ),
-    );
+    if (lesson?.media != null && lesson?.media != '') {
+      return Container(
+        width: double.infinity,
+        margin: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+        color: CustomColors.white,
+        child: Column(
+          children: [
+            Text(
+              'ดูบทเรียนที่คุณบันทึกไว้',
+              style: CustomStyles.bold22Black363636,
+            ),
+            const SizedBox(height: 20),
+            _buttonViewSolvepad(lesson!)
+          ],
+        ),
+      );
+    } else {
+      return Container(
+        width: double.infinity,
+        margin: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+        color: CustomColors.white,
+        child: Column(
+          children: [
+            Text(
+              'บันทึกบทเรียนด้วย SOLVEPAD',
+              style: CustomStyles.bold22Black363636,
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'แต่ละครั้งสามารถ คุณบันทึกบทเรียน',
+              style: DefaultTextStyle.of(context).style,
+              textAlign: TextAlign.center,
+            ),
+            Text(
+              'ได้สูงสุด 30 นาที',
+              style:
+                  CustomStyles.med16Green.copyWith(fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            Text(
+              'หน้าจอขณะบันทึกจะถูกเปลี่ยนเป็นแนวนอน',
+              textAlign: TextAlign.center,
+              style: CustomStyles.med14Gray878787,
+            ),
+            const SizedBox(height: 10),
+            if (!Responsive.isMobile(context)) _buttonRecordSolvepad(lesson!)
+          ],
+        ),
+      );
+    }
   }
 
 // /medias/upload-files-course
@@ -623,6 +642,9 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
         ),
       ),
       onPressed: () async {
+        setState(() {
+          lesson.isExpanded = false;
+        });
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -635,6 +657,38 @@ class _VideoLessonTabState extends State<VideoLessonTab> {
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: CustomColors.redF44336,
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+      ),
+    );
+  }
+
+  Widget _buttonViewSolvepad(Lessons lesson) {
+    return ElevatedButton.icon(
+      icon: const Icon(
+        Icons.play_arrow,
+        size: 20,
+        color: Colors.white,
+      ),
+      label: Text(
+        "ดูคอร์สที่บันทึกไว้",
+        style: CustomStyles.med14White.copyWith(
+          color: CustomColors.white,
+        ),
+      ),
+      onPressed: () async {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => RecordCourse(
+              lesson: lesson,
+              course: courseController.courseData!,
+            ),
+          ),
+        );
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: CustomColors.greenPrimary,
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       ),

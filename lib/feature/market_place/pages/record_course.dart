@@ -157,6 +157,9 @@ class _RecordCourseState extends State<RecordCourse> {
 
   // ---------- VARIABLE: Solve Size
   Size mySolvepadSize = const Size(1059.0, 547.0);
+  Size tutorSolvepadSize = const Size(1059.0, 547.0);
+  double tutorImageWidth = 0;
+  double tutorExtraSpaceX = 0;
   double sheetImageRatio = 0.708;
   double studentImageWidth = 0;
   double studentExtraSpaceX = 0;
@@ -186,6 +189,8 @@ class _RecordCourseState extends State<RecordCourse> {
   bool isRecordEnd = false;
   bool isReplaying = false;
   bool isReplayEnd = true;
+  bool isReplayLoading = false;
+  bool isViewOnly = false;
 
   // ---------- VARIABLE: recorder
   Codec _codec = Codec.aacMP4;
@@ -231,6 +236,7 @@ class _RecordCourseState extends State<RecordCourse> {
     initAudio();
     initPagesData();
     initPagingBtn();
+    checkMediaExistence();
   }
 
   void initAudio() {
@@ -283,6 +289,45 @@ class _RecordCourseState extends State<RecordCourse> {
         setState(() {});
       });
     }
+  }
+
+  void checkMediaExistence() {
+    if (widget.lesson.media != null && widget.lesson.media != '') {
+      setState(() {
+        isRecordEnd = true;
+        _formattedElapsedTime = 'Replay record';
+        isViewOnly = true;
+        isReplayLoading = true;
+      });
+      getRecordedSolvepad();
+    }
+  }
+
+  void getRecordedSolvepad() async {
+    var downloadData =
+        await firebaseService.getMarketCourseSolvepadData(widget.lesson.media!);
+    String voiceUrl =
+        await firebaseService.getMarketCourseAudioFile(downloadData[1]);
+    log('download success');
+    _data = downloadData[0];
+    setState(() {
+      _mPath = voiceUrl;
+      _mPlaybackReady = true;
+      tutorSolvepadSize = Size(_data['solvepadWidth'], _data['solvepadHeight']);
+      replayDuration = _data['metadata']['duration'];
+      isReplayLoading = false;
+    });
+    initSolvepadScaling();
+  }
+
+  void initSolvepadScaling() {
+    tutorImageWidth = tutorSolvepadSize.height * sheetImageRatio;
+    tutorExtraSpaceX = (tutorSolvepadSize.width - tutorImageWidth) / 2;
+    myImageWidth = mySolvepadSize.height * sheetImageRatio;
+    myExtraSpaceX = (mySolvepadSize.width - myImageWidth) / 2;
+    scaleImageX = myImageWidth / tutorImageWidth;
+    scaleX = mySolvepadSize.width / tutorSolvepadSize.width;
+    scaleY = mySolvepadSize.height / tutorSolvepadSize.height;
   }
 
   @override
@@ -537,7 +582,7 @@ class _RecordCourseState extends State<RecordCourse> {
             'y': double.parse(action[0].dy.toStringAsFixed(2)),
             'time': action[1],
           });
-        } else if (action[0] is DrawingMode) {
+        } else if (action[0] is String) {
           if (moveActions.isNotEmpty) {
             formattedActions.add({
               'action': 'moves',
@@ -702,7 +747,7 @@ class _RecordCourseState extends State<RecordCourse> {
       case 'stop-recording':
         break;
       case 'scroll-zoom':
-        List<Map<String, dynamic>> scrollAction = action['data'];
+        List<dynamic> scrollAction = action['data'];
         while (currentReplayScrollIndex < scrollAction.length) {
           await Future.delayed(const Duration(milliseconds: 0), () {
             if (solveStopwatch.elapsed.inMilliseconds >=
@@ -718,7 +763,7 @@ class _RecordCourseState extends State<RecordCourse> {
         currentReplayScrollIndex = 0;
         break;
       case 'drawing':
-        List<Map<String, dynamic>> points = action['data']['points'];
+        List<dynamic> points = action['data']['points'];
         while (currentReplayPointIndex < points.length) {
           await Future.delayed(const Duration(milliseconds: 0), () {
             if (solveStopwatch.elapsed.inMilliseconds >=
@@ -762,7 +807,7 @@ class _RecordCourseState extends State<RecordCourse> {
             if (eraseAction['mode'] == "pen") {
               pointStack = _penPoints[_currentPage];
             } // pen
-            else if (eraseAction['mode'] == "highlighter") {
+            else if (eraseAction['mode'] == "high") {
               pointStack = _highlighterPoints[_currentPage];
             } // high
             setState(() {
@@ -816,7 +861,6 @@ class _RecordCourseState extends State<RecordCourse> {
   Future<void> openTheRecorder() async {
     if (!kIsWeb) {
       var status = await Permission.microphone.request();
-      log("sound!!!!!!!!!!!!!!!!!!! : $status");
       if (status != PermissionStatus.granted) {
         throw RecordingPermissionException('Microphone permission not granted');
       }
@@ -1524,17 +1568,23 @@ class _RecordCourseState extends State<RecordCourse> {
                     ? CustomColors.gray363636
                     : CustomColors.redFF4201,
                 shape: BoxShape.circle),
-            child: isReplaying
-                ? const Icon(
-                    Icons.pause,
-                    size: 20,
-                    color: CustomColors.white,
+            child: isReplayLoading
+                ? Image.asset(
+                    ImageAssets.loading,
+                    height: 44,
+                    width: 44,
                   )
-                : const Icon(
-                    Icons.play_arrow,
-                    size: 20,
-                    color: Colors.white,
-                  ),
+                : isReplaying
+                    ? const Icon(
+                        Icons.pause,
+                        size: 20,
+                        color: CustomColors.white,
+                      )
+                    : const Icon(
+                        Icons.play_arrow,
+                        size: 20,
+                        color: Colors.white,
+                      ),
           ),
         ),
       ),
@@ -1756,66 +1806,70 @@ class _RecordCourseState extends State<RecordCourse> {
             ),
           ),
           Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                SizedBox(
-                  width: 200,
-                  height: 40,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isRecordEnd
-                          ? CustomColors.greenPrimary
-                          : CustomColors.inactivePagingBtn,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0), // <-- Radius
-                      ), // NEW
-                    ),
-                    onPressed: () async {
-                      if (isRecordEnd) {
-                        await Alert.showOverlay(
-                          asyncFunction: () async {
-                            var courseController =
-                                context.read<CourseController>();
-                            await writeToFile('solvepad.txt', _data);
-                            List uploadUrl =
-                                await firebaseService.uploadMarketSolvepad(
-                                    '${widget.course.id!}_${widget.lesson.lessonId.toString()}');
-                            String solvepadId = await firebaseService
-                                .writeSolvepadData(uploadUrl[0], uploadUrl[1]);
-                            widget.lesson.media = solvepadId;
-                            await courseController.updateCourseDetails(
-                                courseController.courseData);
+            child: isViewOnly
+                ? const SizedBox()
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      SizedBox(
+                        width: 200,
+                        height: 40,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: isRecordEnd
+                                ? CustomColors.greenPrimary
+                                : CustomColors.inactivePagingBtn,
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(8.0), // <-- Radius
+                            ), // NEW
+                          ),
+                          onPressed: () async {
+                            if (isRecordEnd) {
+                              await Alert.showOverlay(
+                                asyncFunction: () async {
+                                  var courseController =
+                                      context.read<CourseController>();
+                                  await writeToFile('solvepad.txt', _data);
+                                  List uploadUrl = await firebaseService
+                                      .uploadMarketSolvepad(
+                                          '${widget.course.id!}_${widget.lesson.lessonId.toString()}');
+                                  String solvepadId =
+                                      await firebaseService.writeSolvepadData(
+                                          uploadUrl[0], uploadUrl[1]);
+                                  widget.lesson.media = solvepadId;
+                                  await courseController.updateCourseDetails(
+                                      courseController.courseData);
+                                },
+                                context: context,
+                                loadingWidget: Alert.getOverlayScreen(),
+                              );
+                              if (!mounted) return;
+                              showSnackBar(context, 'อัพโหลดสำเร็จ');
+                            }
                           },
-                          context: context,
-                          loadingWidget: Alert.getOverlayScreen(),
-                        );
-                        if (!mounted) return;
-                        showSnackBar(context, 'อัพโหลดสำเร็จ');
-                      }
-                    },
-                    child: Row(
-                      children: [
-                        Text('อัพโหลด solvepad',
-                            style: CustomStyles.bold14White),
-                        S.w(8),
-                        Container(
-                          width: 3,
-                          height: 16,
-                          color: CustomColors.whitePrimary,
+                          child: Row(
+                            children: [
+                              Text('อัพโหลด solvepad',
+                                  style: CustomStyles.bold14White),
+                              S.w(8),
+                              Container(
+                                width: 3,
+                                height: 16,
+                                color: CustomColors.whitePrimary,
+                              ),
+                              S.w(2),
+                              const Icon(
+                                Icons.arrow_forward,
+                                color: CustomColors.whitePrimary,
+                                size: 20.0,
+                              ),
+                            ],
+                          ),
                         ),
-                        S.w(2),
-                        const Icon(
-                          Icons.arrow_forward,
-                          color: CustomColors.whitePrimary,
-                          size: 20.0,
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
           ),
           S.w(16.0),
         ],

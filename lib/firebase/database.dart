@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'package:http/http.dart' as http;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -64,6 +66,35 @@ class FirebaseService {
     final String voiceUrl = await voiceSnapshot.ref.getDownloadURL();
 
     return [solvepadUrl, voiceUrl];
+  }
+
+  Future<dynamic> getMarketCourseSolvepadData(String solvepadId) async {
+    final collectionRef = db.collection('solvepad');
+    String voiceUrl = '';
+    Map<String, dynamic> solvepadData;
+
+    final directory = await getTemporaryDirectory();
+    final file = File('${directory.path}/downloadedSolvepad.txt');
+
+    final event = await collectionRef.doc(solvepadId).get();
+    voiceUrl = (event.data() as Map)['voice'];
+    var solvepadUrl = (event.data() as Map)['solvepad'];
+    final url = Uri.parse(solvepadUrl);
+    final response = await http.get(url);
+    await file.writeAsBytes(response.bodyBytes);
+    var fileContent = await file.readAsString();
+    solvepadData = json.decode(fileContent);
+
+    return [solvepadData, voiceUrl];
+  }
+
+  Future<String> getMarketCourseAudioFile(fileURL) async {
+    final directory = await getTemporaryDirectory();
+    final file = File('${directory.path}/solve_voice.mp4');
+    final url = Uri.parse(fileURL);
+    final response = await http.get(url);
+    await file.writeAsBytes(response.bodyBytes);
+    return file.path;
   }
 
   Future<String> uploadLiveSolvepad(String fileName) async {
