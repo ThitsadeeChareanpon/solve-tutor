@@ -193,7 +193,8 @@ class _UpdateCourseTabState extends State<UpdateCourseTab>
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          'แก้ไขล่าสุด: ${FormatDate.dt(dt)} ',
+          'แก้ไขล่าสุด: \n'
+          '${FormatDate.dt(dt)} ',
           style: CustomStyles.med12gray878787,
         ),
       ],

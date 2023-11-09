@@ -45,7 +45,7 @@ Future<void> showCloseDialog(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     SizedBox(
-                      width: Responsive.isMobile(context) ? 100 : 185,
+                      width: Responsive.isMobileLandscape(context) ? 100 : 185,
                       height: 40,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
