@@ -580,8 +580,9 @@ class _ReviewLessonState extends State<ReviewLesson>
             setState(() {
               try {
                 setState(() {
-                  pointStack.removeRange(
-                      eraseAction['prev'], eraseAction['next']);
+                  var start = eraseAction['prev'].clamp(0, pointStack.length);
+                  var end = eraseAction['next'].clamp(start, pointStack.length);
+                  pointStack.removeRange(start, end);
                 });
               } catch (e) {
                 if (e is RangeError) {
@@ -646,7 +647,9 @@ class _ReviewLessonState extends State<ReviewLesson>
               pointStack = _replayHighlighterPoints[_tutorCurrentPage];
             } // erase high
             setState(() {
-              pointStack.removeRange(eraseAction['prev'], eraseAction['next']);
+              var start = eraseAction['prev'].clamp(0, pointStack.length);
+              var end = eraseAction['next'].clamp(start, pointStack.length);
+              pointStack.removeRange(start, end);
             });
           } // erase
         }
