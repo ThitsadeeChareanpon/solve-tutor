@@ -983,14 +983,20 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     _meeting.on(
       Events.roomJoined,
       () {
-        setState(() {
-          meeting = _meeting;
-          _joined = true;
-          setLiveCourseLoadState();
-          updateMeetingCode();
-          // meeting.startRecording(config: {"mode": "audio"});
-          initWss();
-        });
+        if(courseType == 'live') {
+          setState(() {
+            meeting = _meeting;
+            _joined = true;
+            setLiveCourseLoadState();
+            updateMeetingCode();
+            // meeting.startRecording(config: {"mode": "audio"});
+            initWss();
+          });
+        }else{
+          setState(() {
+            meeting = _meeting;
+          });
+        }
       },
     );
 
