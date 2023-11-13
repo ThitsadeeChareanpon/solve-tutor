@@ -123,11 +123,12 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                   Row(
                     children: [
                       mobileCard(
-                          'assets/images/menu_qa.png',
-                          'ตอบคำถามนักเรียน',
-                          'อธิบายนักเรียนด้วยนวัตกรรม virtual one-on-one tutoring',
-                          'left',
-                          const MaintenancePage()),
+                        'assets/images/menu_qa.png',
+                        'ตอบคำถามนักเรียน',
+                        'อธิบายนักเรียนด้วยนวัตกรรม virtual one-on-one tutoring',
+                        'left',
+                        const MaintenancePage(),
+                      ),
                     ],
                   ),
                 ],

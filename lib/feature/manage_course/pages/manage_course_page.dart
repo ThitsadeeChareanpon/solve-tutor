@@ -67,10 +67,10 @@ class _ManageCoursePageState extends State<ManageCoursePage>
                   const SizedBox(height: 10),
                 ],
                 if (Responsive.isDesktop(context)) ...[
+                  const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const SizedBox(height: 20),
                       Padding(
                         padding: const EdgeInsets.only(right: 32.0),
                         child: SizedBox(
