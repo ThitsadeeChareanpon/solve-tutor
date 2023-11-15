@@ -241,8 +241,8 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
                 S.h(10),
                 _timeJoin(),
                 S.h(10),
-                widget.course.courseType == 'live' ? SizedBox(height: 100, child: _microphone()) : const SizedBox(),
-                widget.course.courseType == 'live' ? S.h(10) : const SizedBox(),
+                SizedBox(height: 100, child: _microphone()),
+                S.h(10),
                 _tutorTitle(),
                 S.h(30),
                 isActive
@@ -258,8 +258,8 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
                 S.h(10),
                 isActive ? _buttonJoinRoom() : _buttonNotYet(),
               ] else ...[
-                widget.course.courseType == 'live' ? SizedBox(height: 70, child: _microphone()) : const SizedBox(),
-                widget.course.courseType == 'live' ? S.h(10) : const SizedBox(),
+                SizedBox(height: 70, child: _microphone()),
+                S.h(10),
                 if (!isActive)
                   Countdown(
                     courseStart: widget.course.start!,

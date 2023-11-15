@@ -63,7 +63,6 @@ class TutorLiveClassroom extends StatefulWidget {
 
 class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   // Conference
-  bool isAudioMode = true;
   bool isRecordingOn = false;
   bool isRecordingLoading = false;
   int recordIndex = 0;
@@ -333,16 +332,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   void startDataPreparation() async {
     await initPagesData();
     initMessageHandler();
-    if (courseType == 'live') {
-      initConference();
-    } else {
-      setState(() {
-        _joined = true;
-        setLiveCourseLoadState();
-        updateMeetingCode();
-        initWss();
-      });
-    }
+    initConference();
   }
 
   void mockInitPageData() {
@@ -383,11 +373,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       }
       courseName = courseController.courseData!.courseName!;
       courseType = courseController.courseData!.courseType!;
-      if (courseType != 'live') {
-        setState(() {
-          isAudioMode = false;
-        });
-      }
       micEnable = widget.micEnabled;
       isSheetReady = true;
       setLiveCourseLoadState();
@@ -768,20 +753,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     }
   }
 
-  void switchAudioMode() {
-    if (isAudioMode) {
-      meeting.end();
-      sendMessage('AudioMode:OFF', solveStopwatch.elapsed.inMilliseconds);
-    } else {
-      initConference();
-      sendMessage('AudioMode:${widget.meetingId}',
-          solveStopwatch.elapsed.inMilliseconds);
-    }
-    setState(() {
-      isAudioMode = !isAudioMode;
-    });
-  }
-
   void changeSolvepadScaling(double solvepadWidth, double solvepadHeight) {
     setState(() {
       studentSolvepadSize = Size(solvepadWidth, solvepadHeight);
@@ -983,7 +954,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     _meeting.on(
       Events.roomJoined,
       () {
-        if (courseType == 'live') {
           setState(() {
             meeting = _meeting;
             _joined = true;
@@ -992,11 +962,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             // meeting.startRecording(config: {"mode": "audio"});
             initWss();
           });
-        } else {
-          setState(() {
-            meeting = _meeting;
-          });
-        }
       },
     );
 
@@ -1207,7 +1172,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
         .collection('course_live')
         .doc(widget.courseId)
         .update({
-      'currentMeetingCode': courseType == 'live' ? meeting.id : 'hybrid'
+      'currentMeetingCode': meeting.id
     });
   }
 
@@ -2117,9 +2082,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                           solveStopwatch.elapsed.inMilliseconds,
                         );
                         if (!widget.isMock) {
-                          if (isAudioMode) {
-                            meeting.end();
-                          }
+                          meeting.end();
                           closeChanel();
                           FirebaseFirestore.instance
                               .collection('course_live')
@@ -2477,8 +2440,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                 ),
                 S.w(8),
                 statusTouchModeIcon(),
-                courseType == 'live' ? const SizedBox() : S.w(8),
-                courseType == 'live' ? const SizedBox() : audioModeIcon(),
               ],
             ),
           ),
@@ -2487,77 +2448,73 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                isAudioMode
-                    ? Material(
-                        child: InkWell(
-                          onTap: () async {
-                            if (!isRecordingLoading) {
-                              if (!isRecordingOn) {
-                                await meeting
-                                    .startRecording(config: {"mode": "audio"});
-                              } else {
-                                await meeting.stopRecording();
-                              }
-                            }
-                          },
-                          // child: Image.asset(
-                          //   isRecordingLoading
-                          //       ? ImageAssets.loading
-                          //       : isRecordingOn
-                          //           ? ImageAssets.recordDis
-                          //           : ImageAssets.recordEnable,
-                          //   height: 44,
-                          //   width: 44,
-                          // ),
-                          child: isRecordingLoading
-                              ? Image.asset(
-                                  ImageAssets.loading,
-                                  height: 44,
-                                  width: 44,
-                                )
-                              : Container(
-                                  // margin: const EdgeInsets.symmetric(vertical: 14.0),
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                      color: isRecordingOn
-                                          ? CustomColors.gray363636
-                                          : CustomColors.redFF4201,
-                                      shape: BoxShape.circle),
-                                  child: Icon(
-                                    isRecordingOn
-                                        ? Icons.stop
-                                        : Icons.radio_button_checked_rounded,
-                                    size: 20,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                        ),
-                      )
-                    : const Material(),
-                isAudioMode ? S.w(defaultPadding) : const SizedBox(),
-                isAudioMode
-                    ? Material(
-                        child: InkWell(
-                          onTap: () {
-                            setState(() {
-                              micEnable = !micEnable;
-                            });
-                            if (micEnable && !widget.isMock) {
-                              meeting.unmuteMic();
-                            } else {
-                              meeting.muteMic();
-                            }
-                          },
-                          child: Image.asset(
-                            micEnable
-                                ? ImageAssets.micEnable
-                                : ImageAssets.micDis,
+                Material(
+                  child: InkWell(
+                    onTap: () async {
+                      if (!isRecordingLoading) {
+                        if (!isRecordingOn) {
+                          await meeting
+                              .startRecording(config: {"mode": "audio"});
+                        } else {
+                          await meeting.stopRecording();
+                        }
+                      }
+                    },
+                    // child: Image.asset(
+                    //   isRecordingLoading
+                    //       ? ImageAssets.loading
+                    //       : isRecordingOn
+                    //           ? ImageAssets.recordDis
+                    //           : ImageAssets.recordEnable,
+                    //   height: 44,
+                    //   width: 44,
+                    // ),
+                    child: isRecordingLoading
+                        ? Image.asset(
+                            ImageAssets.loading,
                             height: 44,
                             width: 44,
+                          )
+                        : Container(
+                            // margin: const EdgeInsets.symmetric(vertical: 14.0),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                                color: isRecordingOn
+                                    ? CustomColors.gray363636
+                                    : CustomColors.redFF4201,
+                                shape: BoxShape.circle),
+                            child: Icon(
+                              isRecordingOn
+                                  ? Icons.stop
+                                  : Icons.radio_button_checked_rounded,
+                              size: 20,
+                              color: Colors.white,
+                            ),
                           ),
-                        ),
-                      )
-                    : const Material(),
+                  ),
+                ),
+                S.w(defaultPadding),
+                Material(
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        micEnable = !micEnable;
+                      });
+                      if (micEnable && !widget.isMock) {
+                        meeting.unmuteMic();
+                      } else {
+                        meeting.muteMic();
+                      }
+                    },
+                    child: Image.asset(
+                      micEnable
+                          ? ImageAssets.micEnable
+                          : ImageAssets.micDis,
+                      height: 44,
+                      width: 44,
+                    ),
+                  ),
+                ),
                 // S.w(defaultPadding),
                 // InkWell(
                 //   onTap: () {
@@ -3511,9 +3468,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                     solveStopwatch.elapsed.inMilliseconds,
                   );
                   if (!widget.isMock) {
-                    if (isAudioMode) {
-                      meeting.end();
-                    }
+                    meeting.end();
                     closeChanel();
                     FirebaseFirestore.instance
                         .collection('course_live')
@@ -3591,50 +3546,45 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             //     width: 44,
             //   ),
             // ),
-            isAudioMode ? S.h(8) : const SizedBox(),
-            isAudioMode
-                ? InkWell(
-                    onTap: () async {
-                      if (!isRecordingLoading) {
-                        if (!isRecordingOn) {
-                          await meeting
-                              .startRecording(config: {"mode": "audio"});
-                        } else {
-                          await meeting.stopRecording();
-                        }
-                      }
-                    },
-                    child: Image.asset(
-                      isRecordingLoading
-                          ? ImageAssets.loading
-                          : isRecordingOn
-                              ? ImageAssets.recordDis
-                              : ImageAssets.recordEnable,
-                      height: 44,
-                      width: 44,
-                    ),
-                  )
-                : const SizedBox(),
-            isAudioMode ? S.h(8) : const SizedBox(),
-            isAudioMode
-                ? InkWell(
-                    onTap: () {
-                      setState(() {
-                        micEnable = !micEnable;
-                      });
-                      if (micEnable && !widget.isMock) {
-                        meeting.unmuteMic();
-                      } else {
-                        meeting.muteMic();
-                      }
-                    },
-                    child: Image.asset(
-                      micEnable ? ImageAssets.micEnable : ImageAssets.micDis,
-                      width: 44,
-                    ),
-                  )
-                : const SizedBox(),
-            audioModeIcon(),
+            S.h(8),
+            InkWell(
+              onTap: () async {
+                if (!isRecordingLoading) {
+                  if (!isRecordingOn) {
+                    await meeting
+                        .startRecording(config: {"mode": "audio"});
+                  } else {
+                    await meeting.stopRecording();
+                  }
+                }
+              },
+              child: Image.asset(
+                isRecordingLoading
+                    ? ImageAssets.loading
+                    : isRecordingOn
+                        ? ImageAssets.recordDis
+                        : ImageAssets.recordEnable,
+                height: 44,
+                width: 44,
+              ),
+            ),
+            S.h(8),
+            InkWell(
+              onTap: () {
+                setState(() {
+                  micEnable = !micEnable;
+                });
+                if (micEnable && !widget.isMock) {
+                  meeting.unmuteMic();
+                } else {
+                  meeting.muteMic();
+                }
+              },
+              child: Image.asset(
+                micEnable ? ImageAssets.micEnable : ImageAssets.micDis,
+                width: 44,
+              ),
+            ),
           ],
         ),
       ),
@@ -4572,21 +4522,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
         _isStylusActive
             ? 'assets/images/stylus-icon.png'
             : 'assets/images/touch-icon.png',
-        height: 44,
-        width: 44,
-      ),
-    );
-  }
-
-  Widget audioModeIcon() {
-    return InkWell(
-      onTap: () {
-        switchAudioMode();
-      },
-      child: Image.asset(
-        isAudioMode
-            ? 'assets/images/power-button-icon.png'
-            : 'assets/images/video-conference-icon.png',
         height: 44,
         width: 44,
       ),
