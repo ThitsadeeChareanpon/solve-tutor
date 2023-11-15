@@ -983,7 +983,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     _meeting.on(
       Events.roomJoined,
       () {
-        if(courseType == 'live') {
+        if (courseType == 'live') {
           setState(() {
             meeting = _meeting;
             _joined = true;
@@ -992,7 +992,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
             // meeting.startRecording(config: {"mode": "audio"});
             initWss();
           });
-        }else{
+        } else {
           setState(() {
             meeting = _meeting;
           });
@@ -3505,7 +3505,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
           children: [
             InkWell(
               onTap: () {
-                showCloseDialog(context, () {
+                showCloseDialog(context, () async {
                   sendMessage(
                     'EndMeeting',
                     solveStopwatch.elapsed.inMilliseconds,
@@ -3519,7 +3519,10 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                         .collection('course_live')
                         .doc(widget.courseId)
                         .update({'currentMeetingCode': ''});
+                    await updateActualTime();
+                    await endSolvepadDataCollection();
                   }
+                  if (!mounted) return;
                   Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
@@ -3631,6 +3634,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                     ),
                   )
                 : const SizedBox(),
+            audioModeIcon(),
           ],
         ),
       ),
