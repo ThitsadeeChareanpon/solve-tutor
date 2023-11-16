@@ -1105,19 +1105,20 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     });
 
     _meeting.on(
-        Events.error,
-        (error) => {
-              log('meeting function error'),
-              log(error['name'].toString()),
-              log(error['message'].toString()),
-              if (error['name'] == 'START_RECORDING_FAILED')
-                {
-                  showSnackBar(
-                      context,
-                      'ERROR_RECORDING_FAILED: เกิดปัญหาทางเทคนิค ไม่สามารถบันทึกได้',
-                      'red'),
-                }
-            });
+      Events.error,
+      (error) => {
+        log('meeting function error'),
+        log(error['name'].toString()),
+        log(error['message'].toString()),
+        if (error['name'] == 'START_RECORDING_FAILED')
+          {
+            showSnackBar(
+                context,
+                'ERROR_RECORDING_FAILED: เกิดปัญหาทางเทคนิค ไม่สามารถบันทึกได้',
+                'red'),
+          }
+      },
+    );
   }
 
   Future<void> fetchRecording(meetingID) async {
