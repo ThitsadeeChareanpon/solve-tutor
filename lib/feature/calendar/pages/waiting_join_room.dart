@@ -167,7 +167,7 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
       calendars[indexToUpdate].actualStart = now;
     }
     if (!mounted) return;
-    await courseController.updateCourseDetails(
+    await courseController.updateSessionDetails(
         context, courseController.courseData);
   }
 

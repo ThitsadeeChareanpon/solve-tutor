@@ -471,6 +471,19 @@ class CourseLiveController extends ChangeNotifier {
     }
   }
 
+  Future<void> updateSessionDetails(
+      BuildContext context, CourseModel? courseData) async {
+    try {
+      if (courseData == null) return;
+      if (courseData.id?.isNotEmpty == true &&
+          courseData.tutorId?.isNotEmpty == true) {
+        await CourseLiveService().updateCourseLiveDetails(courseData);
+      }
+    } catch (error) {
+      debugPrint('updateCourseDetails error: $error');
+    }
+  }
+
   Future<OrderClassModel> createMarketOrder(
     String courseId,
     String courseTitle,

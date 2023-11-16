@@ -886,7 +886,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
 
     if (indexToUpdate != -1) {
       calendars[indexToUpdate].reviewFile = solvepadUrl;
-      await courseController.updateCourseDetails(
+      await courseController.updateSessionDetails(
           context, courseController.courseData);
     }
   }
@@ -1112,7 +1112,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
 
     if (indexToUpdate != -1) {
       calendars[indexToUpdate].audioFile = recordList;
-      await courseController.updateCourseDetails(
+      await courseController.updateSessionDetails(
           context, courseController.courseData);
     }
   }
@@ -1135,7 +1135,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
               60000)
           .ceil();
       calendars[indexToUpdate].liveDuration = duration;
-      await courseController.updateCourseDetails(
+      await courseController.updateSessionDetails(
           context, courseController.courseData);
       if (courseType == 'live') {
         int students = courseController.courseData?.studentIds?.length ?? 0;
