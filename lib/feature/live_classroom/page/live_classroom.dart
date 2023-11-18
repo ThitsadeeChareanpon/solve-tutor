@@ -73,7 +73,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
   Stream? shareStream;
   Stream? videoStream;
   Stream? audioStream;
-  Stream? remoteParticipantShareStream;
   bool fullScreen = false;
 
   // WSS
@@ -545,7 +544,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       "scrollY": currentScrollY,
       "scale": currentScale,
     });
-    log(_data.toString());
   }
 
   void initMessageHandler() {
@@ -954,14 +952,14 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     _meeting.on(
       Events.roomJoined,
       () {
-          setState(() {
-            meeting = _meeting;
-            _joined = true;
-            setLiveCourseLoadState();
-            updateMeetingCode();
-            // meeting.startRecording(config: {"mode": "audio"});
-            initWss();
-          });
+        setState(() {
+          meeting = _meeting;
+          _joined = true;
+          setLiveCourseLoadState();
+          updateMeetingCode();
+          // meeting.startRecording(config: {"mode": "audio"});
+          initWss();
+        });
       },
     );
 
@@ -1057,18 +1055,6 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
       }
     });
 
-    // Called when presenter is changed
-    _meeting.on(Events.presenterChanged, (_activePresenterId) {
-      Participant? activePresenterParticipant =
-          _meeting.participants[_activePresenterId];
-
-      // Get Share Stream
-      Stream? _stream = activePresenterParticipant?.streams.values
-          .singleWhere((e) => e.kind == "share");
-
-      setState(() => remoteParticipantShareStream = _stream);
-    });
-
     _meeting.on(
       Events.error,
       (error) => {
@@ -1090,6 +1076,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     try {
       List recordList = [];
       var record = await fetchRecordings(widget.token, meetingID);
+      log('record fetched: $record');
       recordIndex += 1;
       record.forEach((r) {
         if (r['file'] != null) {
@@ -1172,9 +1159,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
     FirebaseFirestore.instance
         .collection('course_live')
         .doc(widget.courseId)
-        .update({
-      'currentMeetingCode': meeting.id
-    });
+        .update({'currentMeetingCode': meeting.id});
   }
 
   void updateRatio(String url) {
@@ -2508,9 +2493,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
                       }
                     },
                     child: Image.asset(
-                      micEnable
-                          ? ImageAssets.micEnable
-                          : ImageAssets.micDis,
+                      micEnable ? ImageAssets.micEnable : ImageAssets.micDis,
                       height: 44,
                       width: 44,
                     ),
@@ -3552,8 +3535,7 @@ class _LiveClassroomSolvepadState extends State<TutorLiveClassroom> {
               onTap: () async {
                 if (!isRecordingLoading) {
                   if (!isRecordingOn) {
-                    await meeting
-                        .startRecording(config: {"mode": "audio"});
+                    await meeting.startRecording(config: {"mode": "audio"});
                   } else {
                     await meeting.stopRecording();
                   }
