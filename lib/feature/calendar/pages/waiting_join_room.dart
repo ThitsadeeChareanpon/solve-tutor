@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
@@ -94,6 +95,7 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
         try {
           var meetingID = await createMeeting(_token);
           if (mounted) {
+            log('meeting ID: $meetingID');
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -112,11 +114,13 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
             );
           }
         } catch (error) {
+          if (!mounted) return;
           showSnackBarMessage(
               message: 'ERROR ON CREATE ROOM ${error.toString()}',
               context: context);
         }
       } else {
+        if (!mounted) return;
         showAlertRecordingDialog(
           context,
           title: 'Solve Coin ไม่เพียงพอ',
