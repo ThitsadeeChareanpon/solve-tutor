@@ -1,5 +1,6 @@
 # Uncomment this line to define a global platform for your project
-# platform :ios, '11.0'
+source 'https://cdn.cocoapods.org/'
+platform :ios, '14.0'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
@@ -28,8 +29,8 @@ require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelpe
 flutter_ios_podfile_setup
 
 target 'Runner' do
-  use_frameworks!
-  use_modular_headers!
+  use_frameworks! :linkage => :static
+#   use_modular_headers!
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
@@ -90,4 +91,17 @@ post_install do |installer|
 
     end
   end
+  # --- VideoSDK fix: exclude macOS-only source file on iOS ------------
+  post_install do |installer|
+    installer.pods_project.targets.each do |t|
+      next unless t.name == 'videosdk_webrtc'
+      t.build_configurations.each do |cfg|
+        # Tell Xcode to ignore the file when compiling *any* build config
+        existing = cfg.build_settings['EXCLUDED_SOURCE_FILE_NAMES'] || ''
+        cfg.build_settings['EXCLUDED_SOURCE_FILE_NAMES'] =
+          (existing.split(' ') + ['FlutterRTCDesktopCapturer.m']).uniq.join(' ')
+      end
+    end
+  end
+  # -------------------------------------------------------------------
 end
