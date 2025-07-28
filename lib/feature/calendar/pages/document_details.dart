@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_reorderable_grid_view/entities/order_update_entity.dart';
+// import 'package:flutter_reorderable_grid_view/entities/order_update_entity.dart';
 import 'package:flutter_reorderable_grid_view/widgets/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:solve_tutor/feature/calendar/constants/constants.dart';
@@ -115,87 +115,87 @@ class _DocumentDetailsState extends State<DocumentDetails> {
                                   ],
                                 ),
                                 S.h(10),
-                                Expanded(
-                                  child: ReorderableBuilder(
-                                    enableDraggable: false,
-                                    scrollController: _scrollController,
-                                    automaticScrollExtent: 1.0,
-                                    onReorder: (List<OrderUpdateEntity>
-                                        orderUpdateEntities) {
-                                      for (final orderUpdateEntity
-                                          in orderUpdateEntities) {
-                                        final fruit = document
-                                            .document.data?.docFiles
-                                            ?.removeAt(
-                                                orderUpdateEntity.oldIndex);
-                                        document.document.data?.docFiles
-                                            ?.insert(orderUpdateEntity.newIndex,
-                                                fruit ?? '');
-                                      }
-                                    },
-                                    builder: (children) {
-                                      return GridView.count(
-                                        key: _gridViewKey,
-                                        crossAxisCount: 3,
-                                        childAspectRatio: 2 / 3,
-                                        mainAxisSpacing: 4,
-                                        crossAxisSpacing: 8,
-                                        children: children,
-                                      );
-                                    },
-                                    children: List.generate(
-                                      document.document.data?.docFiles
-                                              ?.length ??
-                                          0,
-                                      (index) => GestureDetector(
-                                        key: Key((index + 1).toString()),
-                                        onTap: () {
-                                          Navigator.of(context).push(
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      PreviewDocument(
-                                                        images: document
-                                                                .document
-                                                                .data
-                                                                ?.docFiles ??
-                                                            [],
-                                                        name: document
-                                                                .document
-                                                                .data
-                                                                ?.documentName ??
-                                                            '',
-                                                        index: index,
-                                                      )));
-                                        },
-                                        child: Container(
-                                          margin: const EdgeInsets.all(10.0),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius:
-                                                BorderRadius.circular(5.0),
-                                            border:
-                                                Border.all(color: Colors.grey),
-                                          ),
-                                          child: CachedNetworkImage(
-                                            width: double.infinity,
-                                            fit: BoxFit.fitWidth,
-                                            imageUrl: document
-                                                    .document.data?.docFiles
-                                                    ?.elementAt(index) ??
-                                                '',
-                                            placeholder: (context, url) =>
-                                                const Center(
-                                                    child:
-                                                        CircularProgressIndicator()),
-                                            errorWidget:
-                                                (context, url, error) =>
-                                                    const Icon(Icons.error),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                                // Expanded(
+                                //   child: ReorderableBuilder(
+                                //     enableDraggable: false,
+                                //     scrollController: _scrollController,
+                                //     automaticScrollExtent: 1.0,
+                                //     onReorder: (List<OrderUpdateEntity>
+                                //         orderUpdateEntities) {
+                                //       for (final orderUpdateEntity
+                                //           in orderUpdateEntities) {
+                                //         final fruit = document
+                                //             .document.data?.docFiles
+                                //             ?.removeAt(
+                                //                 orderUpdateEntity.oldIndex);
+                                //         document.document.data?.docFiles
+                                //             ?.insert(orderUpdateEntity.newIndex,
+                                //                 fruit ?? '');
+                                //       }
+                                //     },
+                                //     builder: (children) {
+                                //       return GridView.count(
+                                //         key: _gridViewKey,
+                                //         crossAxisCount: 3,
+                                //         childAspectRatio: 2 / 3,
+                                //         mainAxisSpacing: 4,
+                                //         crossAxisSpacing: 8,
+                                //         children: children,
+                                //       );
+                                //     },
+                                //     children: List.generate(
+                                //       document.document.data?.docFiles
+                                //               ?.length ??
+                                //           0,
+                                //       (index) => GestureDetector(
+                                //         key: Key((index + 1).toString()),
+                                //         onTap: () {
+                                //           Navigator.of(context).push(
+                                //               MaterialPageRoute(
+                                //                   builder: (context) =>
+                                //                       PreviewDocument(
+                                //                         images: document
+                                //                                 .document
+                                //                                 .data
+                                //                                 ?.docFiles ??
+                                //                             [],
+                                //                         name: document
+                                //                                 .document
+                                //                                 .data
+                                //                                 ?.documentName ??
+                                //                             '',
+                                //                         index: index,
+                                //                       )));
+                                //         },
+                                //         child: Container(
+                                //           margin: const EdgeInsets.all(10.0),
+                                //           decoration: BoxDecoration(
+                                //             color: Colors.white,
+                                //             borderRadius:
+                                //                 BorderRadius.circular(5.0),
+                                //             border:
+                                //                 Border.all(color: Colors.grey),
+                                //           ),
+                                //           child: CachedNetworkImage(
+                                //             width: double.infinity,
+                                //             fit: BoxFit.fitWidth,
+                                //             imageUrl: document
+                                //                     .document.data?.docFiles
+                                //                     ?.elementAt(index) ??
+                                //                 '',
+                                //             placeholder: (context, url) =>
+                                //                 const Center(
+                                //                     child:
+                                //                         CircularProgressIndicator()),
+                                //             errorWidget:
+                                //                 (context, url, error) =>
+                                //                     const Icon(Icons.error),
+                                //           ),
+                                //         ),
+                                //       ),
+                                //     ),
+                                //   ),
+                                // ),
                                 S.h(10),
                               ],
                             ),

@@ -1,7 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
@@ -24,7 +24,7 @@ class LoginPageState extends State<LoginPage> {
   _handleGoogleBtnClick() async {
     try {
       // Dialogs.showProgressBar(context);
-      var user = await _signInWithGoogle();
+      var user = await signInWithGoogle();
       if (user != null) {
         // log('\nUser: ${user.user}');
         // log('\nUserAdditionalInfo: ${user.additionalUserInfo}');
@@ -47,18 +47,55 @@ class LoginPageState extends State<LoginPage> {
     }
   }
 
-  Future<UserCredential?> _signInWithGoogle() async {
-    await InternetAddress.lookup('google.com');
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-    final GoogleSignInAuthentication? googleAuth =
-        await googleUser?.authentication;
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth?.accessToken,
-      idToken: googleAuth?.idToken,
-    );
-    return await authProvider!.firebaseAuth.signInWithCredential(credential);
-  }
+  // Future<UserCredential?> _signInWithGoogle() async {
+  //   await InternetAddress.lookup('google.com');
+  //   final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+  //   final GoogleSignInAuthentication? googleAuth =
+  //       await googleUser?.authentication;
+  //   final credential = GoogleAuthProvider.credential(
+  //     accessToken: googleAuth?.accessToken,
+  //     idToken: googleAuth?.idToken,
+  //   );
+  //   return await authProvider!.firebaseAuth.signInWithCredential(credential);
+  //   // return null;
+  // }
 
+  Future<UserCredential?> signInWithGoogle() async {
+    // Optional reachability check – remove if you don’t want it.
+    try {
+      await InternetAddress.lookup('google.com');
+    } catch (_) {
+      return null;
+    }
+
+    final GoogleSignIn g = GoogleSignIn.instance;
+
+    try {
+      // 1️⃣ Show the Google-account picker (new 7.x API).
+      //    authenticate() throws if the user taps “Cancel”.
+      final GoogleSignInAccount account =
+      await g.authenticate(scopeHint: const ['email']);
+
+      // 2️⃣ Tokens are now synchronous.
+      final GoogleSignInAuthentication authData = account.authentication;
+
+      // 3️⃣ Build a Firebase credential *with the ID token only*.
+      final credential = GoogleAuthProvider.credential(
+        idToken: authData.idToken,
+      );
+
+      // 4️⃣ Sign in to Firebase & return the result.
+      return FirebaseAuth.instance.signInWithCredential(credential);
+    } on GoogleSignInException catch (e) {
+      // User cancelled or another G-Sign-In error.
+      log('Google sign-in error: ${e.code.name} – ${e.description}');
+      return null;
+    } catch (e) {
+      // Anything else (network, Firebase).
+      log('Unexpected sign-in error: $e');
+      return null;
+    }
+  }
   _handleAppleBtnClick() async {
     try {
       var auth = await _signInWithApple();
@@ -75,7 +112,7 @@ class LoginPageState extends State<LoginPage> {
         authProvider!.getSelfInfo();
       }
     } catch (e) {
-      log("catch _handleAppleBtnClick : $e");
+      log('login failed $e');
       Dialogs.showSnackbar(context, 'Login failed');
     }
   }

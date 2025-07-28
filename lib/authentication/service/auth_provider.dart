@@ -9,7 +9,7 @@ import 'package:solve_tutor/authentication/models/wallet.model.dart';
 import 'package:solve_tutor/firebase/firestore.dart';
 
 class AuthProvider extends ChangeNotifier {
-  final GoogleSignIn googleSignIn = GoogleSignIn();
+  // final GoogleSignIn googleSignIn = GoogleSignIn();
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
   final FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
   WalletModel? wallet;
@@ -111,7 +111,7 @@ class AuthProvider extends ChangeNotifier {
 
   signOut() async {
     await firebaseAuth.signOut();
-    await GoogleSignIn().signOut();
+    // await GoogleSignIn().signOut();
     user = null;
     uid = null;
     notifyListeners();

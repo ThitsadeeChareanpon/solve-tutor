@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:solve_tutor/feature/calendar/model/course_model.dart';
 import 'package:solve_tutor/feature/calendar/model/days.dart';
 import 'package:solve_tutor/feature/calendar/model/document_model.dart';
@@ -276,19 +277,33 @@ class CourseController extends ChangeNotifier {
         maxWidth: 500,
         maxHeight: 500,
         imageQuality: 100,
+        requestFullMetadata: false, // prevent extra metadata issues
       );
 
       if (pickedFile == null) return;
 
-      pickedImage = File(pickedFile.path);
+      File file = File(pickedFile.path);
+
+      // iOS 17+ fallback for lazy file references
+      if (!await file.exists()) {
+        final bytes = await pickedFile.readAsBytes();
+        final tempDir = await getTemporaryDirectory();
+        final tempPath = '${tempDir.path}/picked_image_${DateTime.now().millisecondsSinceEpoch}.jpg';
+        file = await File(tempPath).writeAsBytes(bytes);
+      }
+
+      pickedImage = file;
+
       final imageUrl = await CourseService().uploadThumbnail(
         tutorId: courseData.tutorId ?? "",
         file: pickedImage!,
         id: courseData.id ?? "",
       );
+
       courseData.thumbnailUrl = imageUrl;
       notifyListeners();
     } catch (error) {
+      debugPrint('❌ openGallery error: $error');
       rethrow;
     }
   }

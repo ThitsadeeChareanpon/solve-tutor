@@ -194,7 +194,8 @@ class _RecordCourseState extends State<RecordCourse> {
 
   // ---------- VARIABLE: recorder
   Codec _codec = Codec.aacMP4;
-  String _mPath = 'tau_file.mp4';
+  // String _mPath = 'tau_file.mp4';
+  late String _mPath;
   FlutterSoundPlayer? _mPlayer = FlutterSoundPlayer();
   FlutterSoundRecorder? _mRecorder = FlutterSoundRecorder();
   bool _mPlayerIsInited = false;
@@ -233,10 +234,16 @@ class _RecordCourseState extends State<RecordCourse> {
         SystemUiOverlay.bottom,
       ]);
     });
+    initRecorderPath();
     initAudio();
     initPagesData();
     initPagingBtn();
     checkMediaExistence();
+  }
+
+  Future<void> initRecorderPath() async {
+    final tempDir = await getTemporaryDirectory();
+    _mPath = '${tempDir.path}/tau_file.mp4';
   }
 
   void initAudio() {
@@ -503,7 +510,7 @@ class _RecordCourseState extends State<RecordCourse> {
     });
   }
 
-  void _initRecord() {
+  void _initRecord() async {
     solveStopwatch.reset();
     solveStopwatch.start();
     setState(() {
@@ -511,6 +518,9 @@ class _RecordCourseState extends State<RecordCourse> {
     });
     _startRecordTimer();
     initSolvepadData();
+    if (_mPath.isEmpty) {
+      await initRecorderPath();
+    }
   }
 
   void _startRecordTimer() {
@@ -1812,7 +1822,7 @@ class _RecordCourseState extends State<RecordCourse> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       SizedBox(
-                        width: 200,
+                        width: 220,
                         height: 40,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
@@ -2467,8 +2477,8 @@ class _RecordCourseState extends State<RecordCourse> {
             child: AnimatedContainer(
               duration: const Duration(seconds: 1),
               curve: Curves.fastOutSlowIn,
-              height: selectedTools ? 270 : 440,
-              width: 120,
+              height: selectedTools ? 200 : 440,
+              width: 100,
               decoration: BoxDecoration(
                 border: Border.all(
                   color: CustomColors.grayCFCFCF,
@@ -2534,51 +2544,54 @@ class _RecordCourseState extends State<RecordCourse> {
                         )
                       : Expanded(
                           flex: 7, // flex 4 if have all
-                          child: ListView.builder(
-                              scrollDirection: Axis.vertical,
-                              shrinkWrap: true,
-                              itemCount: _listTools.length,
-                              itemBuilder: (context, index) {
-                                return Column(
-                                  children: [
-                                    S.h(8),
-                                    InkWell(
-                                      onTap: () {
-                                        setState(() {
-                                          if (!isRecording) return;
-                                          _selectedIndexTools = index;
-                                        });
-                                        if (currentScrollZoom.isNotEmpty) {
-                                          addScrollZoom(currentScrollZoom,
-                                              currentScrollZoom[0].timestamp);
-                                          currentScrollZoom.clear();
-                                        }
-                                        if (index == 0) {
-                                          _mode = DrawingMode.drag;
-                                        } // drag
-                                        else if (index == 1) {
-                                          _mode = DrawingMode.pen;
-                                        } // pen
-                                        else if (index == 2) {
-                                          _mode = DrawingMode.highlighter;
-                                        } // high
-                                        else if (index == 3) {
-                                          _mode = DrawingMode.eraser;
-                                        } // eraser
-                                        else if (index == 4) {
-                                          _mode = DrawingMode.laser;
-                                        } // laser
-                                      },
-                                      child: Image.asset(
-                                        _selectedIndexTools == index
-                                            ? _listTools[index]['image_active']
-                                            : _listTools[index]['image_dis'],
-                                        width: 10.w,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: ListView.builder(
+                                scrollDirection: Axis.vertical,
+                                shrinkWrap: true,
+                                itemCount: _listTools.length,
+                                itemBuilder: (context, index) {
+                                  return Column(
+                                    children: [
+                                      S.h(8),
+                                      InkWell(
+                                        onTap: () {
+                                          setState(() {
+                                            if (!isRecording) return;
+                                            _selectedIndexTools = index;
+                                          });
+                                          if (currentScrollZoom.isNotEmpty) {
+                                            addScrollZoom(currentScrollZoom,
+                                                currentScrollZoom[0].timestamp);
+                                            currentScrollZoom.clear();
+                                          }
+                                          if (index == 0) {
+                                            _mode = DrawingMode.drag;
+                                          } // drag
+                                          else if (index == 1) {
+                                            _mode = DrawingMode.pen;
+                                          } // pen
+                                          else if (index == 2) {
+                                            _mode = DrawingMode.highlighter;
+                                          } // high
+                                          else if (index == 3) {
+                                            _mode = DrawingMode.eraser;
+                                          } // eraser
+                                          else if (index == 4) {
+                                            _mode = DrawingMode.laser;
+                                          } // laser
+                                        },
+                                        child: Image.asset(
+                                          _selectedIndexTools == index
+                                              ? _listTools[index]['image_active']
+                                              : _listTools[index]['image_dis'],
+                                          width: 10.w,
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                );
-                              }),
+                                    ],
+                                  );
+                                }),
+                          ),
                         ),
                   Container(
                       height: 2, width: 80, color: CustomColors.grayF3F3F3),

@@ -2,7 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_reorderable_grid_view/entities/order_update_entity.dart';
+// import 'package:flutter_reorderable_grid_view/entities/order_update_entity.dart';
 import 'package:flutter_reorderable_grid_view/widgets/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:solve_tutor/feature/calendar/constants/custom_colors.dart';
@@ -189,116 +189,116 @@ class _UpdateDocumentFormState extends State<UpdateDocumentForm> {
                                         ],
                                       ),
                                       S.h(10),
-                                      Expanded(
-                                        child: ReorderableBuilder(
-                                          scrollController: _scrollController,
-                                          automaticScrollExtent: 1.0,
-                                          onReorder: (List<OrderUpdateEntity>
-                                              orderUpdateEntities) {
-                                            for (final orderUpdateEntity
-                                                in orderUpdateEntities) {
-                                              final fruit = document
-                                                  .document.data?.docFiles
-                                                  ?.removeAt(orderUpdateEntity
-                                                      .oldIndex);
-                                              document.document.data?.docFiles
-                                                  ?.insert(
-                                                      orderUpdateEntity
-                                                          .newIndex,
-                                                      fruit ?? '');
-                                            }
-                                          },
-                                          builder: (children) {
-                                            return GridView(
-                                              key: _gridViewKey,
-                                              controller: _scrollController,
-                                              physics:
-                                                  const AlwaysScrollableScrollPhysics(),
-                                              gridDelegate:
-                                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                                crossAxisCount: 3,
-                                                childAspectRatio: 2 / 3,
-                                                mainAxisSpacing: 4,
-                                                crossAxisSpacing: 8,
-                                              ),
-                                              children: children,
-                                            );
-                                          },
-                                          children: List.generate(
-                                            document.document.data?.docFiles
-                                                    ?.length ??
-                                                0,
-                                            (index) => GestureDetector(
-                                              key: Key((index + 1).toString()),
-                                              onTap: () {},
-                                              child: Container(
-                                                  margin: const EdgeInsets.all(
-                                                      10.0),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            5.0),
-                                                    border: Border.all(
-                                                        color: Colors.grey),
-                                                    // image: DecorationImage(
-                                                    //   image: NetworkImage(
-                                                    //     document.document.data
-                                                    //             ?.docFiles
-                                                    //             ?.elementAt(
-                                                    //                 index) ??
-                                                    //         '',
-                                                    //   ),
-                                                    //   fit: BoxFit.fill,
-                                                    // ),
-                                                  ),
-                                                  child: Stack(
-                                                    children: [
-                                                      CachedNetworkImage(
-                                                        width: double.infinity,
-                                                        fit: BoxFit.fitHeight,
-                                                        imageUrl: document
-                                                                .document
-                                                                .data
-                                                                ?.docFiles
-                                                                ?.elementAt(
-                                                                    index) ??
-                                                            '',
-                                                        placeholder: (context,
-                                                                url) =>
-                                                            const Center(
-                                                                child:
-                                                                    CircularProgressIndicator()),
-                                                        errorWidget: (context,
-                                                                url, error) =>
-                                                            const Icon(
-                                                                Icons.error),
-                                                      ),
-                                                      Row(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                        children: [
-                                                          _hoverMove(),
-                                                          _deleteImage(
-                                                              document
-                                                                          .document
-                                                                          .data
-                                                                          ?.docFiles?[
-                                                                      index] ??
-                                                                  '',
-                                                              index),
-                                                        ],
-                                                      ),
-                                                    ],
-                                                  )),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                                      // Expanded(
+                                      //   child: ReorderableBuilder(
+                                      //     scrollController: _scrollController,
+                                      //     automaticScrollExtent: 1.0,
+                                      //     onReorder: (List<OrderUpdateEntity>
+                                      //         orderUpdateEntities) {
+                                      //       for (final orderUpdateEntity
+                                      //           in orderUpdateEntities) {
+                                      //         final fruit = document
+                                      //             .document.data?.docFiles
+                                      //             ?.removeAt(orderUpdateEntity
+                                      //                 .oldIndex);
+                                      //         document.document.data?.docFiles
+                                      //             ?.insert(
+                                      //                 orderUpdateEntity
+                                      //                     .newIndex,
+                                      //                 fruit ?? '');
+                                      //       }
+                                      //     },
+                                      //     builder: (children) {
+                                      //       return GridView(
+                                      //         key: _gridViewKey,
+                                      //         controller: _scrollController,
+                                      //         physics:
+                                      //             const AlwaysScrollableScrollPhysics(),
+                                      //         gridDelegate:
+                                      //             const SliverGridDelegateWithFixedCrossAxisCount(
+                                      //           crossAxisCount: 3,
+                                      //           childAspectRatio: 2 / 3,
+                                      //           mainAxisSpacing: 4,
+                                      //           crossAxisSpacing: 8,
+                                      //         ),
+                                      //         children: children,
+                                      //       );
+                                      //     },
+                                      //     children: List.generate(
+                                      //       document.document.data?.docFiles
+                                      //               ?.length ??
+                                      //           0,
+                                      //       (index) => GestureDetector(
+                                      //         key: Key((index + 1).toString()),
+                                      //         onTap: () {},
+                                      //         child: Container(
+                                      //             margin: const EdgeInsets.all(
+                                      //                 10.0),
+                                      //             decoration: BoxDecoration(
+                                      //               color: Colors.white,
+                                      //               borderRadius:
+                                      //                   BorderRadius.circular(
+                                      //                       5.0),
+                                      //               border: Border.all(
+                                      //                   color: Colors.grey),
+                                      //               // image: DecorationImage(
+                                      //               //   image: NetworkImage(
+                                      //               //     document.document.data
+                                      //               //             ?.docFiles
+                                      //               //             ?.elementAt(
+                                      //               //                 index) ??
+                                      //               //         '',
+                                      //               //   ),
+                                      //               //   fit: BoxFit.fill,
+                                      //               // ),
+                                      //             ),
+                                      //             child: Stack(
+                                      //               children: [
+                                      //                 CachedNetworkImage(
+                                      //                   width: double.infinity,
+                                      //                   fit: BoxFit.fitHeight,
+                                      //                   imageUrl: document
+                                      //                           .document
+                                      //                           .data
+                                      //                           ?.docFiles
+                                      //                           ?.elementAt(
+                                      //                               index) ??
+                                      //                       '',
+                                      //                   placeholder: (context,
+                                      //                           url) =>
+                                      //                       const Center(
+                                      //                           child:
+                                      //                               CircularProgressIndicator()),
+                                      //                   errorWidget: (context,
+                                      //                           url, error) =>
+                                      //                       const Icon(
+                                      //                           Icons.error),
+                                      //                 ),
+                                      //                 Row(
+                                      //                   crossAxisAlignment:
+                                      //                       CrossAxisAlignment
+                                      //                           .start,
+                                      //                   mainAxisAlignment:
+                                      //                       MainAxisAlignment
+                                      //                           .spaceBetween,
+                                      //                   children: [
+                                      //                     _hoverMove(),
+                                      //                     _deleteImage(
+                                      //                         document
+                                      //                                     .document
+                                      //                                     .data
+                                      //                                     ?.docFiles?[
+                                      //                                 index] ??
+                                      //                             '',
+                                      //                         index),
+                                      //                   ],
+                                      //                 ),
+                                      //               ],
+                                      //             )),
+                                      //       ),
+                                      //     ),
+                                      //   ),
+                                      // ),
                                       S.h(150),
                                     ],
                                   ),

@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:solve_tutor/feature/calendar/app_client/app_client.dart';
 import 'package:solve_tutor/feature/calendar/app_client/endpoint.dart';
 import 'package:solve_tutor/feature/calendar/model/document_model.dart';
@@ -51,25 +53,36 @@ class DocumentService {
     }
   }
 
-  Future<List<dynamic>?> uploadFilesImage(List<File> files,
-      {required String tutorId, required String documentId}) async {
+  Future<List<String>> uploadFilesImage(
+      List<File> files, {
+        required String tutorId,
+        required String documentId,
+      }) async {
     try {
-      Map<String, dynamic> json = await client.uploadFiles(
-        endpoint.getUploadFiles(),
-        files: files,
-        tutorId: tutorId,
-        documentId: documentId,
-        id: documentId,
-      );
-      List<String> data = [];
-      if (json['data'] != null) {
-        data = <String>[];
-        json['data'].forEach((v) {
-          data.add(v);
-        });
+      final storage = FirebaseStorage.instance;
+      List<String> uploadedUrls = [];
+
+      for (int i = 0; i < files.length; i++) {
+        final file = files[i];
+
+        if (!await file.exists()) continue;
+
+        final ext = file.path.split('.').last;
+        final fileName =
+            '${DateTime.now().millisecondsSinceEpoch}_${i}.$ext';
+
+        final ref = storage
+            .ref()
+            .child('documents/$tutorId/$documentId/$fileName');
+
+        final task = await ref.putFile(file);
+        final url = await task.ref.getDownloadURL();
+        uploadedUrls.add(url);
       }
-      return data;
+
+      return uploadedUrls;
     } catch (error) {
+      debugPrint('❌ uploadFilesImage error: $error');
       rethrow;
     }
   }

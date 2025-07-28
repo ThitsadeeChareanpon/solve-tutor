@@ -21,7 +21,7 @@ class _ManageCoursePageState extends State<ManageCoursePage>
   TabController? _tabController;
   @override
   void initState() {
-    _tabController = TabController(length: 2, vsync: this, initialIndex: 0);
+    _tabController = TabController(length: 1, vsync: this, initialIndex: 0);
     super.initState();
   }
 
@@ -45,10 +45,13 @@ class _ManageCoursePageState extends State<ManageCoursePage>
                 if (Responsive.isMobile(context) ||
                     Responsive.isTablet(context)) ...[
                   const SizedBox(height: 20),
-                  SizedBox(
-                      width: 110,
-                      height: 50,
-                      child: Image.asset('assets/images/big_solve_logo.png')),
+                  InkWell(
+                    onTap: () => Responsive.showSize(context),
+                    child: SizedBox(
+                        width: 110,
+                        height: 50,
+                        child: Image.asset('assets/images/big_solve_logo.png')),
+                  ),
                   const Text(
                     "เทคโนโลยีใหม่ในการสอนออนไลน์",
                     style: TextStyle(
@@ -66,18 +69,22 @@ class _ManageCoursePageState extends State<ManageCoursePage>
                   ),
                   const SizedBox(height: 10),
                 ],
-                if (Responsive.isDesktop(context)) ...[
+                if (Responsive.isDesktop(context) || !(Responsive.isMobile(context) ||
+                    Responsive.isTablet(context))) ...[
                   const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 32.0),
-                        child: SizedBox(
-                            width: 110,
-                            height: 50,
-                            child: Image.asset(
-                                'assets/images/big_solve_logo.png')),
+                      InkWell(
+                        onTap: () => Responsive.showSize(context),
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 32.0),
+                          child: SizedBox(
+                              width: 110,
+                              height: 50,
+                              child: Image.asset(
+                                  'assets/images/big_solve_logo.png')),
+                        ),
                       ),
                       const Column(
                         children: [
@@ -146,31 +153,31 @@ class _ManageCoursePageState extends State<ManageCoursePage>
                                   ],
                                 ),
                               ),
-                              Container(
-                                alignment: Alignment.center,
-                                constraints: const BoxConstraints(
-                                    minWidth: 100, minHeight: 150),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      "คอร์สสอนสด",
-                                      textAlign: TextAlign.center,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    Text(
-                                      "(SOLVE LIVE)",
-                                      textAlign: TextAlign.center,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
-                                ),
-                              ),
+                              // Container(
+                              //   alignment: Alignment.center,
+                              //   constraints: const BoxConstraints(
+                              //       minWidth: 100, minHeight: 150),
+                              //   decoration: BoxDecoration(
+                              //     borderRadius: BorderRadius.circular(8),
+                              //   ),
+                              //   child: const Column(
+                              //     mainAxisAlignment: MainAxisAlignment.center,
+                              //     children: [
+                              //       Text(
+                              //         "คอร์สสอนสด",
+                              //         textAlign: TextAlign.center,
+                              //         maxLines: 1,
+                              //         overflow: TextOverflow.ellipsis,
+                              //       ),
+                              //       Text(
+                              //         "(SOLVE LIVE)",
+                              //         textAlign: TextAlign.center,
+                              //         maxLines: 1,
+                              //         overflow: TextOverflow.ellipsis,
+                              //       ),
+                              //     ],
+                              //   ),
+                              // ),
                             ],
                           ),
                         ),
@@ -183,7 +190,7 @@ class _ManageCoursePageState extends State<ManageCoursePage>
                     controller: _tabController,
                     children: const [
                       ManageMarketCoursePage(),
-                      ManageLiveCoursePage(),
+                      // ManageLiveCoursePage(),
                     ],
                   ),
                 ),

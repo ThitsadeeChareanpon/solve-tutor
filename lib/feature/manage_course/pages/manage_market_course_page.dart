@@ -44,7 +44,7 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                       ),
                       mobileCard(
                         'assets/images/withdraw-money.png',
-                        'ถอนเงิน',
+                        'การเงิน',
                         'จัดการ Credits รายได้และยอดเงินเตรียมโอนของคุณ',
                         'right',
                         const MaintenancePage(),
@@ -64,7 +64,7 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                       ),
                       mobileCard(
                         'assets/images/withdraw-money.png',
-                        'ถอนเงิน',
+                        'การเงิน',
                         'จัดการ Credits รายได้, ยอดเงิน',
                         'tight',
                         const MaintenancePage(),
@@ -189,7 +189,7 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
                     ],
                   ),
                 ],
-                if (Responsive.isDesktop(context)) ...[
+                if (Responsive.isDesktop(context) || Responsive.isTabletLandscape(context)) ...[
                   Row(
                     children: [
                       mobileCard(
@@ -231,8 +231,7 @@ class _ManageMarketCoursePageState extends State<ManageMarketCoursePage> {
     );
   }
 
-  Widget mobileCard(
-      String img, String title, String desc, String position, Widget link) {
+  Widget mobileCard(String img, String title, String desc, String position, Widget link) {
     EdgeInsets cardPosition;
     if (position == 'left') {
       cardPosition = const EdgeInsets.fromLTRB(30, 25, 15, 0);

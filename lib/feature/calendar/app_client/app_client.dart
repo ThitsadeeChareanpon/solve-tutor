@@ -299,18 +299,17 @@ class AppClient {
     }
   }
 
-  Future<Map<String, dynamic>> uploadFiles(Uri uri,
-      {required List<File> files,
-      required String tutorId,
-      String? documentId,
-      required String id,
-      bool dupilcate = false,
-      Map<String, String>? preferHeader}) async {
-    //** dupilcate คือ เงื่อนไขการกำหนด id ภาพสามารถอัพเดททับชื่อเดิมได้
+  Future<Map<String, dynamic>> uploadFiles(
+      Uri uri, {
+        required List<File> files,
+        required String tutorId,
+        String? documentId,
+        required String id,
+        bool dupilcate = false,
+        Map<String, String>? preferHeader,
+      }) async {
     try {
       Map<String, String> headers = {};
-
-      headers.addAll({});
 
       if (preferHeader != null) {
         headers = preferHeader;
@@ -359,12 +358,24 @@ class AppClient {
       var responseBody = await response.stream.bytesToString();
       log.fine(response.statusCode);
 
-      // await _validateResponseStatus(uri.toString(), response);
+      // ✅ SAFETY CHECK: Make sure it's valid JSON before decoding
+      final contentType = response.headers['content-type'] ?? '';
 
-      var json = jsonDecode(responseBody);
-      _validateResponsePattern(json);
+      if (response.statusCode == 200 &&
+          contentType.contains('application/json')) {
+        final json = jsonDecode(responseBody);
+        _validateResponsePattern(json);
+        return json;
+      } else {
+        log.warning('❌ Unexpected server response');
+        log.warning('Status code: ${response.statusCode}');
+        log.warning('Content-Type: $contentType');
+        log.warning('Body:\n$responseBody');
 
-      return json;
+        throw Exception(
+          'Upload failed. Server returned non-JSON response: ${response.statusCode}',
+        );
+      }
     } catch (error) {
       rethrow;
     }

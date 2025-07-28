@@ -96,22 +96,22 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
           var meetingID = await createMeeting(_token);
           if (mounted) {
             log('meeting ID: $meetingID');
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => TutorLiveClassroom(
-                  token: _token,
-                  userId: widget.course.tutorId!,
-                  courseId: widget.course.courseId!,
-                  startTime: widget.course.start!.millisecondsSinceEpoch,
-                  meetingId: meetingID,
-                  isHost: true,
-                  displayName: displayName,
-                  micEnabled: isMicOn,
-                  camEnabled: false,
-                ),
-              ),
-            );
+            // Navigator.push(
+            //   context,
+            //   MaterialPageRoute(
+            //     builder: (context) => TutorLiveClassroom(
+            //       token: _token,
+            //       userId: widget.course.tutorId!,
+            //       courseId: widget.course.courseId!,
+            //       startTime: widget.course.start!.millisecondsSinceEpoch,
+            //       meetingId: meetingID,
+            //       isHost: true,
+            //       displayName: displayName,
+            //       micEnabled: isMicOn,
+            //       camEnabled: false,
+            //     ),
+            //   ),
+            // );
           }
         } catch (error) {
           if (!mounted) return;
@@ -133,22 +133,22 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
       try {
         var meetingID = await createMeeting(_token);
         if (mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => TutorLiveClassroom(
-                token: _token,
-                userId: widget.course.tutorId!,
-                courseId: widget.course.courseId!,
-                startTime: widget.course.start!.millisecondsSinceEpoch,
-                meetingId: meetingID,
-                isHost: true,
-                displayName: displayName,
-                micEnabled: isMicOn,
-                camEnabled: false,
-              ),
-            ),
-          );
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (context) => TutorLiveClassroom(
+          //       token: _token,
+          //       userId: widget.course.tutorId!,
+          //       courseId: widget.course.courseId!,
+          //       startTime: widget.course.start!.millisecondsSinceEpoch,
+          //       meetingId: meetingID,
+          //       isHost: true,
+          //       displayName: displayName,
+          //       micEnabled: isMicOn,
+          //       camEnabled: false,
+          //     ),
+          //   ),
+          // );
         }
       } catch (error) {
         showSnackBarMessage(

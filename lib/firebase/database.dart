@@ -51,12 +51,14 @@ class FirebaseService {
     log('file status :${await solvepadFile.exists()},${await voiceFile.exists()}');
     // check record next.
     if (!(await solvepadFile.exists() || await voiceFile.exists())) {
+      log('file not exist');
       throw Exception("File does not exist");
     } else {
       log('file exist');
     }
     final voiceFileSize = await voiceFile.length();
     if (voiceFileSize == 0) {
+      log('file empty');
       throw Exception("File is empty");
     } else {
       log('fileSize $voiceFileSize');

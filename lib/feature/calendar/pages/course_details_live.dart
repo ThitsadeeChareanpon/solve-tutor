@@ -159,48 +159,36 @@ class _CourseDetailsLiveState extends State<CourseDetailsLive> {
                             );
                           },
                           child: DottedBorder(
-                              color: CustomColors.gray878787.withOpacity(0.5),
-                              strokeWidth: 2,
-                              dashPattern: const [5, 5],
-                              padding: const EdgeInsets.all(20),
-                              child: SizedBox(
-                                  height: 200,
-                                  width: double.infinity,
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      if (controller.pickedImage != null) ...[
-                                        imageProvider
-                                      ] else if (courseController.courseData
-                                              ?.thumbnailUrl?.isNotEmpty ==
-                                          true) ...[
-                                        CachedNetworkImage(
-                                          height: 200,
-                                          width: double.infinity,
-                                          fit: BoxFit.cover,
-                                          imageUrl: courseController
-                                                  .courseData?.thumbnailUrl ??
-                                              '',
-                                          placeholder: (context, url) =>
-                                              const Center(
-                                                  child:
-                                                      CircularProgressIndicator()),
-                                          errorWidget: (context, url, error) =>
-                                              const Icon(Icons.error),
-                                        ),
-                                      ] else ...[
-                                        Text(
-                                          "อัพโหลดรูป",
-                                          style: CustomStyles.reg32gray878787,
-                                        ),
-                                        S.h(10),
-                                        Text(
-                                          "ขนาดรูปที่แนะนำ 272px x 379px",
-                                          style: CustomStyles.reg12Gray878787,
-                                        ),
-                                      ]
-                                    ],
-                                  ))),
+                            child: SizedBox(
+                              height: 200,
+                              width: double.infinity,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  if (controller.pickedImage != null) ...[
+                                    imageProvider
+                                  ]
+                                  else if (courseController.courseData ?.thumbnailUrl?.isNotEmpty == true) ...[
+                                    CachedNetworkImage(
+                                      height: 200,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                      imageUrl: courseController.courseData?.thumbnailUrl ?? '',
+                                      placeholder: (context, url) => const Center(
+                                        child: CircularProgressIndicator()
+                                      ),
+                                      errorWidget: (context, url, error) => const Icon(Icons.error),
+                                    ),
+                                  ]
+                                  else ...[
+                                    Text("อัพโหลดรูป", style: CustomStyles.reg32gray878787),
+                                    S.h(10),
+                                    Text("ขนาดรูปที่แนะนำ 272px x 379px", style: CustomStyles.reg12Gray878787),
+                                  ]
+                                ],
+                              ),
+                            ),
+                          ),
                         );
                       }),
                       S.h(20),
@@ -215,7 +203,6 @@ class _CourseDetailsLiveState extends State<CourseDetailsLive> {
                       _managementStudent(),
                       S.h(20),
                       _deleteCourse(),
-                      // ],
                       S.h(100),
                     ],
                   ),
@@ -243,8 +230,7 @@ class _CourseDetailsLiveState extends State<CourseDetailsLive> {
     );
   }
 
-  Widget _textArea(TextEditingController controller,
-      {String? title, String? labelText, String? hintText}) {
+  Widget _textArea(TextEditingController controller, {String? title, String? labelText, String? hintText}) {
     return Column(
       children: [
         _topicText(title ?? ''),

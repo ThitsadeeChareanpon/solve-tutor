@@ -180,10 +180,6 @@ class _CourseDetailsState extends State<CourseDetails> {
                             );
                           },
                           child: DottedBorder(
-                              color: CustomColors.gray878787.withOpacity(0.5),
-                              strokeWidth: 2,
-                              dashPattern: const [5, 5],
-                              padding: const EdgeInsets.all(20),
                               child: SizedBox(
                                   height: 200,
                                   width: double.infinity,

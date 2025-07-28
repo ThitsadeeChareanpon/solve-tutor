@@ -24,11 +24,11 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
   bool bigCenterButton = true;
   int currentIndex = 0;
   List<Widget> pages = [
-    const CourseLiveCalendar(),
+    // const CourseLiveCalendar(),
     const ManageCoursePage(),
     // const ClassListPage(),
-    const ChatListPage(),
-    const NotificationPage(),
+    // const ChatListPage(),
+    // const NotificationPage(),
     const ProfilePage(),
   ];
 
@@ -77,52 +77,54 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: TabBarView(
-        controller: tabController,
-        physics: const NeverScrollableScrollPhysics(),
-        children: pages.map<Widget>((e) => e).toList(),
+      body: SafeArea(
+        child: TabBarView(
+          controller: tabController,
+          physics: const NeverScrollableScrollPhysics(),
+          children: pages,
+        ),
       ),
-      extendBody: true,
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        color: Colors.grey.shade50,
-        // notchMargin: 8,
-        // clipBehavior: Clip.antiAlias,
+      bottomNavigationBar: SafeArea(
+        top: false,
         child: BottomNavigationBar(
-          elevation: 0,
-          onTap: (value) {
-            tab(value);
-          },
-          selectedLabelStyle: GoogleFonts.kanit(),
-          unselectedLabelStyle: GoogleFonts.kanit(),
-          // selectedItemColor: primaryColor,
-          unselectedItemColor: Colors.grey,
-          showUnselectedLabels: true,
           currentIndex: currentIndex,
+          onTap: tab,
           type: BottomNavigationBarType.fixed,
+          elevation: 0,
+          selectedLabelStyle:
+          GoogleFonts.kanit(fontSize: 12, fontWeight: FontWeight.w600),
+          unselectedLabelStyle:
+          GoogleFonts.kanit(fontSize: 12, fontWeight: FontWeight.w400),
+          unselectedItemColor: Colors.grey,
           items: const [
+            // BottomNavigationBarItem(
+            //   icon: Icon(Icons.calendar_month_outlined),
+            //   activeIcon: Icon(Icons.calendar_month),
+            //   label: 'ตารางสอน',
+            // ),
             BottomNavigationBarItem(
-                activeIcon: Icon(Icons.calendar_month),
-                icon: Icon(Icons.calendar_month_outlined),
-                label: "ตารางสอน"),
+              icon: Icon(Icons.copy_outlined),
+              activeIcon: Icon(Icons.copy),
+              label: 'คอร์ส',
+            ),
+            // BottomNavigationBarItem(
+            //   icon: Icon(CupertinoIcons.chat_bubble_2),
+            //   activeIcon: Icon(CupertinoIcons.chat_bubble_2),
+            //   label: 'แชท',
+            // ),
+            // BottomNavigationBarItem(
+            //   icon: Icon(Icons.notifications_outlined),
+            //   activeIcon: Icon(Icons.notifications),
+            //   label: 'แจ้งเตือน',
+            // ),
             BottomNavigationBarItem(
-                activeIcon: Icon(Icons.copy),
-                icon: Icon(Icons.copy_outlined),
-                label: "คอร์ส"),
-            BottomNavigationBarItem(
-                activeIcon: Icon(CupertinoIcons.chat_bubble_2),
-                icon: Icon(CupertinoIcons.chat_bubble_2),
-                label: "แชท"),
-            BottomNavigationBarItem(
-                activeIcon: Icon(Icons.notifications),
-                icon: Icon(Icons.notifications_outlined),
-                label: "แจ้งเตือน"),
-            BottomNavigationBarItem(
-                activeIcon: Icon(Icons.account_circle),
-                icon: Icon(Icons.account_circle_outlined),
-                label: "ตั้งค่า"),
+              icon: Icon(Icons.account_circle_outlined),
+              activeIcon: Icon(Icons.account_circle),
+              label: 'ตั้งค่า',
+            ),
           ],
         ),
       ),
