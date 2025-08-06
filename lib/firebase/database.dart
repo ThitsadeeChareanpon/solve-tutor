@@ -134,4 +134,29 @@ class FirebaseService {
       return '';
     }
   }
+
+  Future<void> addAnswer({
+    required String courseId,
+    required int lesson,
+    required int page,
+    required String solvepad,
+    required String tutorId,
+    required String studentId,
+  }) async {
+    try {
+      await db.collection('answer_market').add({
+        'courseId': courseId,
+        'lesson': lesson,
+        'page': page,
+        'solvepad': solvepad,
+        'tutorId': tutorId,
+        'studentId': studentId,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      log("Answer successfully written to answer_market.");
+    } catch (e) {
+      log("Error writing answer to Firestore: $e");
+    }
+  }
 }

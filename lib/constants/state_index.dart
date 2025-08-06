@@ -8,7 +8,10 @@ import 'package:solve_tutor/feature/calendar/controller/document_controller.dart
 import 'package:solve_tutor/feature/calendar/controller/student_controller.dart';
 import 'package:solve_tutor/feature/chat/service/chat_provider.dart';
 import 'package:solve_tutor/feature/class/services/class_provider.dart';
+import 'package:solve_tutor/feature/notification/student_provider.dart';
 import 'package:solve_tutor/feature/order/service/order_mock_provider.dart';
+
+import '../feature/notification/notification_provider.dart';
 
 final List<SingleChildWidget> stateIndex = [
   ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
@@ -20,4 +23,6 @@ final List<SingleChildWidget> stateIndex = [
   ChangeNotifierProvider(create: (context) => CourseLiveController()),
   ChangeNotifierProvider(create: (context) => DocumentController()),
   ChangeNotifierProvider(create: (context) => StudentController()),
+  ChangeNotifierProvider(create: (_) => NotificationProvider()),
+  ChangeNotifierProvider(create: (_) => StudentProvider()),
 ];
