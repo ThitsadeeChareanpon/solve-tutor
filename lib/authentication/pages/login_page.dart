@@ -1,7 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
@@ -22,6 +22,7 @@ class LoginPage extends StatefulWidget {
 
 class LoginPageState extends State<LoginPage> {
   _handleGoogleBtnClick() async {
+    log('login btn tap');
     try {
       // Dialogs.showProgressBar(context);
       var user = await _signInWithGoogle();
@@ -30,6 +31,7 @@ class LoginPageState extends State<LoginPage> {
         // log('\nUserAdditionalInfo: ${user.additionalUserInfo}');
         if (await authProvider!.userExists(user.user!)) {
         } else {
+          log('here');
           await authProvider!.createUser(
             id: user.user?.uid ?? "",
             name: user.user?.displayName ?? "",
@@ -42,21 +44,32 @@ class LoginPageState extends State<LoginPage> {
         //     MaterialPageRoute(builder: (context) => const Authenticate());
         // Navigator.pushReplacement(context, route);
       }
+      else {
+        log('here');
+        await authProvider!.createUser(
+          id: "test",
+          name: "test",
+          email: "test@mail.com",
+          image: "",
+        );
+      }
     } catch (e) {
+      log(e.toString());
       Dialogs.showSnackbar(context, 'Login failed');
     }
   }
 
   Future<UserCredential?> _signInWithGoogle() async {
-    await InternetAddress.lookup('google.com');
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-    final GoogleSignInAuthentication? googleAuth =
-        await googleUser?.authentication;
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth?.accessToken,
-      idToken: googleAuth?.idToken,
-    );
-    return await authProvider!.firebaseAuth.signInWithCredential(credential);
+    // await InternetAddress.lookup('google.com');
+    // final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    // final GoogleSignInAuthentication? googleAuth =
+    //     await googleUser?.authentication;
+    // final credential = GoogleAuthProvider.credential(
+    //   accessToken: googleAuth?.accessToken,
+    //   idToken: googleAuth?.idToken,
+    // );
+    // return await authProvider!.firebaseAuth.signInWithCredential(credential);
+    return null;
   }
 
   _handleAppleBtnClick() async {

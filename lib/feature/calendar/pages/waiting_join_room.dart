@@ -21,7 +21,6 @@ import 'package:solve_tutor/feature/live_classroom/components/close_dialog.dart'
 import 'package:solve_tutor/widgets/sizer.dart';
 
 import '../../live_classroom/page/live_classroom.dart';
-import '../../live_classroom/utils/api.dart';
 import '../../live_classroom/utils/toast.dart';
 import '../controller/create_course_live_controller.dart';
 
@@ -41,8 +40,7 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
   late AnimationController _controller;
   String? _image;
 
-  // VideoSDK
-  String _token = "";
+  // VideoSDK disabled
   bool isActive = false;
   bool isMicOn = true;
   bool? isJoinMeetingSelected;
@@ -62,8 +60,7 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
     ]);
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final token = await fetchToken(context);
-      setState(() => _token = token);
+      // VideoSDK disabled: token fetch skipped
     });
   }
 
@@ -81,81 +78,10 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
   }
 
   Future<void> createAndJoinMeeting(displayName) async {
-    if (widget.course.courseType == 'live') {
-      int totalMinuteLive = ((widget.course.end!.millisecondsSinceEpoch -
-                  widget.course.start!.millisecondsSinceEpoch) /
-              60000)
-          .ceil();
-      int? students = widget.course.studentCount ?? 0;
-      int? minPoint = totalMinuteLive * students;
-      await authProvider.getWallet();
-      int? point = authProvider.wallet?.balance ?? 0;
-      if (point >= minPoint) {
-        await updateActualTime();
-        try {
-          var meetingID = await createMeeting(_token);
-          if (mounted) {
-            log('meeting ID: $meetingID');
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => TutorLiveClassroom(
-                  token: _token,
-                  userId: widget.course.tutorId!,
-                  courseId: widget.course.courseId!,
-                  startTime: widget.course.start!.millisecondsSinceEpoch,
-                  meetingId: meetingID,
-                  isHost: true,
-                  displayName: displayName,
-                  micEnabled: isMicOn,
-                  camEnabled: false,
-                ),
-              ),
-            );
-          }
-        } catch (error) {
-          if (!mounted) return;
-          showSnackBarMessage(
-              message: 'ERROR ON CREATE ROOM ${error.toString()}',
-              context: context);
-        }
-      } else {
-        if (!mounted) return;
-        showAlertRecordingDialog(
-          context,
-          title: 'Solve Coin ไม่เพียงพอ',
-          detail:
-              '\t\t\tSolve Coin ของคุณไม่เพียงพอสำหรับใช้เข้าสอนในคลาสนี้\nกรุณาติดต่อทีมงานดูแลลูกค้าได้ในเวลา 11.00-22.00 น.',
-          confirm: 'ตกลง',
-        );
-      }
-    } else {
-      try {
-        var meetingID = await createMeeting(_token);
-        if (mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => TutorLiveClassroom(
-                token: _token,
-                userId: widget.course.tutorId!,
-                courseId: widget.course.courseId!,
-                startTime: widget.course.start!.millisecondsSinceEpoch,
-                meetingId: meetingID,
-                isHost: true,
-                displayName: displayName,
-                micEnabled: isMicOn,
-                camEnabled: false,
-              ),
-            ),
-          );
-        }
-      } catch (error) {
-        showSnackBarMessage(
-            message: 'ERROR ON CREATE ROOM ${error.toString()}',
-            context: context);
-      }
-    }
+    // VideoSDK functionality is disabled. Notify the user.
+    if (!mounted) return;
+    showSnackBarMessage(
+        message: 'ฟีเจอร์ห้องเรียนสดถูกปิดใช้งาน', context: context);
   }
 
   Future<void> updateActualTime() async {
@@ -408,6 +334,7 @@ class _WaitingJoinRoomState extends State<WaitingJoinRoom>
       Material(
         child: InkWell(
           onTap: () async {
+            // VideoSDK disabled: show information only
             createAndJoinMeeting(authProvider.user?.name ?? '');
           },
           child: Container(
